@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check if already logged in
     if (isAuthenticated()) {
-        window.location.href = 'dashboard.html';
+        window.location.href = getAbsoluteUrl('dashboard.html');
         return;
     }
     

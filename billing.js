@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     logoutBtn.addEventListener('click', () => {
         if (confirm('Are you sure you want to logout?')) {
             clearToken();
-            window.location.href = 'index.html';
+            window.location.href = getAbsoluteUrl('index.html');
         }
     });
     
@@ -64,8 +64,8 @@ async function purchasePackage(packageId) {
     try {
         const response = await api.post('/billing/purchase', {
             packageId: packageId,
-            successUrl: window.location.origin + '/billing.html?success=true',
-            cancelUrl: window.location.origin + '/billing.html?canceled=true',
+            successUrl: getAbsoluteUrl('billing.html?success=true'),
+            cancelUrl: getAbsoluteUrl('billing.html?canceled=true'),
         });
         
         if (response.success && response.data.sessionUrl) {

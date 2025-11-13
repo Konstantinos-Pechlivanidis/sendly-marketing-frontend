@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Handle error
         console.error('OAuth error:', error);
         setTimeout(() => {
-            window.location.href = `index.html?error=${encodeURIComponent(error)}`;
+            window.location.href = getAbsoluteUrl(`index.html?error=${encodeURIComponent(error)}`);
         }, 2000);
         return;
     }
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Redirect to dashboard
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = getAbsoluteUrl('dashboard.html');
                 }, 1000);
             } else {
                 throw new Error('Invalid token response');
@@ -36,13 +36,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Token verification error:', error);
             clearToken();
             setTimeout(() => {
-                window.location.href = 'index.html?error=token_verification_failed';
+                window.location.href = getAbsoluteUrl('index.html?error=token_verification_failed');
             }, 2000);
         }
     } else {
         // No token received
         setTimeout(() => {
-            window.location.href = 'index.html?error=no_token';
+            window.location.href = getAbsoluteUrl('index.html?error=no_token');
         }, 2000);
     }
 });

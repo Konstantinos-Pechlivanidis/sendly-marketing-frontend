@@ -27,10 +27,17 @@ function isAuthenticated() {
     return !!getToken();
 }
 
+// Helper to get absolute URL for a path
+function getAbsoluteUrl(path) {
+    // Remove leading slash if present to avoid double slashes
+    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return `${window.location.origin}/${cleanPath}`;
+}
+
 // Redirect to login if not authenticated
 function requireAuth() {
     if (!isAuthenticated()) {
-        window.location.href = 'index.html';
+        window.location.href = getAbsoluteUrl('index.html');
     }
 }
 

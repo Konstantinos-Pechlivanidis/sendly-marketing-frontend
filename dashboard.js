@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     logoutBtn.addEventListener('click', () => {
         if (confirm('Are you sure you want to logout?')) {
             clearToken();
-            window.location.href = 'index.html';
+            window.location.href = getAbsoluteUrl('index.html');
         }
     });
     

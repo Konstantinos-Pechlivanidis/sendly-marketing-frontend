@@ -25,7 +25,7 @@ class APIClient {
             // Handle 401 - Unauthorized
             if (response.status === 401) {
                 clearToken();
-                window.location.href = 'index.html?error=session_expired';
+                window.location.href = getAbsoluteUrl('index.html?error=session_expired');
                 throw new Error('Session expired');
             }
             
