@@ -78,10 +78,9 @@ export default function Automations() {
         <PageHeader
           title="Automations"
           subtitle="Set up automated SMS workflows for your store"
-          action={Link}
           actionLabel="Create Automation"
           actionIcon="automation"
-          onAction="/app/automations/new"
+          actionTo="/app/automations/new"
         />
 
         {/* Error State */}

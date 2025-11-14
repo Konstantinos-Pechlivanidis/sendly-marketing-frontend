@@ -19,6 +19,7 @@ import ImportContactsModal from '../../components/contacts/ImportContactsModal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
+import ErrorState from '../../components/ui/ErrorState';
 import { useContacts, useContactStats, useDeleteContact } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
@@ -178,17 +179,12 @@ export default function Contacts() {
 
         {/* Error State */}
         {error && (
-          <GlassCard variant="default" className="p-6 mb-8 border border-red-200 bg-red-50/50">
-            <div className="flex items-start gap-3">
-              <Icon name="error" size="md" variant="default" className="text-red-500 flex-shrink-0" />
-              <div>
-                <h3 className="text-lg font-semibold mb-2 text-red-500">Error Loading Contacts</h3>
-                <p className="text-sm text-neutral-text-secondary">
-                  {error.message || 'Failed to load contacts. Please try refreshing the page.'}
-                </p>
-              </div>
-            </div>
-          </GlassCard>
+          <ErrorState
+            title="Error Loading Contacts"
+            message={error.message || 'Failed to load contacts. Please try refreshing the page.'}
+            onAction={() => window.location.reload()}
+            actionLabel="Refresh Page"
+          />
         )}
 
         {/* Contacts Table */}
