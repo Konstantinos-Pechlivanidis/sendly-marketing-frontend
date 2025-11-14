@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
 import GlassCard from './GlassCard';
 import GlassButton from './GlassButton';
