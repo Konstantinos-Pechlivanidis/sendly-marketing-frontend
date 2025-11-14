@@ -8,7 +8,13 @@ import api from '../../services/api';
 
 /**
  * Auth Callback Page
- * Handles OAuth callback from backend, saves token, and redirects to dashboard
+ * 
+ * OAuth Flow:
+ * 1. User clicks "Log in" → Frontend redirects to Backend /auth/shopify
+ * 2. Backend redirects to Shopify OAuth page
+ * 3. Shopify redirects back to Backend /auth/callback (configured in Shopify Partners)
+ * 4. Backend processes OAuth and redirects to Frontend /auth/callback?token=...
+ * 5. This page saves the token and redirects to dashboard
  */
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();

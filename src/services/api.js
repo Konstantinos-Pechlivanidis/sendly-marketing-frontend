@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { API_URL, TOKEN_KEY, STORE_KEY } from '../utils/constants';
+import { getAPIUrl, TOKEN_KEY, STORE_KEY } from '../utils/constants';
 
-// Create axios instance
+// Create axios instance with runtime API URL detection
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getAPIUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
