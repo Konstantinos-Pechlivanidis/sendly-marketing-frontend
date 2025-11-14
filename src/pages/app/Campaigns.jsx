@@ -134,23 +134,24 @@ export default function Campaigns() {
 
         {/* Stats Cards */}
         {!error && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat) => (
-            <GlassCard key={stat.label} variant={stat.variant} className="p-5 hover:shadow-glass-light-lg transition-shadow">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2.5 rounded-xl bg-ice-soft/80">
-                  <Icon name={stat.icon} size="md" variant="ice" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-neutral-text-primary mb-1">
-                {stat.value.toLocaleString()}
-              </p>
-              <p className="text-xs font-medium text-neutral-text-secondary uppercase tracking-wider">{stat.label}</p>
-            </GlassCard>
-          ))}
-        </div>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {stats.map((stat) => (
+                <GlassCard key={stat.label} variant={stat.variant} className="p-5 hover:shadow-glass-light-lg transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2.5 rounded-xl bg-ice-soft/80">
+                      <Icon name={stat.icon} size="md" variant="ice" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-neutral-text-primary mb-1">
+                    {stat.value.toLocaleString()}
+                  </p>
+                  <p className="text-xs font-medium text-neutral-text-secondary uppercase tracking-wider">{stat.label}</p>
+                </GlassCard>
+              ))}
+            </div>
 
-        {/* Filters and Search */}
+            {/* Filters and Search */}
         <GlassCard className="p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <GlassInput
@@ -181,23 +182,22 @@ export default function Campaigns() {
             />
           </div>
         </GlassCard>
-        )}
 
-        {/* Campaigns Table */}
-        {!error && campaigns.length === 0 ? (
-          <EmptyState
-            icon="campaign"
-            title="No campaigns found"
-            message={searchQuery || statusFilter
-              ? 'Try adjusting your filters'
-              : 'Create your first SMS campaign to get started'}
-            actionLabel={!searchQuery && !statusFilter ? "Create Campaign" : undefined}
-            actionIcon={!searchQuery && !statusFilter ? "campaign" : undefined}
-            actionTo={!searchQuery && !statusFilter ? "/app/campaigns/new" : undefined}
-          />
-        ) : !error && (
-          <>
-            <GlassCard className="p-0 overflow-hidden">
+            {/* Campaigns Table */}
+            {!error && campaigns.length === 0 ? (
+              <EmptyState
+                icon="campaign"
+                title="No campaigns found"
+                message={searchQuery || statusFilter
+                  ? 'Try adjusting your filters'
+                  : 'Create your first SMS campaign to get started'}
+                actionLabel={!searchQuery && !statusFilter ? "Create Campaign" : undefined}
+                actionIcon={!searchQuery && !statusFilter ? "campaign" : undefined}
+                actionTo={!searchQuery && !statusFilter ? "/app/campaigns/new" : undefined}
+              />
+            ) : !error && (
+              <>
+                <GlassCard className="p-0 overflow-hidden">
               <GlassTable>
                 <GlassTableHeader>
                   <GlassTableRow>
@@ -294,6 +294,8 @@ export default function Campaigns() {
                   onPageChange={setPage}
                 />
               </div>
+            )}
+              </>
             )}
           </>
         )}
