@@ -17,9 +17,22 @@ export default function GlassModal({
   showCloseButton = true,
   className,
 }) {
+  const modalRef = useRef(null);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Focus trap: focus the modal when it opens
+      setTimeout(() => {
+        if (modalRef.current) {
+          const focusableElements = modalRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+          }
+        }
+      }, 100);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -60,11 +73,15 @@ export default function GlassModal({
       }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-primary-dark/80 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-neutral-text-primary/20 backdrop-blur-sm" />
       
       {/* Modal */}
       <GlassCard
+        ref={modalRef}
         variant="ice"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
         className={clsx(
           'relative z-10 w-full',
           sizeClasses[size],
@@ -73,14 +90,14 @@ export default function GlassModal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-glass-border">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-border/60">
             {title && (
-              <h2 className="text-h2 font-bold text-primary-light">{title}</h2>
+              <h2 id="modal-title" className="text-2xl font-bold text-neutral-text-primary">{title}</h2>
             )}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-glass-white transition-colors focus-ring"
+                className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring"
                 aria-label="Close modal"
               >
                 <Icon name="arrowRight" size="md" className="rotate-45" />

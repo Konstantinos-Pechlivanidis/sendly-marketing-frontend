@@ -67,22 +67,32 @@ const queryClient = new QueryClient({
   },
 });
 
-// Scroll to top on route change
+// Scroll to top on route change with smooth animation
 function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth',
+    });
   }, [pathname]);
 
   return null;
 }
 
-// Loading component
+// Loading component with iOS 26 style
 function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-ice-accent animate-pulse">Loading...</div>
+    <div className="min-h-screen flex items-center justify-center bg-bg-dark">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-2 border-ice-accent/30 border-t-ice-accent rounded-full animate-spin" 
+             style={{ animation: 'spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+             role="status"
+             aria-label="Loading" />
+        <p className="text-sm text-primary-light">Loading...</p>
+      </div>
     </div>
   );
 }
@@ -113,7 +123,8 @@ function AppRoutes() {
       <ScrollToTop />
       {!isAppRoute && <Navbar />}
       <Suspense fallback={<Loading />}>
-        <Routes>
+        <div className="page-enter">
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/features" element={<Features />} />
@@ -302,7 +313,8 @@ function AppRoutes() {
           
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </div>
       </Suspense>
       {!isAppRoute && <Footer />}
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />

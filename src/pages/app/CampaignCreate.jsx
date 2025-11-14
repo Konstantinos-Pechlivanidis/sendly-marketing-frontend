@@ -265,13 +265,13 @@ export default function CampaignCreate() {
         description="Create a new SMS campaign and preview it in real-time"
         path={isEditMode ? `/app/campaigns/${id}/edit` : '/app/campaigns/new'}
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8 bg-bg-dark">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-8">
-            <h1 className="text-h1 md:text-4xl font-bold mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-neutral-text-primary">
               {isEditMode ? 'Edit Campaign' : 'Create Campaign'}
             </h1>
-            <p className="text-body text-border-subtle">
+            <p className="text-base text-neutral-text-secondary">
               {isEditMode 
                 ? 'Update your SMS campaign and preview it in real-time'
                 : 'Create a new SMS campaign and preview it in real-time'}
@@ -326,20 +326,20 @@ export default function CampaignCreate() {
                   />
 
                   <div>
-                    <label className="text-sm font-medium text-primary-light mb-2 block">
+                    <label className="text-sm font-medium text-neutral-text-primary mb-2 block">
                       SMS Info
                     </label>
-                    <div className="p-3 rounded-lg bg-glass-white border border-glass-border">
+                    <div className="p-3 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-border-subtle">
+                        <span className="text-neutral-text-secondary">
                           {smsInfo.characters} characters
                         </span>
-                        <span className={`font-semibold ${smsInfo.parts > 1 ? 'text-zoom-fuchsia' : 'text-ice-accent'}`}>
+                        <span className={`font-semibold ${smsInfo.parts > 1 ? 'text-fuchsia-primary' : 'text-ice-primary'}`}>
                           {smsInfo.parts} SMS part{smsInfo.parts > 1 ? 's' : ''}
                         </span>
                       </div>
                       {smsInfo.parts > 1 && (
-                        <p className="text-xs text-zoom-fuchsia mt-2">
+                        <p className="text-xs text-fuchsia-primary mt-2">
                           This message will be split into {smsInfo.parts} parts
                         </p>
                       )}
@@ -367,9 +367,9 @@ export default function CampaignCreate() {
                         type="checkbox"
                         checked={isScheduled}
                         onChange={handleScheduleToggle}
-                        className="w-5 h-5 rounded border-glass-border bg-glass-white text-ice-accent focus:ring-ice-accent focus:ring-2"
+                        className="w-5 h-5 rounded border-neutral-border bg-neutral-surface-primary text-ice-primary focus:ring-ice-primary focus:ring-2"
                       />
-                      <span className="text-sm font-medium text-primary-light">
+                      <span className="text-sm font-medium text-neutral-text-primary">
                         Schedule for later
                       </span>
                     </label>
@@ -399,7 +399,7 @@ export default function CampaignCreate() {
                           error={errors.scheduleAt}
                         />
                         {formData.scheduleAt && (
-                          <p className="mt-2 text-sm text-ice-accent flex items-center gap-2">
+                          <p className="mt-2 text-sm text-ice-primary flex items-center gap-2">
                             <span>🕐</span>
                             <span>
                               Scheduled for {format(new Date(formData.scheduleAt), 'PPp')}
@@ -450,10 +450,10 @@ export default function CampaignCreate() {
 
             {/* iPhone Preview */}
             <div className="lg:sticky lg:top-8">
-              <GlassCard variant="dark" className="p-4">
+              <GlassCard variant="default" className="p-4">
                 <div className="mb-4">
-                  <h3 className="text-h3 font-semibold mb-2">Live Preview</h3>
-                  <p className="text-sm text-border-subtle">
+                  <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">Live Preview</h3>
+                  <p className="text-sm text-neutral-text-secondary">
                     See how your message will appear on a mobile device
                   </p>
                 </div>

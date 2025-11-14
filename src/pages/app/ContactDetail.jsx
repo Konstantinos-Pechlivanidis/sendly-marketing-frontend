@@ -1,15 +1,19 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
+import PageHeader from '../../components/ui/PageHeader';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import LoadingState from '../../components/ui/LoadingState';
+import ErrorState from '../../components/ui/ErrorState';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useContact, useUpdateContact, useDeleteContact, useCreateContact } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format } from 'date-fns';
-import { useState, useEffect } from 'react';
 
 export default function ContactDetail() {
   const { id } = useParams();
@@ -17,6 +21,7 @@ export default function ContactDetail() {
   const toast = useToastContext();
   const isNewContact = !id || id === 'new';
   const [isEditing, setIsEditing] = useState(isNewContact);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -106,8 +111,6 @@ export default function ContactDetail() {
       navigate('/app/contacts');
       return;
     }
-    
-    if (!window.confirm(`Are you sure you want to delete this contact?`)) return;
 
     try {
       await deleteContact.mutateAsync(id);
@@ -119,31 +122,19 @@ export default function ContactDetail() {
   };
 
   if (!isNewContact && isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <LoadingState size="lg" />;
   }
 
   if (!isNewContact && error && !contact) {
     return (
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
-          <GlassCard variant="dark" className="p-6 border border-red-500/30">
-            <div className="flex items-start gap-3">
-              <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
-              <div>
-                <h3 className="text-h3 font-semibold mb-2 text-red-400">Contact Not Found</h3>
-                <p className="text-body text-border-subtle mb-4">
-                  {error?.message || 'The contact you are looking for does not exist.'}
-                </p>
-                <GlassButton variant="primary" onClick={() => navigate('/app/contacts')}>
-                  Back to Contacts
-                </GlassButton>
-              </div>
-            </div>
-          </GlassCard>
+          <ErrorState
+            title="Contact Not Found"
+            message={error?.message || 'The contact you are looking for does not exist.'}
+            actionLabel="Back to Contacts"
+            onAction={() => navigate('/app/contacts')}
+          />
         </div>
       </div>
     );
@@ -156,83 +147,87 @@ export default function ContactDetail() {
         description="View and edit contact details"
         path={isNewContact ? '/app/contacts/new' : `/app/contacts/${id}`}
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <GlassButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/app/contacts')}
-                >
-                  <Icon name="arrowRight" size="sm" className="rotate-180" />
-                </GlassButton>
-                <h1 className="text-h1 md:text-4xl font-bold">
-                  {isNewContact 
-                    ? 'New Contact'
-                    : contact?.firstName && contact?.lastName
-                    ? `${contact.firstName} ${contact.lastName}`
-                    : contact?.name || 'Unnamed Contact'}
-                </h1>
-              </div>
-              {!isNewContact && (
-                <div className="flex items-center gap-3 mt-2">
-                  <StatusBadge status={contact?.consentStatus} />
-                  {contact?.createdAt && (
-                    <span className="text-sm text-border-subtle">
-                      Added {format(new Date(contact.createdAt), 'MMM d, yyyy')}
-                    </span>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <GlassButton
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/app/contacts')}
+              >
+                <Icon name="arrowRight" size="sm" className="rotate-180" />
+              </GlassButton>
+            </div>
+            <PageHeader
+              title={
+                isNewContact 
+                  ? 'New Contact'
+                  : contact?.firstName && contact?.lastName
+                  ? `${contact.firstName} ${contact.lastName}`
+                  : contact?.name || 'Unnamed Contact'
+              }
+              subtitle={
+                !isNewContact ? (
+                  <div className="flex items-center gap-3 mt-2">
+                    <StatusBadge status={contact?.consentStatus} />
+                    {contact?.createdAt && (
+                      <span className="text-sm text-neutral-text-secondary">
+                        Added {format(new Date(contact.createdAt), 'MMM d, yyyy')}
+                      </span>
+                    )}
+                  </div>
+                ) : undefined
+              }
+              action={
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <>
+                      {!isNewContact && (
+                        <GlassButton variant="ghost" size="md" onClick={() => setIsEditing(false)}>
+                          Cancel
+                        </GlassButton>
+                      )}
+                      <GlassButton 
+                        variant="primary" 
+                        size="md" 
+                        onClick={handleSave}
+                        disabled={createContact.isPending || updateContact.isPending}
+                      >
+                        {createContact.isPending || updateContact.isPending ? (
+                          <span className="flex items-center gap-2">
+                            <LoadingSpinner size="sm" />
+                            Saving...
+                          </span>
+                        ) : (
+                          isNewContact ? 'Create Contact' : 'Save Changes'
+                        )}
+                      </GlassButton>
+                    </>
+                  ) : !isNewContact && (
+                    <>
+                      <GlassButton
+                        variant="ghost"
+                        size="md"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Icon name="edit" size="sm" variant="ice" />
+                          Edit
+                        </span>
+                      </GlassButton>
+                      <GlassButton variant="ghost" size="md" onClick={() => setShowDeleteDialog(true)}>
+                        <span className="flex items-center gap-2">
+                          <Icon name="delete" size="sm" className="text-red-500" />
+                          Delete
+                        </span>
+                      </GlassButton>
+                    </>
                   )}
                 </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  {!isNewContact && (
-                    <GlassButton variant="ghost" size="md" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </GlassButton>
-                  )}
-                  <GlassButton 
-                    variant="primary" 
-                    size="md" 
-                    onClick={handleSave}
-                    disabled={createContact.isPending || updateContact.isPending}
-                  >
-                    {createContact.isPending || updateContact.isPending ? (
-                      <span className="flex items-center gap-2">
-                        <LoadingSpinner size="sm" />
-                        Saving...
-                      </span>
-                    ) : (
-                      isNewContact ? 'Create Contact' : 'Save Changes'
-                    )}
-                  </GlassButton>
-                </>
-              ) : !isNewContact && (
-                <>
-                  <GlassButton
-                    variant="ghost"
-                    size="md"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Icon name="edit" size="sm" variant="ice" />
-                      Edit
-                    </span>
-                  </GlassButton>
-                  <GlassButton variant="ghost" size="md" onClick={handleDelete}>
-                    <span className="flex items-center gap-2">
-                      <Icon name="delete" size="sm" className="text-red-400" />
-                      Delete
-                    </span>
-                  </GlassButton>
-                </>
-              )}
-            </div>
+              }
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -240,7 +235,7 @@ export default function ContactDetail() {
             <div className="lg:col-span-2 space-y-6">
               {/* Contact Details */}
               <GlassCard className="p-6">
-                <h2 className="text-h2 font-bold mb-4">Contact Details</h2>
+                <h2 className="text-2xl font-bold mb-4 text-neutral-text-primary">Contact Details</h2>
                 {isEditing ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -276,29 +271,29 @@ export default function ContactDetail() {
                 ) : !isNewContact && (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-border-subtle">Name</label>
-                      <p className="text-primary-light mt-1">
+                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Name</label>
+                      <p className="text-neutral-text-primary mt-1">
                         {contact?.firstName && contact?.lastName
                           ? `${contact.firstName} ${contact.lastName}`
                           : contact?.name || 'Unnamed Contact'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-border-subtle">Phone</label>
-                      <p className="text-primary-light mt-1">{contact?.phone || '-'}</p>
+                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Phone</label>
+                      <p className="text-neutral-text-primary mt-1">{contact?.phone || '-'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-border-subtle">Email</label>
-                      <p className="text-primary-light mt-1">{contact?.email || '-'}</p>
+                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Email</label>
+                      <p className="text-neutral-text-primary mt-1">{contact?.email || '-'}</p>
                     </div>
                     {contact?.tags && contact.tags.length > 0 && (
                       <div>
-                        <label className="text-sm font-medium text-border-subtle">Tags</label>
+                        <label className="text-sm font-medium text-neutral-text-secondary mb-1">Tags</label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {contact.tags.map((tag, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 text-sm rounded-lg bg-glass-white border border-glass-border text-primary-light"
+                              className="px-3 py-1 text-sm rounded-full bg-ice-soft/60 border border-ice-primary/20 text-ice-primary font-medium"
                             >
                               {tag}
                             </span>
@@ -315,26 +310,26 @@ export default function ContactDetail() {
             <div className="space-y-6">
               {/* Quick Info */}
               <GlassCard variant="ice" className="p-6">
-                <h3 className="text-h3 font-semibold mb-4">Quick Info</h3>
+                <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Quick Info</h3>
                 <div className="space-y-3">
                   {!isNewContact && (
                     <>
                       <div>
-                        <p className="text-xs text-border-subtle mb-1">Consent Status</p>
+                        <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Consent Status</p>
                         <StatusBadge status={contact?.consentStatus} />
                       </div>
                       {contact?.createdAt && (
                         <div>
-                          <p className="text-xs text-border-subtle mb-1">Created</p>
-                          <p className="text-sm text-primary-light">
+                          <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Created</p>
+                          <p className="text-sm text-neutral-text-primary">
                             {format(new Date(contact.createdAt), 'MMM d, yyyy')}
                           </p>
                         </div>
                       )}
                       {contact?.updatedAt && (
                         <div>
-                          <p className="text-xs text-border-subtle mb-1">Last Updated</p>
-                          <p className="text-sm text-primary-light">
+                          <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Last Updated</p>
+                          <p className="text-sm text-neutral-text-primary">
                             {format(new Date(contact.updatedAt), 'MMM d, yyyy')}
                           </p>
                         </div>
@@ -347,6 +342,19 @@ export default function ContactDetail() {
           </div>
         </div>
       </div>
+      
+      {!isNewContact && (
+        <ConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={handleDelete}
+          title="Delete Contact"
+          message="Are you sure you want to delete this contact? This action cannot be undone."
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          destructive={true}
+        />
+      )}
     </>
   );
 }

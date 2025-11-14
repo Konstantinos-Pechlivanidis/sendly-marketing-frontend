@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
+import PageHeader from '../../components/ui/PageHeader';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassSelect from '../../components/ui/GlassSelect';
 import Icon from '../../components/ui/Icon';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import LoadingState from '../../components/ui/LoadingState';
+import ErrorState from '../../components/ui/ErrorState';
+import EmptyState from '../../components/ui/EmptyState';
 import { useTemplates, useTemplateCategories, useTrackTemplateUsage } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
+import { normalizeArrayResponse } from '../../utils/apiHelpers';
 import SEO from '../../components/SEO';
 
 export default function Templates() {
@@ -57,11 +61,7 @@ export default function Templates() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <LoadingState size="lg" message="Loading templates..." />;
   }
 
   return (
@@ -71,111 +71,96 @@ export default function Templates() {
         description="Browse and use SMS message templates"
         path="/app/templates"
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
-        <div className="max-w-[1400px] mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-h1 md:text-4xl font-bold mb-2">Templates</h1>
-            <p className="text-body text-border-subtle">
-              Browse and use pre-built SMS message templates
-            </p>
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+        {/* Header */}
+        <PageHeader
+          title="Templates"
+          subtitle="Browse and use pre-built SMS message templates"
+        />
+
+        {/* Filters */}
+        <GlassCard className="p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <GlassInput
+              label="Search Templates"
+              type="text"
+              placeholder="Search by name or content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <GlassSelect
+              label="Filter by Category"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              options={[
+                { value: '', label: 'All Categories' },
+                ...categories.map((cat) => ({
+                  value: cat.id || cat.name,
+                  label: cat.name || cat.id,
+                })),
+              ]}
+            />
           </div>
+        </GlassCard>
 
-          {/* Filters */}
-          <GlassCard className="p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <GlassInput
-                label="Search Templates"
-                type="text"
-                placeholder="Search by name or content..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <GlassSelect
-                label="Filter by Category"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                options={[
-                  { value: '', label: 'All Categories' },
-                  ...categories.map((cat) => ({
-                    value: cat.id || cat.name,
-                    label: cat.name || cat.id,
-                  })),
-                ]}
-              />
-            </div>
-          </GlassCard>
+        {/* Error State */}
+        {error && (
+          <ErrorState
+            title="Error Loading Templates"
+            message={error.message || 'Failed to load templates. Please try refreshing the page.'}
+            onAction={() => window.location.reload()}
+            actionLabel="Refresh Page"
+          />
+        )}
 
-          {/* Error State */}
-          {error && (
-            <GlassCard variant="dark" className="p-6 mb-6 border border-red-500/30">
-              <div className="flex items-start gap-3">
-                <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
-                <div>
-                  <h3 className="text-h3 font-semibold mb-2 text-red-400">Error Loading Templates</h3>
-                  <p className="text-body text-border-subtle">
-                    {error.message || 'Failed to load templates. Please try refreshing the page.'}
+        {/* Templates Grid */}
+        {!error && templates.length === 0 ? (
+          <EmptyState
+            icon="templates"
+            title="No templates found"
+            message={searchQuery || categoryFilter
+              ? 'Try adjusting your filters'
+              : 'No templates available at the moment'}
+          />
+        ) : !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {templates.map((template) => (
+              <GlassCard key={template.id} className="p-6 hover:shadow-glass-light-lg transition-shadow">
+                <div className="mb-4">
+                  {template.category && (
+                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-ice-soft/60 border border-ice-primary/20 text-ice-primary font-medium mb-2">
+                      {template.category}
+                    </span>
+                  )}
+                  <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">{template.name}</h3>
+                  <p className="text-sm text-neutral-text-secondary line-clamp-3">
+                    {template.message || template.content}
                   </p>
                 </div>
-              </div>
-            </GlassCard>
-          )}
-
-          {/* Templates Grid */}
-          {templates.length === 0 ? (
-            <GlassCard className="p-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-xl bg-ice-accent/20">
-                  <Icon name="templates" size="xl" variant="ice" />
-                </div>
-              </div>
-              <h3 className="text-h3 font-semibold mb-2">No templates found</h3>
-              <p className="text-body text-border-subtle">
-                {searchQuery || categoryFilter
-                  ? 'Try adjusting your filters'
-                  : 'No templates available at the moment'}
-              </p>
-            </GlassCard>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {templates.map((template) => (
-                <GlassCard key={template.id} className="p-6 hover:scale-[1.02] transition-transform">
+                
+                {template.useCount !== undefined && (
                   <div className="mb-4">
-                    {template.category && (
-                      <span className="inline-block px-3 py-1 text-xs rounded-lg bg-ice-accent/20 text-ice-accent mb-2">
-                        {template.category}
-                      </span>
-                    )}
-                    <h3 className="text-h3 font-semibold mb-2">{template.name}</h3>
-                    <p className="text-sm text-border-subtle line-clamp-3">
-                      {template.message || template.content}
+                    <p className="text-xs text-neutral-text-secondary">
+                      Used {template.useCount} time{template.useCount !== 1 ? 's' : ''}
                     </p>
                   </div>
-                  
-                  {template.useCount !== undefined && (
-                    <div className="mb-4">
-                      <p className="text-xs text-border-subtle">
-                        Used {template.useCount} time{template.useCount !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  )}
+                )}
 
-                  <GlassButton
-                    variant="primary"
-                    size="md"
-                    onClick={() => handleUseTemplate(template)}
-                    className="w-full"
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <Icon name="campaign" size="sm" variant="ice" />
-                      Use Template
-                    </span>
-                  </GlassButton>
-                </GlassCard>
-              ))}
-            </div>
-          )}
-        </div>
+                <GlassButton
+                  variant="primary"
+                  size="md"
+                  onClick={() => handleUseTemplate(template)}
+                  className="w-full"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <Icon name="campaign" size="sm" variant="ice" />
+                    Use Template
+                  </span>
+                </GlassButton>
+              </GlassCard>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

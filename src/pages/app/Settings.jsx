@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
+import PageHeader from '../../components/ui/PageHeader';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
 import GlassSelect from '../../components/ui/GlassSelect';
@@ -69,7 +70,7 @@ export default function Settings() {
 
   if (isLoadingSettings || isLoadingAccount) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-bg-base">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -82,45 +83,42 @@ export default function Settings() {
         description="Manage your account settings"
         path="/app/settings"
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
-        <div className="max-w-[1200px] mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-h1 md:text-4xl font-bold mb-2">Settings</h1>
-            <p className="text-body text-border-subtle">
-              Manage your account and SMS settings
-            </p>
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+        {/* Header */}
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and SMS settings"
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Tabs Sidebar */}
+          <div className="lg:col-span-1">
+            <GlassCard className="p-0 overflow-hidden">
+              <nav className="space-y-1 p-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                      activeTab === tab.id
+                        ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
+                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
+                    }`}
+                  >
+                    <Icon name={tab.icon} size="md" variant={activeTab === tab.id ? 'ice' : 'default'} />
+                    <span className="text-sm font-medium">{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </GlassCard>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Tabs Sidebar */}
-            <div className="lg:col-span-1">
-              <GlassCard className="p-0 overflow-hidden">
-                <nav className="space-y-1 p-2">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        activeTab === tab.id
-                          ? 'bg-ice-accent/20 text-ice-accent border border-ice-accent/30'
-                          : 'text-primary-light hover:bg-glass-white'
-                      }`}
-                    >
-                      <Icon name={tab.icon} size="md" variant={activeTab === tab.id ? 'ice' : 'default'} />
-                      <span className="text-sm font-medium">{tab.label}</span>
-                    </button>
-                  ))}
-                </nav>
-              </GlassCard>
-            </div>
-
-            {/* Content */}
-            <div className="lg:col-span-3">
-              {/* General Settings */}
-              {activeTab === 'general' && (
-                <GlassCard className="p-6">
-                  <h2 className="text-h2 font-bold mb-6">General Settings</h2>
+          {/* Content */}
+          <div className="lg:col-span-3">
+            {/* General Settings */}
+            {activeTab === 'general' && (
+              <GlassCard className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">General Settings</h2>
                   <div className="space-y-6">
                     <GlassInput
                       label="Sender ID / Name"
@@ -157,60 +155,21 @@ export default function Settings() {
                         { value: 'JPY', label: 'JPY (¥)' },
                       ]}
                     />
-                    {storeInfo && (
-                      <div>
-                        <label className="block text-sm font-medium text-border-subtle mb-2">
-                          Store Information
-                        </label>
-                        <div className="p-4 rounded-lg bg-glass-white border border-glass-border">
-                          <p className="text-sm text-primary-light">
-                            <strong>Store:</strong> {storeInfo.shopName || storeInfo.shopDomain}
-                          </p>
-                          <p className="text-sm text-primary-light mt-1">
-                            <strong>Domain:</strong> {storeInfo.shopDomain}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex justify-end pt-4">
-                      <GlassButton variant="primary" size="lg" onClick={handleSave}>
-                        Save Changes
-                      </GlassButton>
-                    </div>
-                  </div>
-                </GlassCard>
-              )}
-
-              {/* SMS Settings */}
-              {activeTab === 'sms' && (
-                <GlassCard className="p-6">
-                  <h2 className="text-h2 font-bold mb-6">SMS Settings</h2>
-                  <div className="space-y-6">
-                    <GlassTextarea
-                      label="Default Unsubscribe Message"
-                      name="unsubscribeMessage"
-                      value={formData.unsubscribeMessage}
-                      onChange={handleChange}
-                      rows={4}
-                      placeholder="Reply STOP to unsubscribe"
-                    />
-                    <div>
-                      <label className="flex items-center gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="deliveryNotifications"
-                          checked={formData.deliveryNotifications}
-                          onChange={handleChange}
-                          className="w-5 h-5 rounded border-glass-border bg-glass-white text-ice-accent focus:ring-ice-accent focus:ring-2"
-                        />
-                        <span className="text-sm font-medium text-primary-light">
-                          Enable delivery notifications
-                        </span>
-                      </label>
-                      <p className="text-xs text-border-subtle mt-1 ml-8">
-                        Receive notifications when messages are delivered or fail
+                {storeInfo && (
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                      Store Information
+                    </label>
+                    <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
+                      <p className="text-sm text-neutral-text-primary">
+                        <strong>Store:</strong> {storeInfo.shopName || storeInfo.shopDomain}
+                      </p>
+                      <p className="text-sm text-neutral-text-primary mt-1">
+                        <strong>Domain:</strong> {storeInfo.shopDomain}
                       </p>
                     </div>
+                  </div>
+                )}
                     <div className="flex justify-end pt-4">
                       <GlassButton variant="primary" size="lg" onClick={handleSave}>
                         Save Changes
@@ -220,103 +179,141 @@ export default function Settings() {
                 </GlassCard>
               )}
 
-              {/* Integrations */}
-              {activeTab === 'integrations' && (
-                <GlassCard className="p-6">
-                  <h2 className="text-h2 font-bold mb-6">Integrations</h2>
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-border-subtle mb-2">
-                        Shopify Connection
-                      </label>
-                      <div className="p-4 rounded-lg bg-glass-white border border-glass-border">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-primary-light">
-                              {storeInfo?.shopName || storeInfo?.shopDomain || 'Not connected'}
-                            </p>
-                            <p className="text-xs text-border-subtle mt-1">
-                              {storeInfo ? 'Connected' : 'Not connected'}
-                            </p>
-                          </div>
-                          <StatusBadge status={storeInfo ? 'active' : 'pending'} />
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-border-subtle mb-2">
-                        Webhook URL
-                      </label>
-                      <div className="p-4 rounded-lg bg-glass-white border border-glass-border">
-                        <code className="text-sm text-primary-light break-all">
-                          {window.location.origin}/webhooks/shopify
-                        </code>
-                        <p className="text-xs text-border-subtle mt-2">
-                          Use this URL in your Shopify webhook settings
-                        </p>
-                      </div>
+            {/* SMS Settings */}
+            {activeTab === 'sms' && (
+              <GlassCard className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">SMS Settings</h2>
+                <div className="space-y-6">
+                  <GlassTextarea
+                    label="Default Unsubscribe Message"
+                    name="unsubscribeMessage"
+                    value={formData.unsubscribeMessage}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="Reply STOP to unsubscribe"
+                  />
+                  <div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="deliveryNotifications"
+                        checked={formData.deliveryNotifications}
+                        onChange={handleChange}
+                        className="w-5 h-5 rounded border-neutral-border bg-neutral-surface-primary text-ice-primary focus:ring-ice-primary focus:ring-2"
+                      />
+                      <span className="text-sm font-medium text-neutral-text-primary">
+                        Enable delivery notifications
+                      </span>
+                    </label>
+                    <p className="text-xs text-neutral-text-secondary mt-1 ml-8">
+                      Receive notifications when messages are delivered or fail
+                    </p>
+                  </div>
+                    <div className="flex justify-end pt-4">
+                      <GlassButton variant="primary" size="lg" onClick={handleSave}>
+                        Save Changes
+                      </GlassButton>
                     </div>
                   </div>
                 </GlassCard>
               )}
 
-              {/* Account */}
-              {activeTab === 'account' && (
-                <GlassCard className="p-6">
-                  <h2 className="text-h2 font-bold mb-6">Account</h2>
-                  <div className="space-y-6">
-                    {storeInfo && (
-                      <div>
-                        <label className="block text-sm font-medium text-border-subtle mb-2">
-                          Store Details
-                        </label>
-                        <div className="p-4 rounded-lg bg-glass-white border border-glass-border space-y-2">
-                          <div>
-                            <span className="text-xs text-border-subtle">Store Name:</span>
-                            <p className="text-sm text-primary-light">{storeInfo.shopName || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <span className="text-xs text-border-subtle">Domain:</span>
-                            <p className="text-sm text-primary-light">{storeInfo.shopDomain || 'N/A'}</p>
-                          </div>
-                          {accountData && (
-                            <>
-                              {accountData.email && (
-                                <div>
-                                  <span className="text-xs text-border-subtle">Email:</span>
-                                  <p className="text-sm text-primary-light">{accountData.email}</p>
-                                </div>
-                              )}
-                              {accountData.createdAt && (
-                                <div>
-                                  <span className="text-xs text-border-subtle">Created:</span>
-                                  <p className="text-sm text-primary-light">
-                                    {new Date(accountData.createdAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              )}
-                            </>
-                          )}
+            {/* Integrations */}
+            {activeTab === 'integrations' && (
+              <GlassCard className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">Integrations</h2>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                      Shopify Connection
+                    </label>
+                    <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-neutral-text-primary">
+                            {storeInfo?.shopName || storeInfo?.shopDomain || 'Not connected'}
+                          </p>
+                          <p className="text-xs text-neutral-text-secondary mt-1">
+                            {storeInfo ? 'Connected' : 'Not connected'}
+                          </p>
                         </div>
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium text-border-subtle mb-2">
-                        API Token
-                      </label>
-                      <div className="p-4 rounded-lg bg-glass-white border border-glass-border">
-                        <code className="text-sm text-primary-light break-all">
-                          {localStorage.getItem(TOKEN_KEY) ? '••••••••••••••••' : 'No token'}
-                        </code>
-                        <p className="text-xs text-border-subtle mt-2">
-                          Your API token is stored securely
-                        </p>
+                        <StatusBadge status={storeInfo ? 'active' : 'pending'} />
                       </div>
                     </div>
                   </div>
-                </GlassCard>
-              )}
-            </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                      Webhook URL
+                    </label>
+                    <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
+                      <code className="text-sm text-neutral-text-primary break-all font-mono">
+                        {window.location.origin}/webhooks/shopify
+                      </code>
+                      <p className="text-xs text-neutral-text-secondary mt-2">
+                        Use this URL in your Shopify webhook settings
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
+            )}
+
+            {/* Account */}
+            {activeTab === 'account' && (
+              <GlassCard className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">Account</h2>
+                <div className="space-y-6">
+                  {storeInfo && (
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                        Store Details
+                      </label>
+                      <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border space-y-2">
+                        <div>
+                          <span className="text-xs text-neutral-text-secondary">Store Name:</span>
+                          <p className="text-sm text-neutral-text-primary font-medium">{storeInfo.shopName || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-neutral-text-secondary">Domain:</span>
+                          <p className="text-sm text-neutral-text-primary font-medium">{storeInfo.shopDomain || 'N/A'}</p>
+                        </div>
+                        {accountData && (
+                          <>
+                            {accountData.email && (
+                              <div>
+                                <span className="text-xs text-neutral-text-secondary">Email:</span>
+                                <p className="text-sm text-neutral-text-primary font-medium">{accountData.email}</p>
+                              </div>
+                            )}
+                            {accountData.createdAt && (
+                              <div>
+                                <span className="text-xs text-neutral-text-secondary">Created:</span>
+                                <p className="text-sm text-neutral-text-primary font-medium">
+                                  {new Date(accountData.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                      API Token
+                    </label>
+                    <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
+                      <code className="text-sm text-neutral-text-primary break-all font-mono">
+                        {localStorage.getItem(TOKEN_KEY) ? '••••••••••••••••' : 'No token'}
+                      </code>
+                      <p className="text-xs text-neutral-text-secondary mt-2">
+                        Your API token is stored securely
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
+            )}
           </div>
         </div>
       </div>

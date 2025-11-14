@@ -45,54 +45,56 @@ export default function AppLayout({ children }) {
   return (
     <div className="min-h-screen bg-neutral-bg-base flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:z-40">
-        <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[20px] border-r border-neutral-border shadow-glass-light">
+      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:z-40">
+        <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border/60 shadow-glass-light">
           {/* Logo */}
-          <div className="flex items-center gap-2 px-6 py-5 border-b border-neutral-border">
-            <div className="w-8 h-8 rounded-lg bg-ice-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+          <div className="flex items-center gap-3 px-6 py-6 border-b border-neutral-border/60">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ice-primary to-ice-deep flex items-center justify-center shadow-glow-ice-light">
+              <span className="text-white font-bold text-xl">S</span>
             </div>
-            <span className="text-h3 font-semibold text-neutral-text-primary">Sendly</span>
+            <span className="text-xl font-bold text-neutral-text-primary tracking-tight">Sendly</span>
           </div>
 
           {/* Store Info */}
           {storeInfo && (
-            <div className="px-6 py-4 border-b border-neutral-border">
-              <p className="text-xs text-neutral-text-secondary mb-1">Store</p>
-              <p className="text-sm font-medium text-neutral-text-primary truncate">
+            <div className="px-6 py-4 border-b border-neutral-border/60 bg-neutral-surface-secondary/50">
+              <p className="text-xs font-medium text-neutral-text-secondary mb-1.5 uppercase tracking-wider">Store</p>
+              <p className="text-sm font-semibold text-neutral-text-primary truncate">
                 {storeInfo.shopName || storeInfo.shopDomain}
               </p>
             </div>
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Main navigation">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                aria-current={isActive(item.path) ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
                   isActive(item.path)
-                    ? 'bg-ice-soft text-ice-primary border border-ice-primary/30'
+                    ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
                     : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
                 }`}
               >
-                <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} />
+                <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} aria-hidden="true" />
                 <span className="text-sm font-medium">{item.label}</span>
               </Link>
             ))}
           </nav>
 
           {/* Logout */}
-          <div className="px-4 py-4 border-t border-neutral-border">
+          <div className="px-3 py-4 border-t border-neutral-border/60">
             <GlassButton
               variant="ghost"
               size="sm"
               onClick={handleLogout}
               className="w-full justify-start"
+              aria-label="Log out"
             >
               <span className="flex items-center gap-3">
-                <Icon name="logout" size="md" variant="ice" />
+                <Icon name="logout" size="md" variant="default" aria-hidden="true" />
                 <span>Log out</span>
               </span>
             </GlassButton>
@@ -136,14 +138,19 @@ export default function AppLayout({ children }) {
           />
           
           {/* Sidebar */}
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border shadow-glass-light-lg flex flex-col">
+          <div 
+            className="absolute left-0 top-0 bottom-0 w-72 bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border/60 shadow-glass-light-lg flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+          >
             {/* Logo */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-border">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-ice-primary flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">S</span>
+            <div className="flex items-center justify-between px-6 py-6 border-b border-neutral-border/60">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ice-primary to-ice-deep flex items-center justify-center shadow-glow-ice-light" aria-hidden="true">
+                  <span className="text-white font-bold text-xl">S</span>
                 </div>
-                <span className="text-h3 font-semibold text-neutral-text-primary">Sendly</span>
+                <span className="text-xl font-bold text-neutral-text-primary tracking-tight">Sendly</span>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -156,35 +163,36 @@ export default function AppLayout({ children }) {
 
             {/* Store Info */}
             {storeInfo && (
-              <div className="px-6 py-4 border-b border-neutral-border">
-                <p className="text-xs text-neutral-text-secondary mb-1">Store</p>
-                <p className="text-sm font-medium text-neutral-text-primary truncate">
+              <div className="px-6 py-4 border-b border-neutral-border/60 bg-neutral-surface-secondary/50">
+                <p className="text-xs font-medium text-neutral-text-secondary mb-1.5 uppercase tracking-wider">Store</p>
+                <p className="text-sm font-semibold text-neutral-text-primary truncate">
                   {storeInfo.shopName || storeInfo.shopDomain}
                 </p>
               </div>
             )}
 
             {/* Navigation */}
-            <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Main navigation">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  aria-current={isActive(item.path) ? 'page' : undefined}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
                     isActive(item.path)
-                      ? 'bg-ice-soft text-ice-primary border border-ice-primary/30'
+                      ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
                       : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
                   }`}
                 >
-                  <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} />
+                  <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} aria-hidden="true" />
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
               ))}
             </nav>
 
             {/* Logout */}
-            <div className="px-4 py-4 border-t border-neutral-border">
+            <div className="px-3 py-4 border-t border-neutral-border/60">
               <GlassButton
                 variant="ghost"
                 size="sm"
@@ -193,9 +201,10 @@ export default function AppLayout({ children }) {
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full justify-start"
+                aria-label="Log out"
               >
                 <span className="flex items-center gap-3">
-                  <Icon name="logout" size="md" variant="ice" />
+                  <Icon name="logout" size="md" variant="default" aria-hidden="true" />
                   <span>Log out</span>
                 </span>
               </GlassButton>
@@ -205,9 +214,11 @@ export default function AppLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 lg:pl-64 bg-neutral-bg-base">
+      <main className="flex-1 lg:pl-72 bg-neutral-bg-base">
         <div className="min-h-screen">
-          {children}
+          <div className="max-w-[1600px] mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

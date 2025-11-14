@@ -13,6 +13,8 @@ import GlassTable, {
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import ErrorState from '../../components/ui/ErrorState';
+import EmptyState from '../../components/ui/EmptyState';
 import { useCampaignReports, useCampaigns } from '../../services/queries';
 import { normalizeArrayResponse } from '../../utils/apiHelpers';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -38,7 +40,7 @@ export default function CampaignReports() {
         description="Detailed campaign performance reports"
         path="/app/reports/campaigns"
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -52,9 +54,9 @@ export default function CampaignReports() {
                 >
                   <Icon name="arrowRight" size="sm" className="rotate-180" />
                 </GlassButton>
-                <h1 className="text-h1 md:text-4xl font-bold">Campaign Reports</h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-neutral-text-primary">Campaign Reports</h1>
               </div>
-              <p className="text-body text-border-subtle">
+              <p className="text-base text-neutral-text-secondary">
                 Detailed performance metrics for your campaigns
               </p>
             </div>
@@ -78,39 +80,28 @@ export default function CampaignReports() {
 
           {/* Error State */}
           {error && (
-            <GlassCard variant="dark" className="p-6 mb-6 border border-red-500/30">
-              <div className="flex items-start gap-3">
-                <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
-                <div>
-                  <h3 className="text-h3 font-semibold mb-2 text-red-400">Error Loading Reports</h3>
-                  <p className="text-body text-border-subtle">
-                    {error.message || 'Failed to load campaign reports. Please try refreshing the page.'}
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
+            <ErrorState
+              title="Error Loading Reports"
+              message={error.message || 'Failed to load campaign reports. Please try refreshing the page.'}
+              onAction={() => window.location.reload()}
+              actionLabel="Refresh Page"
+            />
           )}
 
           {/* Reports Table */}
-          {isLoading ? (
+          {!error && isLoading ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" />
             </div>
-          ) : reports.length === 0 ? (
-            <GlassCard className="p-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-xl bg-ice-accent/20">
-                  <Icon name="report" size="xl" variant="ice" />
-                </div>
-              </div>
-              <h3 className="text-h3 font-semibold mb-2">No reports found</h3>
-              <p className="text-body text-border-subtle">
-                {selectedCampaignId
-                  ? 'No reports available for this campaign'
-                  : 'No campaign reports available'}
-              </p>
-            </GlassCard>
-          ) : (
+          ) : !error && reports.length === 0 ? (
+            <EmptyState
+              icon="report"
+              title="No reports found"
+              message={selectedCampaignId
+                ? 'No reports available for this campaign'
+                : 'No campaign reports available'}
+            />
+          ) : !error && (
             <GlassCard className="p-0 overflow-hidden">
               <GlassTable>
                 <GlassTableHeader>
@@ -131,7 +122,7 @@ export default function CampaignReports() {
                       <GlassTableCell>
                         <Link
                           to={`/app/campaigns/${report.campaignId || report.id}`}
-                          className="font-medium text-ice-accent hover:underline"
+                          className="font-semibold text-ice-primary hover:underline"
                         >
                           {report.campaignName || report.name || 'Unknown Campaign'}
                         </Link>
@@ -140,28 +131,28 @@ export default function CampaignReports() {
                         <StatusBadge status={report.status} />
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-primary-light">{report.sent || 0}</span>
+                        <span className="text-neutral-text-primary font-medium">{report.sent || 0}</span>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-ice-accent">{report.delivered || 0}</span>
+                        <span className="text-ice-primary font-medium">{report.delivered || 0}</span>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-red-400">{report.failed || 0}</span>
+                        <span className="text-red-500 font-medium">{report.failed || 0}</span>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-primary-light">
+                        <span className="text-neutral-text-primary font-medium">
                           {report.deliveryRate ? `${report.deliveryRate.toFixed(1)}%` : '0%'}
                         </span>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-border-subtle text-sm">
+                        <span className="text-neutral-text-secondary text-sm">
                           {report.date ? format(new Date(report.date), 'MMM d, yyyy') : '-'}
                         </span>
                       </GlassTableCell>
                       <GlassTableCell>
                         <Link
                           to={`/app/campaigns/${report.campaignId || report.id}`}
-                          className="p-2 rounded-lg hover:bg-glass-white transition-colors inline-block"
+                          className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors inline-block"
                         >
                           <Icon name="view" size="sm" variant="ice" />
                         </Link>

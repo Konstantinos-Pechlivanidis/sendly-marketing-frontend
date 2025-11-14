@@ -39,10 +39,10 @@ export default function DateRangePicker({
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg glass border border-glass-border hover:border-ice-accent transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg glass border border-neutral-border hover:border-ice-primary transition-colors"
       >
         <Icon name="calendar" size="sm" variant="ice" />
-        <span className="text-sm text-primary-light">
+        <span className="text-sm text-neutral-text-primary">
           {startDate && endDate
             ? `${formatDate(startDate)} - ${formatDate(endDate)}`
             : 'Select date range'}
@@ -50,7 +50,7 @@ export default function DateRangePicker({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 p-4 rounded-lg glass border border-glass-border z-10 min-w-[300px]">
+        <div className="absolute top-full left-0 mt-2 p-4 rounded-lg glass border border-neutral-border z-10 min-w-[300px]">
           <div className="space-y-4">
             <GlassInput
               label="Start Date"
@@ -75,7 +75,7 @@ export default function DateRangePicker({
                   onEndDateChange(end);
                   setIsOpen(false);
                 }}
-                className="flex-1 px-3 py-2 text-xs rounded-lg glass border border-glass-border hover:border-ice-accent transition-colors text-primary-light"
+                className="flex-1 px-3 py-2 text-xs rounded-lg glass border border-neutral-border hover:border-ice-primary transition-colors text-neutral-text-primary"
               >
                 Last 7 days
               </button>
@@ -89,7 +89,7 @@ export default function DateRangePicker({
                   onEndDateChange(end);
                   setIsOpen(false);
                 }}
-                className="flex-1 px-3 py-2 text-xs rounded-lg glass border border-glass-border hover:border-ice-accent transition-colors text-primary-light"
+                className="flex-1 px-3 py-2 text-xs rounded-lg glass border border-neutral-border hover:border-ice-primary transition-colors text-neutral-text-primary"
               >
                 Last 30 days
               </button>

@@ -49,7 +49,7 @@ export default function GlassPagination({
           >
             1
           </GlassButton>
-          {startPage > 2 && <span className="text-border-subtle px-2">...</span>}
+          {startPage > 2 && <span className="text-neutral-text-secondary px-2">...</span>}
         </>
       )}
 
@@ -68,7 +68,7 @@ export default function GlassPagination({
       {/* Last Page */}
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="text-border-subtle px-2">...</span>}
+          {endPage < totalPages - 1 && <span className="text-neutral-text-secondary px-2">...</span>}
           <GlassButton
             variant={totalPages === currentPage ? 'primary' : 'ghost'}
             size="sm"

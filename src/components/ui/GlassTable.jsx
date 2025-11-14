@@ -6,12 +6,13 @@ import { clsx } from 'clsx';
  */
 export default function GlassTable({ children, className, ...props }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" role="region" aria-label="Data table" tabIndex={0}>
       <table
         className={clsx(
           'w-full border-collapse',
           className
         )}
+        role="table"
         {...props}
       >
         {children}

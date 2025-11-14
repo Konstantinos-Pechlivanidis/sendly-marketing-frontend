@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { clsx } from 'clsx';
 
 /**
  * Custom Icon Component
  * Consistent icon style for the Sendly brand
  */
-export default function Icon({ name, className, size = 'md', variant = 'default' }) {
+const Icon = memo(function Icon({ name, className, size = 'md', variant = 'default' }) {
   const sizeClasses = {
     sm: 'w-5 h-5',
     md: 'w-6 h-6',
@@ -13,10 +14,10 @@ export default function Icon({ name, className, size = 'md', variant = 'default'
   };
 
   const variantClasses = {
-    default: 'text-primary-light',
-    ice: 'text-ice-accent',
-    fuchsia: 'text-zoom-fuchsia',
-    accent: 'text-ice-accent',
+    default: 'text-neutral-text-primary',
+    ice: 'text-ice-primary',
+    fuchsia: 'text-fuchsia-primary',
+    accent: 'text-ice-primary',
   };
 
   const icons = {
@@ -342,5 +343,9 @@ export default function Icon({ name, className, size = 'md', variant = 'default'
       {IconComponent}
     </div>
   );
-}
+});
+
+Icon.displayName = 'Icon';
+
+export default Icon;
 

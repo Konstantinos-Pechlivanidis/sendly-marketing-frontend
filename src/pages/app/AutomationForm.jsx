@@ -116,7 +116,7 @@ export default function AutomationForm() {
         description="Create or edit an SMS automation workflow"
         path={isEditMode ? `/app/automations/${id}` : '/app/automations/new'}
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8 bg-bg-dark">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1000px] mx-auto">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
@@ -127,11 +127,11 @@ export default function AutomationForm() {
               >
                 <Icon name="arrowRight" size="sm" className="rotate-180" />
               </GlassButton>
-              <h1 className="text-h1 md:text-4xl font-bold">
+              <h1 className="text-3xl md:text-4xl font-bold text-neutral-text-primary">
                 {isEditMode ? 'Edit Automation' : 'Create Automation'}
               </h1>
             </div>
-            <p className="text-body text-border-subtle">
+            <p className="text-base text-neutral-text-secondary">
               {isEditMode 
                 ? 'Update your automation workflow'
                 : 'Set up an automated SMS workflow for your store'}

@@ -17,10 +17,10 @@ export const useCampaigns = (params = {}) => {
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - list data changes with CRUD operations
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false, // Don't refetch on focus
     refetchOnMount: false, // Use cached data if fresh
-    keepPreviousData: true, // Keep previous data while fetching (smooth pagination)
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching (smooth pagination)
   });
 };
 
@@ -30,7 +30,7 @@ export const useCampaign = (id, options = {}) => {
     queryFn: () => api.get(`/campaigns/${id}`),
     enabled: !!id,
     staleTime: 2 * 60 * 1000, // 2 minutes - detail data changes less frequently
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: options.refetchOnMount !== false ? 'always' : false, // Always refetch when navigating to detail page
     ...options,
@@ -121,10 +121,10 @@ export const useContacts = (params = {}) => {
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -133,7 +133,7 @@ export const useContactStats = () => {
     queryKey: ['contacts', 'stats'],
     queryFn: () => api.get('/contacts/stats'),
     staleTime: 1 * 60 * 1000, // 1 minute - stats change with imports/updates
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: false,
   });
 };
@@ -144,7 +144,7 @@ export const useBillingBalance = () => {
     queryKey: ['billing', 'balance'],
     queryFn: () => api.get('/billing/balance'),
     staleTime: 1 * 60 * 1000, // 1 minute - balance changes after purchases
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: true, // Refetch when user returns (might have purchased)
   });
 };
@@ -195,7 +195,7 @@ export const useCampaignStats = () => {
     queryKey: ['campaigns', 'stats'],
     queryFn: () => api.get('/campaigns/stats/summary'),
     staleTime: 1 * 60 * 1000, // 1 minute - stats change frequently
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: false,
   });
 };
@@ -206,7 +206,7 @@ export const useCampaignMetrics = (id, options = {}) => {
     queryFn: () => api.get(`/campaigns/${id}/metrics`),
     enabled: !!id,
     staleTime: 30 * 1000, // 30 seconds - metrics update frequently for active campaigns
-    cacheTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 2 * 60 * 1000, // 2 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Auto-refetch every 30s for live updates
     refetchIntervalInBackground: false,
@@ -247,7 +247,7 @@ export const useDashboard = (options = {}) => {
       return response;
     },
     staleTime: 1 * 60 * 1000, // 1 minute - dashboard data changes frequently
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Auto-refetch every 30s (can be disabled)
     refetchIntervalInBackground: false, // Don't refetch in background tabs
@@ -278,10 +278,10 @@ export const useTemplates = (params = {}) => {
       return api.get(`/templates?${queryString}`);
     },
     staleTime: 15 * 60 * 1000, // 15 minutes - templates rarely change
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -290,7 +290,7 @@ export const useTemplateCategories = () => {
     queryKey: ['templates', 'categories'],
     queryFn: () => api.get('/templates/categories'),
     staleTime: Infinity, // Never stale - categories are static
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -302,7 +302,7 @@ export const useTemplate = (id) => {
     queryFn: () => api.get(`/templates/${id}`),
     enabled: !!id,
     staleTime: 15 * 60 * 1000, // 15 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -359,7 +359,7 @@ export const useContact = (id, options = {}) => {
     queryFn: () => api.get(`/contacts/${id}`),
     enabled: !!id && id !== 'new' && (options.enabled !== false),
     staleTime: 2 * 60 * 1000, // 2 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: options.refetchOnMount !== false ? 'always' : false,
     ...options,
@@ -395,7 +395,7 @@ export const useBirthdayContacts = (params = {}) => {
       return api.get(`/contacts/birthdays?${queryString}`);
     },
     staleTime: 1 * 60 * 1000, // 1 minute - birthdays change daily
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -423,10 +423,10 @@ export const useBillingHistory = (params = {}) => {
       return api.get(`/billing/history?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - history changes with purchases
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -438,10 +438,10 @@ export const useBillingHistoryStripe = (params = {}) => {
       return api.get(`/billing/billing-history?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -451,7 +451,7 @@ export const useSettings = () => {
     queryKey: ['settings'],
     queryFn: () => api.get('/settings'),
     staleTime: 15 * 60 * 1000, // 15 minutes - settings change only when user updates
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -462,7 +462,7 @@ export const useAccountInfo = () => {
     queryKey: ['settings', 'account'],
     queryFn: () => api.get('/settings/account'),
     staleTime: 30 * 60 * 1000, // 30 minutes - account info rarely changes
-    cacheTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 60 * 60 * 1000, // 1 hour (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -485,7 +485,7 @@ export const useDiscounts = () => {
     queryKey: ['discounts'],
     queryFn: () => api.get('/discounts'),
     staleTime: 10 * 60 * 1000, // 10 minutes - discounts change occasionally
-    cacheTime: 20 * 60 * 1000, // 20 minutes
+    gcTime: 20 * 60 * 1000, // 20 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -517,7 +517,7 @@ export const useAudiences = () => {
     queryKey: ['audiences'],
     queryFn: () => api.get('/audiences'),
     staleTime: 10 * 60 * 1000, // 10 minutes - audiences change occasionally
-    cacheTime: 20 * 60 * 1000, // 20 minutes
+    gcTime: 20 * 60 * 1000, // 20 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -546,10 +546,10 @@ export const useAutomations = () => {
     queryKey: ['automations'],
     queryFn: () => api.get('/automations'),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -558,7 +558,7 @@ export const useAutomationStats = () => {
     queryKey: ['automations', 'stats'],
     queryFn: () => api.get('/automations/stats'),
     staleTime: 1 * 60 * 1000, // 1 minute - stats change frequently
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: false,
   });
 };
@@ -590,7 +590,7 @@ export const useSystemDefaults = () => {
     queryKey: ['automations', 'defaults'],
     queryFn: () => api.get('/automations/defaults'),
     staleTime: Infinity, // Never stale - system defaults are static
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -616,10 +616,10 @@ export const useReportsOverview = (params = {}) => {
       return api.get(`/reports/overview?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - reports are expensive to compute
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -631,10 +631,10 @@ export const useReportsKPIs = (params = {}) => {
       return api.get(`/reports/kpis?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -646,10 +646,10 @@ export const useCampaignReports = (params = {}) => {
       return api.get(`/reports/campaigns?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -659,7 +659,7 @@ export const useCampaignReport = (id) => {
     queryFn: () => api.get(`/reports/campaigns/${id}`),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -673,10 +673,10 @@ export const useAutomationReports = (params = {}) => {
       return api.get(`/reports/automations?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -688,10 +688,10 @@ export const useMessagingReports = (params = {}) => {
       return api.get(`/reports/messaging?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -703,10 +703,10 @@ export const useCreditsReports = (params = {}) => {
       return api.get(`/reports/credits?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -718,10 +718,10 @@ export const useContactsReports = (params = {}) => {
       return api.get(`/reports/contacts?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // React Query v5
   });
 };
 
@@ -741,7 +741,7 @@ export const useCampaignDeliveryStatus = (id, options = {}) => {
     queryFn: () => api.get(`/tracking/campaign/${id}`),
     enabled: !!id,
     staleTime: 0, // Always stale - tracking data is real-time
-    cacheTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 2 * 60 * 1000, // 2 minutes (React Query v5)
     refetchOnWindowFocus: true, // Refetch when user returns
     refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Refetch every 30 seconds for live updates
     refetchIntervalInBackground: false, // Don't refetch in background tabs

@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
+import PageHeader from '../../components/ui/PageHeader';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import LoadingState from '../../components/ui/LoadingState';
+import ErrorState from '../../components/ui/ErrorState';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import {
   useCampaign,
   useDeleteCampaign,
@@ -19,6 +24,7 @@ export default function CampaignDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToastContext();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: campaign, isLoading, error } = useCampaign(id);
   const { data: metrics } = useCampaignMetrics(id);
@@ -27,8 +33,6 @@ export default function CampaignDetail() {
   const scheduleCampaign = useScheduleCampaign();
 
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete "${campaign?.name}"?`)) return;
-
     try {
       await deleteCampaign.mutateAsync(id);
       toast.success('Campaign deleted successfully');
@@ -48,31 +52,19 @@ export default function CampaignDetail() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <LoadingState size="lg" />;
   }
 
   if (error || !campaign) {
     return (
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
-          <GlassCard variant="dark" className="p-6 border border-red-500/30">
-            <div className="flex items-start gap-3">
-              <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
-              <div>
-                <h3 className="text-h3 font-semibold mb-2 text-red-400">Campaign Not Found</h3>
-                <p className="text-body text-border-subtle mb-4">
-                  {error?.message || 'The campaign you are looking for does not exist.'}
-                </p>
-                <GlassButton variant="primary" onClick={() => navigate('/app/campaigns')}>
-                  Back to Campaigns
-                </GlassButton>
-              </div>
-            </div>
-          </GlassCard>
+          <ErrorState
+            title="Campaign Not Found"
+            message={error?.message || 'The campaign you are looking for does not exist.'}
+            actionLabel="Back to Campaigns"
+            onAction={() => navigate('/app/campaigns')}
+          />
         </div>
       </div>
     );
@@ -89,61 +81,65 @@ export default function CampaignDetail() {
         description="View campaign details and metrics"
         path={`/app/campaigns/${id}`}
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <GlassButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/app/campaigns')}
-                >
-                  <Icon name="arrowRight" size="sm" className="rotate-180" />
-                </GlassButton>
-                <h1 className="text-h1 md:text-4xl font-bold">{campaign.name}</h1>
-              </div>
-              <div className="flex items-center gap-3 mt-2">
-                <StatusBadge status={campaign.status} />
-                {campaign.createdAt && (
-                  <span className="text-sm text-border-subtle">
-                    Created {format(new Date(campaign.createdAt), 'MMM d, yyyy')}
-                  </span>
-                )}
-              </div>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <GlassButton
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/app/campaigns')}
+              >
+                <Icon name="arrowRight" size="sm" className="rotate-180" />
+              </GlassButton>
             </div>
-            <div className="flex gap-2">
-              {canSend && (
-                <GlassButton variant="primary" size="md" onClick={handleSend}>
-                  <span className="flex items-center gap-2">
-                    <Icon name="send" size="sm" variant="ice" />
-                    Send Now
-                  </span>
-                </GlassButton>
-              )}
-              {canEdit && (
-                <GlassButton
-                  variant="ghost"
-                  size="md"
-                  as={Link}
-                  to={`/app/campaigns/${id}/edit`}
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon name="edit" size="sm" variant="ice" />
-                    Edit
-                  </span>
-                </GlassButton>
-              )}
-              {canDelete && (
-                <GlassButton variant="ghost" size="md" onClick={handleDelete}>
-                  <span className="flex items-center gap-2">
-                    <Icon name="delete" size="sm" className="text-red-400" />
-                    Delete
-                  </span>
-                </GlassButton>
-              )}
-            </div>
+            <PageHeader
+              title={campaign.name}
+              subtitle={
+                <div className="flex items-center gap-3 mt-2">
+                  <StatusBadge status={campaign.status} />
+                  {campaign.createdAt && (
+                    <span className="text-sm text-neutral-text-secondary">
+                      Created {format(new Date(campaign.createdAt), 'MMM d, yyyy')}
+                    </span>
+                  )}
+                </div>
+              }
+              action={
+                <div className="flex gap-2">
+                  {canSend && (
+                    <GlassButton variant="primary" size="md" onClick={handleSend}>
+                      <span className="flex items-center gap-2">
+                        <Icon name="send" size="sm" variant="ice" />
+                        Send Now
+                      </span>
+                    </GlassButton>
+                  )}
+                  {canEdit && (
+                    <GlassButton
+                      variant="ghost"
+                      size="md"
+                      as={Link}
+                      to={`/app/campaigns/${id}/edit`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon name="edit" size="sm" variant="ice" />
+                        Edit
+                      </span>
+                    </GlassButton>
+                  )}
+                  {canDelete && (
+                    <GlassButton variant="ghost" size="md" onClick={() => setShowDeleteDialog(true)}>
+                      <span className="flex items-center gap-2">
+                        <Icon name="delete" size="sm" className="text-red-500" />
+                        Delete
+                      </span>
+                    </GlassButton>
+                  )}
+                </div>
+              }
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -151,22 +147,22 @@ export default function CampaignDetail() {
             <div className="lg:col-span-2 space-y-6">
               {/* Campaign Details */}
               <GlassCard className="p-6">
-                <h2 className="text-h2 font-bold mb-4">Campaign Details</h2>
+                <h2 className="text-2xl font-bold mb-4 text-neutral-text-primary">Campaign Details</h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-border-subtle">Message</label>
-                    <p className="text-primary-light mt-1 whitespace-pre-wrap">{campaign.message}</p>
+                    <label className="text-sm font-medium text-neutral-text-secondary mb-1">Message</label>
+                    <p className="text-neutral-text-primary mt-1 whitespace-pre-wrap">{campaign.message}</p>
                   </div>
                   {campaign.audience && (
                     <div>
-                      <label className="text-sm font-medium text-border-subtle">Audience</label>
-                      <p className="text-primary-light mt-1">{campaign.audience}</p>
+                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Audience</label>
+                      <p className="text-neutral-text-primary mt-1">{campaign.audience}</p>
                     </div>
                   )}
                   {campaign.scheduleAt && (
                     <div>
-                      <label className="text-sm font-medium text-border-subtle">Scheduled For</label>
-                      <p className="text-primary-light mt-1">
+                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Scheduled For</label>
+                      <p className="text-neutral-text-primary mt-1">
                         {format(new Date(campaign.scheduleAt), 'PPp')}
                       </p>
                     </div>
@@ -177,29 +173,29 @@ export default function CampaignDetail() {
               {/* Metrics */}
               {metrics && (
                 <GlassCard className="p-6">
-                  <h2 className="text-h2 font-bold mb-4">Performance Metrics</h2>
+                  <h2 className="text-2xl font-bold mb-4 text-neutral-text-primary">Performance Metrics</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-xs text-border-subtle mb-1">Sent</p>
-                      <p className="text-2xl font-bold text-primary-light">
+                      <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Sent</p>
+                      <p className="text-2xl font-bold text-neutral-text-primary">
                         {metrics.sent || 0}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-border-subtle mb-1">Delivered</p>
-                      <p className="text-2xl font-bold text-ice-accent">
+                      <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Delivered</p>
+                      <p className="text-2xl font-bold text-ice-primary">
                         {metrics.delivered || 0}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-border-subtle mb-1">Failed</p>
-                      <p className="text-2xl font-bold text-red-400">
+                      <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Failed</p>
+                      <p className="text-2xl font-bold text-red-500">
                         {metrics.failed || 0}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-border-subtle mb-1">Delivery Rate</p>
-                      <p className="text-2xl font-bold text-ice-accent">
+                      <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Delivery Rate</p>
+                      <p className="text-2xl font-bold text-ice-primary">
                         {metrics.deliveryRate ? `${metrics.deliveryRate.toFixed(1)}%` : '0%'}
                       </p>
                     </div>
@@ -212,22 +208,22 @@ export default function CampaignDetail() {
             <div className="space-y-6">
               {/* Quick Info */}
               <GlassCard variant="ice" className="p-6">
-                <h3 className="text-h3 font-semibold mb-4">Quick Info</h3>
+                <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Quick Info</h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-border-subtle mb-1">Recipients</p>
-                    <p className="text-lg font-semibold text-primary-light">
+                    <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Recipients</p>
+                    <p className="text-lg font-semibold text-neutral-text-primary">
                       {campaign.recipientCount || campaign.totalRecipients || 0}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-border-subtle mb-1">Status</p>
+                    <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Status</p>
                     <StatusBadge status={campaign.status} />
                   </div>
                   {campaign.createdAt && (
                     <div>
-                      <p className="text-xs text-border-subtle mb-1">Created</p>
-                      <p className="text-sm text-primary-light">
+                      <p className="text-xs font-medium text-neutral-text-secondary mb-1 uppercase tracking-wider">Created</p>
+                      <p className="text-sm text-neutral-text-primary">
                         {format(new Date(campaign.createdAt), 'MMM d, yyyy')}
                       </p>
                     </div>
@@ -238,6 +234,17 @@ export default function CampaignDetail() {
           </div>
         </div>
       </div>
+      
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Campaign"
+        message={`Are you sure you want to delete "${campaign?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        destructive={true}
+      />
     </>
   );
 }
