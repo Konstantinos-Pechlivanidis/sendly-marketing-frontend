@@ -1,88 +1,163 @@
-# Sendly Marketing Frontend
+# Sendly Frontend
 
-Simple frontend application for testing Sendly Marketing Backend authentication and functionality.
+Modern React application for Sendly Marketing App with glass morphism design system.
 
-## 🚀 Quick Start
+## Tech Stack
 
-### Option 1: Using Python (Recommended)
+- **React 18** - UI library
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Router** - Client-side routing
+- **React Query** - Data fetching and caching
+- **Axios** - HTTP client
+- **date-fns** - Date utilities
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm 8+
+
+### Installation
+
+1. Install dependencies:
 ```bash
-# Python 3
-python -m http.server 3000
-
-# Then open: http://localhost:3000
+npm install
 ```
 
-### Option 2: Using Node.js
+2. Create a `.env` file in the `frontend` directory:
+```env
+VITE_API_URL=http://localhost:8080
+```
 
+For production, update to:
+```env
+VITE_API_URL=https://sendly-marketing-backend.onrender.com
+```
+
+### Development
+
+Start the development server:
 ```bash
-# Install http-server globally
-npm install -g http-server
-
-# Run server
-http-server -p 3000
-
-# Then open: http://localhost:3000
+npm run dev
 ```
 
-### Option 3: Using Scripts
+The app will be available at `http://localhost:3000`
 
-**Windows:**
+### Build
+
+Build for production:
 ```bash
-start-server.bat
+npm run build
 ```
 
-**Linux/Mac:**
+The production build will be in the `dist` directory.
+
+### Preview Production Build
+
+Preview the production build locally:
 ```bash
-chmod +x start-server.sh
-./start-server.sh
+npm run preview
 ```
 
-## 📁 Structure
+## Project Structure
 
-- `index.html` - Login page
-- `callback.html` - OAuth callback handler
-- `dashboard.html` - Dashboard with stats
-- `billing.html` - Billing & credits management
-- `config.js` - Configuration (API URL)
-- `api.js` - API client
-- `auth.js` - Authentication logic
-- `callback.js` - OAuth callback handler
-- `dashboard.js` - Dashboard functionality
-- `billing.js` - Billing functionality
-- `styles.css` - Styling
-
-## ⚙️ Configuration
-
-Edit `config.js` to change the API URL:
-
-```javascript
-const CONFIG = {
-    API_URL: 'https://sendly-marketing-backend.onrender.com',
-    // For local development:
-    // API_URL: 'http://localhost:8080',
-};
+```
+frontend/
+├── src/
+│   ├── components/          # Reusable components
+│   │   ├── ui/             # Base UI components
+│   │   ├── layout/          # Layout components
+│   │   ├── iphone/         # iPhone preview component
+│   │   └── SEO.jsx         # SEO component
+│   ├── pages/              # Page components
+│   │   ├── Landing.jsx
+│   │   ├── Features.jsx
+│   │   ├── Pricing.jsx
+│   │   ├── HowItWorks.jsx
+│   │   ├── Contact.jsx
+│   │   ├── NotFound.jsx
+│   │   └── app/
+│   │       └── CampaignCreate.jsx
+│   ├── services/           # API services
+│   │   ├── api.js         # Axios instance
+│   │   └── queries.js     # React Query hooks
+│   ├── utils/             # Utility functions
+│   │   ├── constants.js   # Design tokens
+│   │   └── smsParser.js   # SMS parsing utilities
+│   ├── styles/            # Global styles
+│   │   └── index.css      # Tailwind imports
+│   ├── App.jsx            # Main app component
+│   └── main.jsx           # Entry point
+├── public/                # Static assets
+├── index.html             # HTML template
+├── package.json
+├── vite.config.js         # Vite configuration
+└── tailwind.config.js     # Tailwind configuration
 ```
 
-## 🔐 Authentication Flow
+## Design System
 
-1. User enters shop domain on login page
-2. Redirects to Shopify OAuth
-3. User authorizes the app
-4. Shopify redirects back with authorization code
-5. Backend exchanges code for access token
-6. Backend generates JWT token
-7. Frontend receives JWT token and stores it
-8. User is redirected to dashboard
+The application uses a custom design system inspired by iOS 26 Liquid Glass with dark mode first approach.
 
-## 📝 Notes
+### Colors
 
-- This is a simple testing frontend
-- For production, consider building a proper React/Next.js app
-- All API calls require JWT token in Authorization header
-- Token is stored in localStorage
+- **Primary**: Dark (#020202) and Light (#E5E5E5)
+- **Ice Accent**: #99B5D7 (primary accent)
+- **Zoom Fuchsia**: #C09DAE (secondary accent)
+- **Glass Effects**: Various transparency levels for glass morphism
 
-## 🔗 Backend Repository
+### Typography
 
-Backend code: https://github.com/Konstantinos-Pechlivanidis/sendly-marketing-backend
+- **Font**: Inter (with system font fallbacks)
+- **Scale**: Hero (3-4.5rem) down to Small (0.75-0.875rem)
 
+### Components
+
+All components follow the glass morphism design pattern with:
+- Backdrop blur effects
+- Semi-transparent backgrounds
+- Subtle borders and shadows
+- Smooth hover animations
+
+## Features
+
+- ✅ Responsive design (mobile, tablet, desktop)
+- ✅ Glass morphism UI components
+- ✅ Real-time iPhone SMS preview
+- ✅ SMS character and parts calculator
+- ✅ Form validation
+- ✅ API integration with React Query
+- ✅ Code splitting and lazy loading
+- ✅ SEO optimization
+- ✅ Accessibility features (ARIA, keyboard navigation)
+
+## Routes
+
+- `/` - Landing page
+- `/features` - Features page
+- `/pricing` - Pricing page
+- `/how-it-works` - How it works page
+- `/contact` - Contact page
+- `/app/campaigns/new` - Campaign creation page
+- `*` - 404 page
+
+## API Integration
+
+The app connects to the backend API configured in `.env`. All API calls are handled through:
+- Axios instance in `src/services/api.js`
+- React Query hooks in `src/services/queries.js`
+
+Authentication tokens are stored in localStorage and automatically included in API requests.
+
+## Development Notes
+
+- Components use Tailwind CSS classes
+- Glass effects are implemented via CSS utilities
+- Responsive breakpoints: mobile (<768px), tablet (768-1279px), desktop (≥1280px)
+- All interactive elements have focus states for accessibility
+- Images should be optimized (WebP format recommended)
+
+## License
+
+ISC

@@ -1,0 +1,180 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import GlassCard from '../../components/ui/GlassCard';
+import GlassButton from '../../components/ui/GlassButton';
+import GlassSelect from '../../components/ui/GlassSelect';
+import GlassTable, {
+  GlassTableHeader,
+  GlassTableBody,
+  GlassTableRow,
+  GlassTableHeaderCell,
+  GlassTableCell,
+} from '../../components/ui/GlassTable';
+import StatusBadge from '../../components/ui/StatusBadge';
+import Icon from '../../components/ui/Icon';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { useCampaignReports, useCampaigns } from '../../services/queries';
+import { normalizeArrayResponse } from '../../utils/apiHelpers';
+import { useToastContext } from '../../contexts/ToastContext';
+import SEO from '../../components/SEO';
+import { format } from 'date-fns';
+
+export default function CampaignReports() {
+  const toast = useToastContext();
+  const [selectedCampaignId, setSelectedCampaignId] = useState('');
+
+  const { data: campaignsData } = useCampaigns();
+  const { data: reportsData, isLoading, error } = useCampaignReports({
+    campaignId: selectedCampaignId || undefined,
+  });
+
+  const campaigns = campaignsData?.campaigns || [];
+  const reports = normalizeArrayResponse(reportsData, 'reports');
+
+  return (
+    <>
+      <SEO
+        title="Campaign Reports - Sendly SMS Marketing"
+        description="Detailed campaign performance reports"
+        path="/app/reports/campaigns"
+      />
+      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <GlassButton
+                  variant="ghost"
+                  size="sm"
+                  as={Link}
+                  to="/app/reports"
+                >
+                  <Icon name="arrowRight" size="sm" className="rotate-180" />
+                </GlassButton>
+                <h1 className="text-h1 md:text-4xl font-bold">Campaign Reports</h1>
+              </div>
+              <p className="text-body text-border-subtle">
+                Detailed performance metrics for your campaigns
+              </p>
+            </div>
+          </div>
+
+          {/* Filter */}
+          <GlassCard className="p-6 mb-6">
+            <GlassSelect
+              label="Filter by Campaign"
+              value={selectedCampaignId}
+              onChange={(e) => setSelectedCampaignId(e.target.value)}
+              options={[
+                { value: '', label: 'All Campaigns' },
+                ...campaigns.map((campaign) => ({
+                  value: campaign.id,
+                  label: campaign.name,
+                })),
+              ]}
+            />
+          </GlassCard>
+
+          {/* Error State */}
+          {error && (
+            <GlassCard variant="dark" className="p-6 mb-6 border border-red-500/30">
+              <div className="flex items-start gap-3">
+                <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
+                <div>
+                  <h3 className="text-h3 font-semibold mb-2 text-red-400">Error Loading Reports</h3>
+                  <p className="text-body text-border-subtle">
+                    {error.message || 'Failed to load campaign reports. Please try refreshing the page.'}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          )}
+
+          {/* Reports Table */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : reports.length === 0 ? (
+            <GlassCard className="p-12 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 rounded-xl bg-ice-accent/20">
+                  <Icon name="report" size="xl" variant="ice" />
+                </div>
+              </div>
+              <h3 className="text-h3 font-semibold mb-2">No reports found</h3>
+              <p className="text-body text-border-subtle">
+                {selectedCampaignId
+                  ? 'No reports available for this campaign'
+                  : 'No campaign reports available'}
+              </p>
+            </GlassCard>
+          ) : (
+            <GlassCard className="p-0 overflow-hidden">
+              <GlassTable>
+                <GlassTableHeader>
+                  <GlassTableRow>
+                    <GlassTableHeaderCell>Campaign</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Status</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Sent</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Delivered</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Failed</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Delivery Rate</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Date</GlassTableHeaderCell>
+                    <GlassTableHeaderCell>Actions</GlassTableHeaderCell>
+                  </GlassTableRow>
+                </GlassTableHeader>
+                <GlassTableBody>
+                  {reports.map((report) => (
+                    <GlassTableRow key={report.id || report.campaignId}>
+                      <GlassTableCell>
+                        <Link
+                          to={`/app/campaigns/${report.campaignId || report.id}`}
+                          className="font-medium text-ice-accent hover:underline"
+                        >
+                          {report.campaignName || report.name || 'Unknown Campaign'}
+                        </Link>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <StatusBadge status={report.status} />
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <span className="text-primary-light">{report.sent || 0}</span>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <span className="text-ice-accent">{report.delivered || 0}</span>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <span className="text-red-400">{report.failed || 0}</span>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <span className="text-primary-light">
+                          {report.deliveryRate ? `${report.deliveryRate.toFixed(1)}%` : '0%'}
+                        </span>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <span className="text-border-subtle text-sm">
+                          {report.date ? format(new Date(report.date), 'MMM d, yyyy') : '-'}
+                        </span>
+                      </GlassTableCell>
+                      <GlassTableCell>
+                        <Link
+                          to={`/app/campaigns/${report.campaignId || report.id}`}
+                          className="p-2 rounded-lg hover:bg-glass-white transition-colors inline-block"
+                        >
+                          <Icon name="view" size="sm" variant="ice" />
+                        </Link>
+                      </GlassTableCell>
+                    </GlassTableRow>
+                  ))}
+                </GlassTableBody>
+              </GlassTable>
+            </GlassCard>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
