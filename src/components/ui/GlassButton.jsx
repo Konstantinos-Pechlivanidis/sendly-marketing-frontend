@@ -12,9 +12,9 @@ export default function GlassButton({
   const baseClasses = 'transition-button focus-ring font-medium rounded-lg inline-flex items-center justify-center';
   
   const variantClasses = {
-    primary: 'bg-ice-accent text-primary-dark hover:bg-ice-dark shadow-glow-ice hover:shadow-glow-ice-lg',
-    ghost: 'border border-glass-border text-primary-light hover:border-ice-accent hover:text-ice-accent bg-transparent',
-    fuchsia: 'bg-zoom-fuchsia text-primary-dark hover:bg-zoom-fuchsia-deep shadow-glow-fuchsia',
+    primary: 'bg-ice-primary text-white hover:bg-ice-deep shadow-glow-ice-light hover:shadow-glow-ice-light-lg',
+    ghost: 'border border-neutral-border text-neutral-text-primary hover:border-ice-primary hover:text-ice-primary bg-transparent',
+    fuchsia: 'bg-fuchsia-primary text-white hover:bg-fuchsia-primary/90 shadow-glow-fuchsia-light',
   };
   
   const sizeClasses = {

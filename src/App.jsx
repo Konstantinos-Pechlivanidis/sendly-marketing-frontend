@@ -93,6 +93,20 @@ function AppRoutes() {
   
   // Check if current route is an app route
   const isAppRoute = location.pathname.startsWith('/app');
+  
+  // Apply light mode class to body for logged-in pages
+  useEffect(() => {
+    if (isAppRoute) {
+      document.body.classList.add('app-light-mode');
+    } else {
+      document.body.classList.remove('app-light-mode');
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('app-light-mode');
+    };
+  }, [isAppRoute]);
 
   return (
     <>

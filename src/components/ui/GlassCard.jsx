@@ -11,14 +11,14 @@ export default function GlassCard({
   const baseClasses = 'glass rounded-2xl p-6 transition-glass';
   
   const variantClasses = {
-    default: '',
+    default: 'bg-neutral-surface-primary',
     ice: 'glass-ice',
     fuchsia: 'glass-fuchsia',
     dark: 'glass-dark',
   };
   
   const hoverClasses = hover 
-    ? 'hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-glass-lg cursor-pointer' 
+    ? 'hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-glass-light-lg cursor-pointer' 
     : '';
 
   const Component = as || 'div';

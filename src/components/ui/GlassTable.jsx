@@ -25,7 +25,7 @@ export default function GlassTable({ children, className, ...props }) {
  */
 export function GlassTableHeader({ children, className, ...props }) {
   return (
-    <thead className={clsx('border-b border-glass-border', className)} {...props}>
+    <thead className={clsx('border-b border-neutral-border', className)} {...props}>
       {children}
     </thead>
   );
@@ -36,7 +36,7 @@ export function GlassTableHeader({ children, className, ...props }) {
  */
 export function GlassTableBody({ children, className, ...props }) {
   return (
-    <tbody className={clsx('divide-y divide-glass-border/50', className)} {...props}>
+    <tbody className={clsx('divide-y divide-neutral-border/50', className)} {...props}>
       {children}
     </tbody>
   );
@@ -50,7 +50,7 @@ export function GlassTableRow({ children, className, hover = true, ...props }) {
     <tr
       className={clsx(
         'transition-colors',
-        hover && 'hover:bg-glass-white/50',
+        hover && 'hover:bg-neutral-surface-secondary/50',
         className
       )}
       {...props}
@@ -67,7 +67,7 @@ export function GlassTableHeaderCell({ children, className, ...props }) {
   return (
     <th
       className={clsx(
-        'px-4 py-3 text-left text-xs font-semibold text-border-subtle uppercase tracking-wider',
+        'px-4 py-3 text-left text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider',
         className
       )}
       {...props}
@@ -84,7 +84,7 @@ export function GlassTableCell({ children, className, ...props }) {
   return (
     <td
       className={clsx(
-        'px-4 py-3 text-sm text-primary-light',
+        'px-4 py-3 text-sm text-neutral-text-primary',
         className
       )}
       {...props}

@@ -39,7 +39,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-bg-base">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -52,14 +52,14 @@ export default function Dashboard() {
         description="Manage your SMS marketing campaigns and grow your Shopify store."
         path="/app/dashboard"
       />
-      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8">
+      <div className="min-h-screen pt-8 pb-20 px-4 lg:px-8 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-h1 md:text-4xl font-bold mb-2">Dashboard</h1>
+              <h1 className="text-h1 md:text-4xl font-bold mb-2 text-neutral-text-primary">Dashboard</h1>
               {storeInfo && (
-                <p className="text-body text-border-subtle">
+                <p className="text-body text-neutral-text-secondary">
                   Welcome back, {storeInfo.shopName || storeInfo.shopDomain}
                 </p>
               )}
@@ -74,12 +74,12 @@ export default function Dashboard() {
 
           {/* Error State */}
           {error && (
-            <GlassCard variant="dark" className="p-6 mb-6 border border-red-500/30">
+            <GlassCard variant="default" className="p-6 mb-6 border border-red-500/30">
               <div className="flex items-start gap-3">
-                <Icon name="error" size="md" variant="ice" className="text-red-400 flex-shrink-0" />
+                <Icon name="error" size="md" variant="ice" className="text-red-500 flex-shrink-0" />
                 <div>
-                  <h3 className="text-h3 font-semibold mb-2 text-red-400">Error Loading Dashboard</h3>
-                  <p className="text-body text-border-subtle">
+                  <h3 className="text-h3 font-semibold mb-2 text-red-500">Error Loading Dashboard</h3>
+                  <p className="text-body text-neutral-text-secondary">
                     {error.message || 'Failed to load dashboard data. Please try refreshing the page.'}
                   </p>
                 </div>
@@ -93,57 +93,57 @@ export default function Dashboard() {
               {/* Credits Balance */}
               <GlassCard variant="ice" className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-ice-accent/20">
+                  <div className="p-3 rounded-xl bg-ice-soft">
                     <Icon name="sms" size="lg" variant="ice" />
                   </div>
                 </div>
-                <h3 className="text-h3 font-semibold mb-1">SMS Credits</h3>
-                <p className="text-3xl font-bold text-ice-accent mb-2">
+                <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">SMS Credits</h3>
+                <p className="text-3xl font-bold text-ice-primary mb-2">
                   {dashboardData.credits?.toLocaleString() || '0'}
                 </p>
-                <p className="text-sm text-border-subtle">Available credits</p>
+                <p className="text-sm text-neutral-text-secondary">Available credits</p>
               </GlassCard>
 
               {/* Total Campaigns */}
               <GlassCard className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-ice-accent/20">
+                  <div className="p-3 rounded-xl bg-ice-soft">
                     <Icon name="campaign" size="lg" variant="ice" />
                   </div>
                 </div>
-                <h3 className="text-h3 font-semibold mb-1">Campaigns</h3>
-                <p className="text-3xl font-bold text-primary-light mb-2">
+                <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Campaigns</h3>
+                <p className="text-3xl font-bold text-neutral-text-primary mb-2">
                   {dashboardData.totalCampaigns || 0}
                 </p>
-                <p className="text-sm text-border-subtle">Total campaigns</p>
+                <p className="text-sm text-neutral-text-secondary">Total campaigns</p>
               </GlassCard>
 
               {/* Total Contacts */}
               <GlassCard className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-ice-accent/20">
+                  <div className="p-3 rounded-xl bg-ice-soft">
                     <Icon name="segment" size="lg" variant="ice" />
                   </div>
                 </div>
-                <h3 className="text-h3 font-semibold mb-1">Contacts</h3>
-                <p className="text-3xl font-bold text-primary-light mb-2">
+                <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Contacts</h3>
+                <p className="text-3xl font-bold text-neutral-text-primary mb-2">
                   {dashboardData.totalContacts?.toLocaleString() || 0}
                 </p>
-                <p className="text-sm text-border-subtle">Total contacts</p>
+                <p className="text-sm text-neutral-text-secondary">Total contacts</p>
               </GlassCard>
 
               {/* Messages Sent */}
               <GlassCard className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-ice-accent/20">
+                  <div className="p-3 rounded-xl bg-ice-soft">
                     <Icon name="send" size="lg" variant="ice" />
                   </div>
                 </div>
-                <h3 className="text-h3 font-semibold mb-1">Messages Sent</h3>
-                <p className="text-3xl font-bold text-primary-light mb-2">
+                <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Messages Sent</h3>
+                <p className="text-3xl font-bold text-neutral-text-primary mb-2">
                   {dashboardData.totalMessagesSent?.toLocaleString() || 0}
                 </p>
-                <p className="text-sm text-border-subtle">All time</p>
+                <p className="text-sm text-neutral-text-secondary">All time</p>
               </GlassCard>
             </div>
           )}
@@ -152,12 +152,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <GlassCard variant="ice" className="p-6 group hover:scale-[1.02] transition-transform cursor-pointer" onClick={() => navigate('/app/campaigns/new')}>
               <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-ice-accent/20 group-hover:bg-ice-accent/30 transition-colors">
+                <div className="p-4 rounded-xl bg-ice-soft group-hover:bg-ice-primary/20 transition-colors">
                   <Icon name="campaign" size="xl" variant="ice" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-h3 font-semibold mb-1">Create Campaign</h3>
-                  <p className="text-sm text-border-subtle">Start a new SMS campaign</p>
+                  <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Create Campaign</h3>
+                  <p className="text-sm text-neutral-text-secondary">Start a new SMS campaign</p>
                 </div>
                 <Icon name="arrowRight" size="sm" variant="ice" className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -165,12 +165,12 @@ export default function Dashboard() {
 
             <GlassCard className="p-6 group hover:scale-[1.02] transition-transform cursor-pointer" onClick={() => navigate('/app/contacts')}>
               <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-ice-accent/20 group-hover:bg-ice-accent/30 transition-colors">
+                <div className="p-4 rounded-xl bg-ice-soft group-hover:bg-ice-primary/20 transition-colors">
                   <Icon name="segment" size="xl" variant="ice" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-h3 font-semibold mb-1">Manage Contacts</h3>
-                  <p className="text-sm text-border-subtle">View and manage your contacts</p>
+                  <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Manage Contacts</h3>
+                  <p className="text-sm text-neutral-text-secondary">View and manage your contacts</p>
                 </div>
                 <Icon name="arrowRight" size="sm" variant="ice" className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -178,12 +178,12 @@ export default function Dashboard() {
 
             <GlassCard className="p-6 group hover:scale-[1.02] transition-transform cursor-pointer" onClick={() => navigate('/app/automations')}>
               <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-ice-accent/20 group-hover:bg-ice-accent/30 transition-colors">
+                <div className="p-4 rounded-xl bg-ice-soft group-hover:bg-ice-primary/20 transition-colors">
                   <Icon name="automation" size="xl" variant="ice" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-h3 font-semibold mb-1">Automations</h3>
-                  <p className="text-sm text-border-subtle">Set up automated workflows</p>
+                  <h3 className="text-h3 font-semibold mb-1 text-neutral-text-primary">Automations</h3>
+                  <p className="text-sm text-neutral-text-secondary">Set up automated workflows</p>
                 </div>
                 <Icon name="arrowRight" size="sm" variant="ice" className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>

@@ -10,7 +10,7 @@ const GlassInput = forwardRef(({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-primary-light mb-2">
+        <label className="block text-sm font-medium text-neutral-text-primary mb-2">
           {label}
         </label>
       )}
@@ -18,10 +18,10 @@ const GlassInput = forwardRef(({
         ref={ref}
         className={clsx(
           'w-full px-4 py-3 rounded-md',
-          'bg-glass-white backdrop-blur-[24px]',
-          'border border-glass-border',
-          'text-primary-light placeholder:text-border-subtle',
-          'focus-ring focus:border-ice-accent focus:shadow-glow-ice',
+          'bg-neutral-surface-primary backdrop-blur-[24px]',
+          'border border-neutral-border',
+          'text-neutral-text-primary placeholder:text-neutral-text-secondary',
+          'focus-ring focus:border-ice-primary focus:shadow-glow-ice-light',
           'transition-button',
           error && 'border-red-500 focus:border-red-500 focus:shadow-none',
           className
