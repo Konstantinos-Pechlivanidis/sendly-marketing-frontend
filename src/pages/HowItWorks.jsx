@@ -30,6 +30,12 @@ export default function HowItWorks() {
 
   const automations = [
     {
+      icon: 'sms',
+      title: 'Welcome Message',
+      description: 'Automatically send a welcome SMS when customers opt-in to receive messages.',
+      trigger: 'Customer opt-in',
+    },
+    {
       icon: 'workflow',
       title: 'Abandoned Cart Recovery',
       description: 'Automatically send SMS when customers leave items in cart.',

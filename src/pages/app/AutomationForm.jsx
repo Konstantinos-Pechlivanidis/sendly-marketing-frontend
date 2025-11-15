@@ -106,6 +106,7 @@ export default function AutomationForm() {
   };
 
   const triggerOptions = [
+    { value: 'welcome', label: 'Welcome Message' },
     { value: 'order_placed', label: 'Order Placed' },
     { value: 'order_fulfilled', label: 'Order Fulfilled' },
     { value: 'birthday', label: 'Birthday' },
