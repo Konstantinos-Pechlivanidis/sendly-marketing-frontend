@@ -131,7 +131,14 @@ export default function GlassSelectCustom({
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-xl glass border border-neutral-border/60 z-10 shadow-glass-light-lg overflow-hidden">
+        <>
+          {/* Mobile Backdrop */}
+          <div
+            className="fixed inset-0 bg-neutral-text-primary/20 backdrop-blur-sm z-[9] lg:hidden"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute top-full left-0 right-0 sm:right-auto mt-2 rounded-xl glass border border-neutral-border/60 z-[60] shadow-glass-light-lg overflow-hidden w-full sm:w-auto sm:min-w-[200px]">
           {/* Search Input (if searchable) */}
           {searchable && (
             <div className="p-3 border-b border-neutral-border/60">
@@ -186,7 +193,8 @@ export default function GlassSelectCustom({
               })
             )}
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

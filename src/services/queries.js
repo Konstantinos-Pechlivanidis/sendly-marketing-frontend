@@ -244,13 +244,23 @@ export const useBillingPackages = () => {
 };
 
 // Campaign Stats
-export const useCampaignStats = () => {
+export const useCampaignStats = (options = {}) => {
   return useQuery({
     queryKey: ['campaigns', 'stats'],
-    queryFn: () => api.get('/campaigns/stats/summary'),
-    staleTime: 1 * 60 * 1000, // 1 minute - stats change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
+    queryFn: async () => {
+      const response = await api.get('/campaigns/stats/summary');
+      // Normalize response structure - handle both direct data and nested data structure
+      const data = response.data?.data || response.data || response;
+      return {
+        stats: data,
+      };
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes - stats change less frequently than metrics
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching
+    ...options,
   });
 };
 
