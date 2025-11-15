@@ -77,7 +77,7 @@ export default function Automations() {
         description="Manage your SMS marketing automations"
         path="/app/automations"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Automations"
@@ -99,7 +99,7 @@ export default function Automations() {
 
         {/* Stats */}
         {!hasError && stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
             <GlassCard variant="ice" className="p-5 hover:shadow-glass-light-lg transition-shadow">
               <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 rounded-xl bg-ice-soft/80">
@@ -138,7 +138,7 @@ export default function Automations() {
 
         {/* Filter */}
         {!hasError && (
-          <GlassCard className="p-6 mb-8">
+          <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
           <GlassSelectCustom
             label="Filter by Status"
             value={statusFilter}
@@ -166,7 +166,7 @@ export default function Automations() {
             actionTo={!statusFilter ? "/app/automations/new" : undefined}
           />
         ) : !hasError && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredAutomations.map((automation) => (
               <GlassCard key={automation.id} className="p-6 hover:shadow-glass-light-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">

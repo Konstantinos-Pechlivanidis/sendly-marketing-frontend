@@ -75,7 +75,7 @@ export default function Templates() {
         description="Browse and use SMS message templates"
         path="/app/templates"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Templates"
@@ -83,8 +83,8 @@ export default function Templates() {
         />
 
         {/* Filters */}
-        <GlassCard className="p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <GlassInput
               label="Search Templates"
               type="text"
@@ -127,7 +127,7 @@ export default function Templates() {
               : 'No templates available at the moment'}
           />
         ) : !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {templates.map((template) => (
               <GlassCard key={template.id} className="p-6 hover:shadow-glass-light-lg transition-shadow">
                 <div className="mb-4">

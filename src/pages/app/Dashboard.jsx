@@ -47,7 +47,7 @@ export default function Dashboard() {
         description="Manage your SMS marketing campaigns and grow your Shopify store."
         path="/app/dashboard"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Dashboard"
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
         {/* Dashboard Content - Show cached data immediately, update in background */}
         {dashboardData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
               {/* Credits Balance */}
               <GlassCard variant="ice" className="p-6 hover:shadow-glass-light-lg transition-shadow">
                 <div className="flex items-center justify-between mb-4">
@@ -126,7 +126,7 @@ export default function Dashboard() {
           )}
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <GlassCard variant="ice" className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer" onClick={() => navigate('/app/campaigns/new')}>
             <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-ice-soft/80 group-hover:bg-ice-primary/20 transition-colors">

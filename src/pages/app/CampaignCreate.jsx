@@ -271,7 +271,7 @@ export default function CampaignCreate() {
         description="Create a new SMS campaign and preview it in real-time"
         path={isEditMode ? `/app/campaigns/${id}/edit` : '/app/campaigns/new'}
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 text-neutral-text-primary">

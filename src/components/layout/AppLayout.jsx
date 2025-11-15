@@ -110,7 +110,7 @@ export default function AppLayout({ children }) {
 
       {/* Mobile Menu Button */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg glass border border-neutral-border text-neutral-text-primary focus-ring"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-neutral-surface-primary backdrop-blur-[24px] border border-neutral-border/60 shadow-glass-light text-neutral-text-primary focus-ring hover:shadow-glass-light-lg transition-all"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label="Toggle menu"
         aria-expanded={isMobileMenuOpen}
@@ -139,7 +139,7 @@ export default function AppLayout({ children }) {
         <div className="lg:hidden fixed inset-0 z-40">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-neutral-text-primary/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           

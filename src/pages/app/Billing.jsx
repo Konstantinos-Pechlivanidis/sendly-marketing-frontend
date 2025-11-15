@@ -89,7 +89,7 @@ export default function Billing() {
         description="Manage your SMS credits and billing"
         path="/app/billing"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Billing"
@@ -97,15 +97,15 @@ export default function Billing() {
         />
 
         {/* Current Balance */}
-        <GlassCard variant={isLowBalance ? 'default' : 'ice'} className={`p-6 mb-8 ${isLowBalance ? 'border-2 border-red-200 bg-red-50/50' : ''}`}>
+        <GlassCard variant={isLowBalance ? 'default' : 'ice'} className={`p-4 sm:p-6 mb-6 sm:mb-8 ${isLowBalance ? 'border-2 border-red-300 bg-red-50/60' : ''}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-neutral-text-secondary mb-2 uppercase tracking-wider">Current Balance</p>
-              <p className={`text-4xl font-bold ${isLowBalance ? 'text-red-500' : 'text-ice-primary'}`}>
+              <p className={`text-3xl sm:text-4xl font-bold ${isLowBalance ? 'text-red-600' : 'text-ice-primary'}`}>
                 {balance.toLocaleString()} credits
               </p>
               {isLowBalance && (
-                <p className="text-sm text-red-500 mt-2 font-medium">
+                <p className="text-sm text-red-600 mt-2 font-semibold">
                   ⚠️ Low balance. Consider purchasing more credits.
                 </p>
               )}
@@ -117,8 +117,8 @@ export default function Billing() {
         </GlassCard>
 
         {/* Credit Usage Chart */}
-        <GlassCard className="p-6 mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Credit Usage</h3>
+        <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Credit Usage</h3>
           <LineChart
             data={creditUsageData}
             dataKey="credits"

@@ -87,18 +87,18 @@ export default function Settings() {
         description="Manage your account settings"
         path="/app/settings"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Settings"
           subtitle="Manage your account and SMS settings"
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Tabs Sidebar */}
           <div className="lg:col-span-1">
             <GlassCard className="p-0 overflow-hidden">
-              <nav className="space-y-1 p-2">
+              <nav className="space-y-1 p-2 sm:p-3">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -121,9 +121,9 @@ export default function Settings() {
           <div className="lg:col-span-3">
             {/* General Settings */}
             {activeTab === 'general' && (
-              <GlassCard className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">General Settings</h2>
-                  <div className="space-y-6">
+              <GlassCard className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">General Settings</h2>
+                  <div className="space-y-4 sm:space-y-6">
                     <GlassInput
                       label="Sender ID / Name"
                       name="senderId"
@@ -185,9 +185,9 @@ export default function Settings() {
 
             {/* SMS Settings */}
             {activeTab === 'sms' && (
-              <GlassCard className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">SMS Settings</h2>
-                <div className="space-y-6">
+              <GlassCard className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">SMS Settings</h2>
+                <div className="space-y-4 sm:space-y-6">
                   <GlassTextarea
                     label="Default Unsubscribe Message"
                     name="unsubscribeMessage"
@@ -224,9 +224,9 @@ export default function Settings() {
 
             {/* Integrations */}
             {activeTab === 'integrations' && (
-              <GlassCard className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">Integrations</h2>
-                <div className="space-y-6">
+              <GlassCard className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">Integrations</h2>
+                <div className="space-y-4 sm:space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-neutral-text-secondary mb-2">
                       Shopify Connection
@@ -264,9 +264,9 @@ export default function Settings() {
 
             {/* Account */}
             {activeTab === 'account' && (
-              <GlassCard className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-neutral-text-primary">Account</h2>
-                <div className="space-y-6">
+              <GlassCard className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">Account</h2>
+                <div className="space-y-4 sm:space-y-6">
                   {storeInfo && (
                     <div>
                       <label className="block text-sm font-medium text-neutral-text-secondary mb-2">

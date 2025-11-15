@@ -112,9 +112,21 @@ export default function ContactDetail() {
         delete payload.phone;
         
         const result = await createContact.mutateAsync(payload);
+        console.log('[ContactDetail] Create result:', result);
+        
         toast.success('Contact created successfully');
-        if (result?.id) {
-          navigate(`/app/contacts/${result.id}`, { replace: true });
+        
+        // Backend returns { success: true, data: { id, ... } }
+        // API interceptor extracts data, so result should be the contact object
+        const contactId = result?.id || result?.data?.id;
+        
+        if (contactId) {
+          console.log('[ContactDetail] Navigating to:', `/app/contacts/${contactId}`);
+          navigate(`/app/contacts/${contactId}`, { replace: true });
+        } else {
+          console.error('[ContactDetail] No contact ID in result:', result);
+          // Fallback: navigate to contacts list
+          navigate('/app/contacts', { replace: true });
         }
       } else {
         // For updates, also convert phone to phoneE164 if phone is being updated
@@ -149,7 +161,7 @@ export default function ContactDetail() {
 
   // Only show full loading state on initial load (no cached data)
   // If we have cached data, show it immediately even if fetching
-  const isInitialLoad = !isNewContact && isLoading && !contactData;
+  const isInitialLoad = !isNewContact && isLoading && !contact;
 
   if (isInitialLoad) {
     return <LoadingState size="lg" />;
@@ -157,7 +169,7 @@ export default function ContactDetail() {
 
   if (!isNewContact && error && !contact) {
     return (
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           <ErrorState
             title="Contact Not Found"
@@ -177,7 +189,7 @@ export default function ContactDetail() {
         description="View and edit contact details"
         path={isNewContact ? '/app/contacts/new' : `/app/contacts/${id}`}
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -260,15 +272,15 @@ export default function ContactDetail() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Contact Details */}
-              <GlassCard className="p-6">
-                <h2 className="text-2xl font-bold mb-4 text-neutral-text-primary">Contact Details</h2>
+              <GlassCard className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">Contact Details</h2>
                 {isEditing ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4 sm:space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <GlassInput
                         label="First Name"
                         name="firstName"
@@ -301,29 +313,29 @@ export default function ContactDetail() {
                 ) : !isNewContact && (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Name</label>
-                      <p className="text-neutral-text-primary mt-1">
+                      <label className="text-sm font-semibold text-neutral-text-secondary mb-1.5 block">Name</label>
+                      <p className="text-base text-neutral-text-primary font-medium">
                         {contact?.firstName && contact?.lastName
                           ? `${contact.firstName} ${contact.lastName}`
                           : contact?.name || 'Unnamed Contact'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Phone</label>
-                      <p className="text-neutral-text-primary mt-1">{contact?.phoneE164 || '-'}</p>
+                      <label className="text-sm font-semibold text-neutral-text-secondary mb-1.5 block">Phone</label>
+                      <p className="text-base text-neutral-text-primary font-medium">{contact?.phoneE164 || '-'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-neutral-text-secondary mb-1">Email</label>
-                      <p className="text-neutral-text-primary mt-1">{contact?.email || '-'}</p>
+                      <label className="text-sm font-semibold text-neutral-text-secondary mb-1.5 block">Email</label>
+                      <p className="text-base text-neutral-text-primary font-medium">{contact?.email || '-'}</p>
                     </div>
                     {contact?.tags && contact.tags.length > 0 && (
                       <div>
-                        <label className="text-sm font-medium text-neutral-text-secondary mb-1">Tags</label>
+                        <label className="text-sm font-semibold text-neutral-text-secondary mb-1.5 block">Tags</label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {contact.tags.map((tag, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 text-sm rounded-full bg-ice-soft/60 border border-ice-primary/20 text-ice-primary font-medium"
+                              className="px-3 py-1.5 text-sm rounded-full bg-ice-soft/50 border border-ice-primary/30 text-ice-deep font-semibold"
                             >
                               {tag}
                             </span>

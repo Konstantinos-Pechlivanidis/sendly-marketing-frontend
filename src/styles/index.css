@@ -372,15 +372,17 @@
   /* GlassBadge - Light Mode (only for logged-in pages) */
   body.app-light-mode .glass-badge-default,
   body.app-light-mode .glass-badge-ice {
-    background-color: rgba(165, 196, 212, 0.60);
-    color: #4E8FB8;
-    border-color: rgba(78, 143, 184, 0.20);
+    background-color: rgba(165, 196, 212, 0.40);
+    color: #35546A; /* Darker for better contrast */
+    border-color: rgba(78, 143, 184, 0.30);
+    font-weight: 600;
   }
 
   body.app-light-mode .glass-badge-fuchsia {
-    background-color: rgba(244, 229, 236, 0.60);
-    color: #8C5467;
-    border-color: rgba(140, 84, 103, 0.20);
+    background-color: rgba(244, 229, 236, 0.50);
+    color: #6B3F4F; /* Darker for better contrast */
+    border-color: rgba(140, 84, 103, 0.30);
+    font-weight: 600;
   }
 }
 

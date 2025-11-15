@@ -7,13 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light Mode - Neutrals
+        // Light Mode - Neutrals (improved contrast)
         'neutral-bg-base': '#F5F7FA',
         'neutral-surface-primary': '#FFFFFF',
         'neutral-surface-secondary': '#EDF0F4',
         'neutral-border': '#D1D7E0',
         'neutral-text-primary': '#14161C',
-        'neutral-text-secondary': '#4B505B',
+        'neutral-text-secondary': '#5A606B', // Improved from #4B505B for better contrast (WCAG AA compliant)
         
         // Light Mode - Ice Blue (Primary brand)
         'ice-primary': '#4E8FB8',

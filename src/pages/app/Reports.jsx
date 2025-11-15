@@ -83,7 +83,7 @@ export default function Reports() {
         description="View analytics and performance reports"
         path="/app/reports"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Reports"
@@ -134,7 +134,7 @@ export default function Reports() {
 
         {/* KPIs */}
         {!error && hasData && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <GlassCard variant="ice" className="p-5 hover:shadow-glass-light-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <div className="p-2.5 rounded-xl bg-ice-soft/80">
@@ -199,10 +199,10 @@ export default function Reports() {
 
         {/* Charts */}
         {!error && hasData && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* Messages Over Time */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Messages Sent Over Time</h3>
+          <GlassCard className="p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Messages Sent Over Time</h3>
             <LineChart
               data={messagesOverTime}
               dataKey="messages"
@@ -212,8 +212,8 @@ export default function Reports() {
           </GlassCard>
 
           {/* Delivery Status */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Delivery Status Breakdown</h3>
+          <GlassCard className="p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Delivery Status Breakdown</h3>
             <PieChart
               data={deliveryStatusData}
               dataKey="value"
@@ -225,8 +225,8 @@ export default function Reports() {
 
         {/* Campaign Performance */}
         {!error && hasData && campaignPerformance.length > 0 && (
-          <GlassCard className="p-6">
-          <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Campaign Performance</h3>
+          <GlassCard className="p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Campaign Performance</h3>
           <BarChart
             data={campaignPerformance}
             dataKey="delivered"

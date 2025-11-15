@@ -61,7 +61,7 @@ export default function CampaignDetail() {
 
   if (error || !campaign) {
     return (
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           <ErrorState
             title="Campaign Not Found"
@@ -85,7 +85,7 @@ export default function CampaignDetail() {
         description="View campaign details and metrics"
         path={`/app/campaigns/${id}`}
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="mb-8">

@@ -102,7 +102,7 @@ export default function Contacts() {
         description="Manage your SMS marketing contacts"
         path="/app/contacts"
       />
-      <div className="min-h-screen pt-8 pb-20 px-6 lg:px-10 bg-neutral-bg-base">
+      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         {/* Header */}
         <PageHeader
           title="Contacts"
@@ -136,7 +136,7 @@ export default function Contacts() {
         </PageHeader>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
           {statsCards.map((stat) => (
             <GlassCard key={stat.label} variant={stat.variant} className="p-5 hover:shadow-glass-light-lg transition-shadow">
               <div className="flex items-center justify-between mb-3">
@@ -153,8 +153,8 @@ export default function Contacts() {
         </div>
 
         {/* Filters and Search */}
-        <GlassCard className="p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <GlassInput
               label="Search Contacts"
               type="text"
@@ -246,10 +246,10 @@ export default function Contacts() {
                         </Link>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-neutral-text-primary">{contact.phone || '-'}</span>
+                        <span className="text-neutral-text-primary font-medium">{contact.phoneE164 || contact.phone || '-'}</span>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <span className="text-neutral-text-primary">{contact.email || '-'}</span>
+                        <span className="text-neutral-text-primary font-medium">{contact.email || '-'}</span>
                       </GlassTableCell>
                       <GlassTableCell>
                         <div className="flex flex-wrap gap-1">
