@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
@@ -24,15 +23,8 @@ export default function Dashboard() {
     refetchInterval: true, // Enable auto-refetch (30s interval)
   });
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem(TOKEN_KEY);
-
-    if (!token) {
-      navigate('/login', { replace: true });
-      return;
-    }
-  }, [navigate]);
+  // Authentication is handled by ProtectedRoute component
+  // No need for redundant check here
 
   const handleLogout = () => {
     localStorage.removeItem(TOKEN_KEY);

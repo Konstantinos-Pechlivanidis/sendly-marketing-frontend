@@ -4,7 +4,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassInput from '../../components/ui/GlassInput';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
@@ -88,7 +88,7 @@ export default function Templates() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <GlassSelect
+            <GlassSelectCustom
               label="Filter by Category"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}

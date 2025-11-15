@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
@@ -135,7 +135,7 @@ export default function Automations() {
         {/* Filter */}
         {!hasError && (
           <GlassCard className="p-6 mb-8">
-          <GlassSelect
+          <GlassSelectCustom
             label="Filter by Status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}

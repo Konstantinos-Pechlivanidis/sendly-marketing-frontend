@@ -4,7 +4,7 @@ import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -127,7 +127,7 @@ export default function Settings() {
                       onChange={handleChange}
                       placeholder="Your Store Name"
                     />
-                    <GlassSelect
+                    <GlassSelectCustom
                       label="Default Timezone"
                       name="timezone"
                       value={formData.timezone}
@@ -143,7 +143,7 @@ export default function Settings() {
                         { value: 'Asia/Tokyo', label: 'Tokyo' },
                       ]}
                     />
-                    <GlassSelect
+                    <GlassSelectCustom
                       label="Currency"
                       name="currency"
                       value={formData.currency}

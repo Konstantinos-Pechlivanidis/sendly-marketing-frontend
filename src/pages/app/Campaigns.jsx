@@ -10,7 +10,7 @@ import GlassTable, {
   GlassTableHeaderCell,
   GlassTableCell,
 } from '../../components/ui/GlassTable';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassPagination from '../../components/ui/GlassPagination';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -164,7 +164,7 @@ export default function Campaigns() {
                 setPage(1);
               }}
             />
-            <GlassSelect
+            <GlassSelectCustom
               label="Filter by Status"
               value={statusFilter}
               onChange={(e) => {

@@ -83,15 +83,19 @@ function ScrollToTop() {
 }
 
 // Loading component with iOS 26 style
+// Detects if we're on an app route and uses light mode accordingly
 function Loading() {
+  const location = useLocation();
+  const isAppRoute = location.pathname.startsWith('/app');
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-dark">
+    <div className={`min-h-screen flex items-center justify-center ${isAppRoute ? 'bg-neutral-bg-base' : 'bg-bg-dark'}`}>
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-2 border-ice-accent/30 border-t-ice-accent rounded-full animate-spin" 
+        <div className={`w-12 h-12 border-2 ${isAppRoute ? 'border-ice-primary/40 border-t-ice-primary' : 'border-ice-accent/30 border-t-ice-accent'} rounded-full animate-spin`}
              style={{ animation: 'spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
              role="status"
              aria-label="Loading" />
-        <p className="text-sm text-primary-light">Loading...</p>
+        <p className={`text-sm ${isAppRoute ? 'text-neutral-text-secondary' : 'text-primary-light'}`}>Loading...</p>
       </div>
     </div>
   );

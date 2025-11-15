@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassTable, {
   GlassTableHeader,
   GlassTableBody,
@@ -64,7 +64,7 @@ export default function CampaignReports() {
 
           {/* Filter */}
           <GlassCard className="p-6 mb-6">
-            <GlassSelect
+            <GlassSelectCustom
               label="Filter by Campaign"
               value={selectedCampaignId}
               onChange={(e) => setSelectedCampaignId(e.target.value)}

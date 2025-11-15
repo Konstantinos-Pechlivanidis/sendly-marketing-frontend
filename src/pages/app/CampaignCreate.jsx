@@ -5,6 +5,8 @@ import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
 import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
+import GlassDateTimePicker from '../../components/ui/GlassDateTimePicker';
 import IPhonePreviewWithDiscount from '../../components/iphone/IPhonePreviewWithDiscount';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { 
@@ -293,16 +295,17 @@ export default function CampaignCreate() {
                     required
                   />
 
-                  <GlassSelect
+                  <GlassSelectCustom
                     label="Audience / Segment"
                     name="audience"
                     value={formData.audience}
                     onChange={handleChange}
                     options={audienceOptions}
+                    searchable={audienceOptions.length > 5}
                   />
 
                   {settingsData?.senderId && (
-                    <GlassSelect
+                    <GlassSelectCustom
                       label="Sender ID"
                       name="senderId"
                       value={formData.senderId}
@@ -347,7 +350,7 @@ export default function CampaignCreate() {
                   </div>
 
                   {discountOptions.length > 1 && (
-                    <GlassSelect
+                    <GlassSelectCustom
                       label="Discount Code (Optional)"
                       name="discountId"
                       value={formData.discountId || ''}
@@ -358,6 +361,8 @@ export default function CampaignCreate() {
                         }));
                       }}
                       options={discountOptions}
+                      searchable={discountOptions.length > 5}
+                      placeholder="Select a discount code..."
                     />
                   )}
 
@@ -376,27 +381,18 @@ export default function CampaignCreate() {
                     
                     {isScheduled && (
                       <div className="mt-4">
-                        <GlassInput
+                        <GlassDateTimePicker
                           label="Scheduled Date & Time"
                           name="scheduleAt"
-                          type="datetime-local"
-                          value={formData.scheduleAt ? new Date(formData.scheduleAt).toISOString().slice(0, 16) : ''}
+                          value={formData.scheduleAt || ''}
                           onChange={(e) => {
-                            const value = e.target.value;
-                            if (value) {
-                              const date = new Date(value);
-                              setFormData((prev) => ({
-                                ...prev,
-                                scheduleAt: date.toISOString(),
-                              }));
-                            } else {
-                              setFormData((prev) => ({
-                                ...prev,
-                                scheduleAt: '',
-                              }));
-                            }
+                            setFormData((prev) => ({
+                              ...prev,
+                              scheduleAt: e.target.value || '',
+                            }));
                           }}
                           error={errors.scheduleAt}
+                          minDate={new Date().toISOString()}
                         />
                         {formData.scheduleAt && (
                           <p className="mt-2 text-sm text-ice-primary flex items-center gap-2">

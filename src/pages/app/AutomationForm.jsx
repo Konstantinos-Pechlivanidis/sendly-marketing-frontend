@@ -4,7 +4,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
-import GlassSelect from '../../components/ui/GlassSelect';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import Icon from '../../components/ui/Icon';
 import { useAutomations, useCreateAutomation, useUpdateAutomation } from '../../services/queries';
@@ -150,7 +150,7 @@ export default function AutomationForm() {
                 required
               />
 
-              <GlassSelect
+              <GlassSelectCustom
                 label="Trigger"
                 name="trigger"
                 value={formData.trigger}
@@ -169,7 +169,7 @@ export default function AutomationForm() {
                 required
               />
 
-              <GlassSelect
+              <GlassSelectCustom
                 label="Status"
                 name="status"
                 value={formData.status}
