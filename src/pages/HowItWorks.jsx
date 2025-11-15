@@ -31,7 +31,7 @@ export default function HowItWorks() {
     {
       icon: 'workflow',
       title: 'Abandoned Cart Recovery',
-      description: 'Automatically send SMS when customers leave items in cart.',
+      description: 'Automatically send SMS when customers leave items in cart. Requires Shopify integration setup.',
       trigger: 'Cart abandoned for 1 hour',
     },
     {
@@ -42,8 +42,8 @@ export default function HowItWorks() {
     },
     {
       icon: 'send',
-      title: 'Shipping Updates',
-      description: 'Notify customers when their order ships.',
+      title: 'Order Fulfilled',
+      description: 'Notify customers when their order is fulfilled with tracking information.',
       trigger: 'Order fulfilled',
     },
     {

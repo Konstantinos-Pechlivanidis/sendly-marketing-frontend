@@ -101,9 +101,9 @@ export default function AutomationForm() {
   const triggerOptions = [
     { value: 'order_placed', label: 'Order Placed' },
     { value: 'order_fulfilled', label: 'Order Fulfilled' },
-    { value: 'abandoned_cart', label: 'Abandoned Cart' },
     { value: 'birthday', label: 'Birthday' },
-    { value: 'customer_registered', label: 'Customer Registered' },
+    { value: 'abandoned_cart', label: 'Abandoned Cart', note: 'Requires Shopify integration setup' },
+    { value: 'customer_inactive', label: 'Customer Re-engagement', note: 'Coming soon' },
   ];
 
   if (isEditMode && !existingAutomation) {
@@ -149,13 +149,21 @@ export default function AutomationForm() {
                 required
               />
 
-              <GlassSelectCustom
-                label="Trigger"
-                name="trigger"
-                value={formData.trigger}
-                onChange={handleChange}
-                options={triggerOptions}
-              />
+              <div>
+                <GlassSelectCustom
+                  label="Trigger"
+                  name="trigger"
+                  value={formData.trigger}
+                  onChange={handleChange}
+                  options={triggerOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                />
+                {triggerOptions.find(opt => opt.value === formData.trigger)?.note && (
+                  <p className="text-xs text-neutral-text-secondary mt-2 flex items-center gap-1">
+                    <Icon name="info" size="xs" />
+                    {triggerOptions.find(opt => opt.value === formData.trigger).note}
+                  </p>
+                )}
+              </div>
 
               <GlassTextarea
                 label="Message"

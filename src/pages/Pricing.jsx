@@ -70,9 +70,9 @@ export default function Pricing() {
     'Analytics dashboard',
     'Shopify integration',
     'Message templates',
-    'A/B testing',
-    'Link shortening',
-    'Webhook integration',
+    'A/B testing (coming soon)',
+    'Link shortening (coming soon)',
+    'Shopify webhook integration',
     'Unlimited contacts',
     'Priority support',
   ];
@@ -294,7 +294,7 @@ export default function Pricing() {
                   <div className="text-left">
                     <h3 className="text-h3 font-semibold mb-2">Are all features really free?</h3>
                     <p className="text-body text-border-subtle">
-                      Yes! Campaign builder, automations, analytics, integrations, A/B testing—everything is free. You only pay for the SMS messages you send.
+                      Yes! Campaign builder, automations, analytics, Shopify integration, message templates—all core features are free. You only pay for the SMS messages you send. Some advanced features like A/B testing and link shortening are coming soon.
                     </p>
                   </div>
                 </div>

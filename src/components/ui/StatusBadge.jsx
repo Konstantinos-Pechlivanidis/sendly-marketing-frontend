@@ -11,9 +11,13 @@ const StatusBadge = memo(function StatusBadge({ status, className }) {
     // Campaign statuses
     draft: { label: 'Draft', variant: 'default', color: 'neutral-text-secondary' },
     scheduled: { label: 'Scheduled', variant: 'ice', color: 'ice-deep' },
+    sending: { label: 'Sending', variant: 'ice', color: 'ice-deep' },
+    sent: { label: 'Sent', variant: 'ice', color: 'ice-deep' },
+    failed: { label: 'Failed', variant: 'default', color: 'red-600' },
+    cancelled: { label: 'Cancelled', variant: 'default', color: 'red-600' },
+    // Legacy/backward compatibility
     active: { label: 'Active', variant: 'ice', color: 'ice-deep' },
     completed: { label: 'Completed', variant: 'default', color: 'neutral-text-secondary' },
-    cancelled: { label: 'Cancelled', variant: 'default', color: 'red-600' },
     
     // Contact consent statuses
     opted_in: { label: 'Opted In', variant: 'ice', color: 'ice-deep' },
