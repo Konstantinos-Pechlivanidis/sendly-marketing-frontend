@@ -53,7 +53,7 @@ export default function CampaignDetail() {
 
   // Only show full loading state on initial load (no cached data)
   // If we have cached data, show it immediately even if fetching
-  const isInitialLoad = isLoading && !campaignData;
+  const isInitialLoad = isLoading && !campaign;
 
   if (isInitialLoad) {
     return <LoadingState size="lg" />;

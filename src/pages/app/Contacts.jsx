@@ -39,7 +39,7 @@ export default function Contacts() {
   const { data, isLoading, error } = useContacts({
     page,
     pageSize,
-    consentStatus: consentFilter || undefined,
+    smsConsent: consentFilter || undefined,
     search: searchQuery || undefined,
   });
 
@@ -75,13 +75,13 @@ export default function Contacts() {
     },
     {
       label: 'Opted In',
-      value: stats?.optedIn || contacts.filter((c) => c.consentStatus === 'opted_in').length,
+      value: stats?.optedIn || contacts.filter((c) => (c.smsConsent || c.consentStatus) === 'opted_in').length,
       icon: 'check',
       variant: 'ice',
     },
     {
       label: 'Opted Out',
-      value: stats?.optedOut || contacts.filter((c) => c.consentStatus === 'opted_out').length,
+      value: stats?.optedOut || contacts.filter((c) => (c.smsConsent || c.consentStatus) === 'opted_out').length,
       icon: 'error',
       variant: 'default',
     },
@@ -271,7 +271,7 @@ export default function Contacts() {
                         </div>
                       </GlassTableCell>
                       <GlassTableCell>
-                        <StatusBadge status={contact.consentStatus} />
+                        <StatusBadge status={contact.smsConsent || contact.consentStatus} />
                       </GlassTableCell>
                       <GlassTableCell>
                         <div className="flex items-center gap-2">

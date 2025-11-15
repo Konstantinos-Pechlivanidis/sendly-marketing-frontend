@@ -41,8 +41,8 @@ export default function Templates() {
       navigate('/app/campaigns/new', {
         state: {
           template: {
-            message: template.message || template.content,
-            name: template.name,
+            message: template.content || template.message,
+            name: template.title || template.name,
           },
         },
       });
@@ -52,8 +52,8 @@ export default function Templates() {
       navigate('/app/campaigns/new', {
         state: {
           template: {
-            message: template.message || template.content,
-            name: template.name,
+            message: template.content || template.message,
+            name: template.title || template.name,
           },
         },
       });
@@ -130,25 +130,61 @@ export default function Templates() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {templates.map((template) => (
               <GlassCard key={template.id} className="p-6 hover:shadow-glass-light-lg transition-shadow">
+                {template.previewImage && (
+                  <div className="mb-4 rounded-lg overflow-hidden">
+                    <img
+                      src={template.previewImage}
+                      alt={template.title || template.name}
+                      className="w-full h-32 object-cover"
+                    />
+                  </div>
+                )}
+                
                 <div className="mb-4">
                   {template.category && (
                     <span className="inline-block px-3 py-1 text-xs rounded-full bg-ice-soft/60 border border-ice-primary/20 text-ice-primary font-medium mb-2">
                       {template.category}
                     </span>
                   )}
-                  <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">{template.name}</h3>
-                  <p className="text-sm text-neutral-text-secondary line-clamp-3">
-                    {template.message || template.content}
+                  <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">
+                    {template.title || template.name}
+                  </h3>
+                  <p className="text-sm text-neutral-text-secondary line-clamp-3 mb-3">
+                    {template.content || template.message}
                   </p>
+                  
+                  {template.tags && template.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {template.tags.slice(0, 3).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 text-xs rounded-full bg-neutral-surface-secondary/50 border border-neutral-border/30 text-neutral-text-secondary"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {template.tags.length > 3 && (
+                        <span className="px-2 py-0.5 text-xs text-neutral-text-secondary">
+                          +{template.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
-                {template.useCount !== undefined && (
-                  <div className="mb-4">
-                    <p className="text-xs text-neutral-text-secondary">
-                      Used {template.useCount} time{template.useCount !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                )}
+                <div className="flex items-center justify-between mb-4">
+                  {template.useCount !== undefined && template.useCount > 0 && (
+                    <div className="flex items-center gap-1 text-xs text-neutral-text-secondary">
+                      <Icon name="check" size="xs" variant="ice" />
+                      <span>Used {template.useCount} time{template.useCount !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  {template.createdAt && (
+                    <span className="text-xs text-neutral-text-secondary">
+                      {new Date(template.createdAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
 
                 <GlassButton
                   variant="primary"

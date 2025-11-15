@@ -34,9 +34,9 @@ export default function Billing() {
   });
   const createPurchase = useCreatePurchase();
 
-  const balance = balanceData?.credits || 0;
+  const balance = balanceData?.credits || balanceData?.balance || 0;
   const currency = balanceData?.currency || 'EUR';
-  const packages = packagesData?.packages || packagesData || [];
+  const packages = packagesData?.packages || (Array.isArray(packagesData) ? packagesData : []);
   const history = historyData?.transactions || historyData?.items || [];
   const pagination = historyData?.pagination || {};
 
@@ -52,12 +52,16 @@ export default function Billing() {
         successUrl,
         cancelUrl,
       });
-      toast.success('Purchase initiated. Redirecting to payment...');
+      
       // Redirect to Stripe checkout
-      if (result.sessionUrl) {
+      if (result?.sessionUrl) {
+        toast.success('Redirecting to payment...');
         window.location.href = result.sessionUrl;
-      } else if (result.checkoutUrl) {
+      } else if (result?.checkoutUrl) {
+        toast.success('Redirecting to payment...');
         window.location.href = result.checkoutUrl;
+      } else {
+        toast.error('Failed to get checkout URL. Please try again.');
       }
     } catch (error) {
       toast.error(error?.message || 'Failed to initiate purchase');
@@ -134,10 +138,10 @@ export default function Billing() {
             {packages.map((pkg) => (
               <GlassCard
                 key={pkg.id}
-                variant={pkg.mostPopular ? 'fuchsia' : 'default'}
-                className={`p-6 relative hover:shadow-glass-light-lg transition-shadow ${pkg.mostPopular ? 'border-2 border-fuchsia-primary' : ''}`}
+                variant={pkg.popular || pkg.mostPopular ? 'fuchsia' : 'default'}
+                className={`p-6 relative hover:shadow-glass-light-lg transition-shadow ${pkg.popular || pkg.mostPopular ? 'border-2 border-fuchsia-primary' : ''}`}
               >
-                {pkg.mostPopular && (
+                {(pkg.popular || pkg.mostPopular) && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="px-3 py-1 text-xs font-semibold rounded-full bg-fuchsia-primary text-white shadow-glow-fuchsia-light">
                       Most Popular
@@ -171,7 +175,7 @@ export default function Billing() {
                   </ul>
                 )}
                 <GlassButton
-                  variant={pkg.mostPopular ? 'fuchsia' : 'ghost'}
+                  variant={pkg.popular || pkg.mostPopular ? 'fuchsia' : 'ghost'}
                   size="lg"
                   onClick={() => handlePurchase(pkg.id)}
                   disabled={createPurchase.isPending}
@@ -229,17 +233,17 @@ export default function Billing() {
                         </GlassTableCell>
                         <GlassTableCell>
                           <span className="text-neutral-text-primary font-medium">
-                            {transaction.packageName || transaction.package?.name || 'N/A'}
+                            {transaction.packageName || transaction.package?.name || transaction.packageType || 'N/A'}
                           </span>
                         </GlassTableCell>
                         <GlassTableCell>
                           <span className="text-neutral-text-primary font-medium">
-                            {transaction.credits || transaction.package?.credits || 0}
+                            {transaction.credits || transaction.creditsAdded || transaction.package?.credits || 0}
                           </span>
                         </GlassTableCell>
                         <GlassTableCell>
                           <span className="text-neutral-text-primary font-medium">
-                            {transaction.amount || transaction.price || 0} {currency}
+                            {transaction.amount !== undefined ? transaction.amount.toFixed(2) : transaction.price !== undefined ? transaction.price.toFixed(2) : '0.00'} {transaction.currency || currency}
                           </span>
                         </GlassTableCell>
                         <GlassTableCell>

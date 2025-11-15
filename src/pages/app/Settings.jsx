@@ -8,7 +8,7 @@ import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { useSettings, useAccountInfo, useUpdateSenderNumber } from '../../services/queries';
+import { useSettings, useAccountInfo, useUpdateSettings } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useStoreInfo } from '../../hooks/useStoreInfo';
 import SEO from '../../components/SEO';
@@ -22,13 +22,11 @@ export default function Settings() {
     senderId: '',
     timezone: 'UTC',
     currency: 'EUR',
-    unsubscribeMessage: '',
-    deliveryNotifications: true,
   });
 
   const { data: settingsData, isLoading: isLoadingSettings } = useSettings();
   const { data: accountData, isLoading: isLoadingAccount } = useAccountInfo();
-  const updateSenderNumber = useUpdateSenderNumber();
+  const updateSettings = useUpdateSettings();
 
   useEffect(() => {
     if (settingsData) {
@@ -36,8 +34,6 @@ export default function Settings() {
         senderId: settingsData.senderId || '',
         timezone: settingsData.timezone || 'UTC',
         currency: settingsData.currency || 'EUR',
-        unsubscribeMessage: settingsData.unsubscribeMessage || '',
-        deliveryNotifications: settingsData.deliveryNotifications !== false,
       });
     }
   }, [settingsData]);
@@ -52,9 +48,30 @@ export default function Settings() {
 
   const handleSave = async () => {
     try {
-      if (formData.senderId !== settingsData?.senderId) {
-        await updateSenderNumber.mutateAsync({ senderId: formData.senderId });
+      // Check if anything has changed
+      const hasChanges = 
+        formData.senderId !== (settingsData?.senderId || '') ||
+        formData.timezone !== (settingsData?.timezone || 'UTC') ||
+        formData.currency !== (settingsData?.currency || 'EUR');
+
+      if (!hasChanges) {
+        toast.info('No changes to save');
+        return;
       }
+
+      // Prepare update data
+      const updateData = {};
+      if (formData.senderId !== (settingsData?.senderId || '')) {
+        updateData.senderId = formData.senderId;
+      }
+      if (formData.timezone !== (settingsData?.timezone || 'UTC')) {
+        updateData.timezone = formData.timezone;
+      }
+      if (formData.currency !== (settingsData?.currency || 'EUR')) {
+        updateData.currency = formData.currency;
+      }
+
+      await updateSettings.mutateAsync(updateData);
       toast.success('Settings saved successfully');
     } catch (error) {
       toast.error(error?.message || 'Failed to save settings');
@@ -175,8 +192,20 @@ export default function Settings() {
                   </div>
                 )}
                     <div className="flex justify-end pt-4">
-                      <GlassButton variant="primary" size="lg" onClick={handleSave}>
-                        Save Changes
+                      <GlassButton 
+                        variant="primary" 
+                        size="lg" 
+                        onClick={handleSave}
+                        disabled={updateSettings.isPending}
+                      >
+                        {updateSettings.isPending ? (
+                          <span className="flex items-center gap-2">
+                            <LoadingSpinner size="sm" />
+                            Saving...
+                          </span>
+                        ) : (
+                          'Save Changes'
+                        )}
                       </GlassButton>
                     </div>
                   </div>
@@ -188,39 +217,14 @@ export default function Settings() {
               <GlassCard className="p-4 sm:p-6">
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-neutral-text-primary">SMS Settings</h2>
                 <div className="space-y-4 sm:space-y-6">
-                  <GlassTextarea
-                    label="Default Unsubscribe Message"
-                    name="unsubscribeMessage"
-                    value={formData.unsubscribeMessage}
-                    onChange={handleChange}
-                    rows={4}
-                    placeholder="Reply STOP to unsubscribe"
-                  />
-                  <div>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="deliveryNotifications"
-                        checked={formData.deliveryNotifications}
-                        onChange={handleChange}
-                        className="w-5 h-5 rounded border-neutral-border bg-neutral-surface-primary text-ice-primary focus:ring-ice-primary focus:ring-2"
-                      />
-                      <span className="text-sm font-medium text-neutral-text-primary">
-                        Enable delivery notifications
-                      </span>
-                    </label>
-                    <p className="text-xs text-neutral-text-secondary mt-1 ml-8">
-                      Receive notifications when messages are delivered or fail
+                  <div className="p-4 rounded-lg bg-neutral-surface-secondary border border-neutral-border">
+                    <p className="text-sm text-neutral-text-primary">
+                      SMS settings are managed through the General tab. Use the Sender ID field to set your SMS sender number or name.
                     </p>
                   </div>
-                    <div className="flex justify-end pt-4">
-                      <GlassButton variant="primary" size="lg" onClick={handleSave}>
-                        Save Changes
-                      </GlassButton>
-                    </div>
-                  </div>
-                </GlassCard>
-              )}
+                </div>
+              </GlassCard>
+            )}
 
             {/* Integrations */}
             {activeTab === 'integrations' && (

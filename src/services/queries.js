@@ -50,7 +50,7 @@ export const useCampaign = (id, options = {}) => {
 
 export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (data) => api.post('/campaigns', data),
     onSuccess: () => {
@@ -61,7 +61,7 @@ export const useCreateCampaign = () => {
 
 export const useUpdateCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: ({ id, ...data }) => api.put(`/campaigns/${id}`, data),
     onSuccess: (_, variables) => {
@@ -74,7 +74,7 @@ export const useUpdateCampaign = () => {
 
 export const useDeleteCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (id) => api.delete(`/campaigns/${id}`),
     onSuccess: () => {
@@ -86,7 +86,7 @@ export const useDeleteCampaign = () => {
 
 export const useSendCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (id) => {
       // Send POST request without body - explicitly set Content-Type and send empty object
@@ -108,7 +108,7 @@ export const useSendCampaign = () => {
 
 export const useScheduleCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: ({ id, scheduleType, scheduleAt, recurringDays }) => {
       const scheduleData = {
@@ -118,8 +118,11 @@ export const useScheduleCampaign = () => {
       };
       return api.put(`/campaigns/${id}/schedule`, scheduleData);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['campaign', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.id, 'metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }); // Update dashboard stats
     },
   });
 };
@@ -131,7 +134,7 @@ export const useContacts = (params = {}) => {
     queryFn: async () => {
       // Map frontend params to backend params
       const backendParams = {};
-
+      
       // Copy all params except the ones we need to map
       Object.keys(params).forEach(key => {
         if (key !== 'consentStatus' && key !== 'search') {
@@ -140,17 +143,20 @@ export const useContacts = (params = {}) => {
           }
         }
       });
-
+      
       // Map consentStatus to smsConsent (backend expects smsConsent)
+      // Also support direct smsConsent param
       if (params.consentStatus) {
         backendParams.smsConsent = params.consentStatus;
+      } else if (params.smsConsent) {
+        backendParams.smsConsent = params.smsConsent;
       }
-
+      
       // Map search to q (backend expects q for search)
       if (params.search) {
         backendParams.q = params.search;
       }
-
+      
       const queryString = new URLSearchParams(backendParams).toString();
       const response = await api.get(`/contacts?${queryString}`);
       // Normalize response to consistent format
@@ -266,7 +272,7 @@ export const useCampaignMetrics = (id, options = {}) => {
 
 export const usePrepareCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (id) => api.post(`/campaigns/${id}/prepare`),
     onSuccess: () => {
@@ -277,7 +283,7 @@ export const usePrepareCampaign = () => {
 
 export const useRetryFailedCampaign = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (id) => api.post(`/campaigns/${id}/retry-failed`),
     onSuccess: (_, id) => {
@@ -378,7 +384,7 @@ export const useTrackTemplateUsage = () => {
 // Contacts - CRUD
 export const useCreateContact = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (data) => api.post('/contacts', data),
     onSuccess: () => {
@@ -391,7 +397,7 @@ export const useCreateContact = () => {
 
 export const useUpdateContact = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: ({ id, ...data }) => api.put(`/contacts/${id}`, data),
     onSuccess: (_, variables) => {
@@ -403,7 +409,7 @@ export const useUpdateContact = () => {
 
 export const useDeleteContact = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (id) => api.delete(`/contacts/${id}`),
     onSuccess: () => {
@@ -430,7 +436,7 @@ export const useContact = (id, options = {}) => {
 
 export const useImportContacts = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (formData) => {
       // Use axios for consistency with other API calls
@@ -466,7 +472,7 @@ export const useBirthdayContacts = (params = {}) => {
 // Billing
 export const useCreatePurchase = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (data) => api.post('/billing/purchase', data),
     onSuccess: () => {
@@ -532,11 +538,24 @@ export const useAccountInfo = () => {
 
 export const useUpdateSenderNumber = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (data) => api.put('/settings/sender', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
+      queryClient.invalidateQueries({ queryKey: ['settings', 'account'] });
+    },
+  });
+};
+
+export const useUpdateSettings = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => api.put('/settings', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['settings', 'account'] });
     },
   });
 };
@@ -647,7 +666,7 @@ export const useAutomationStats = () => {
  */
 export const useCreateAutomation = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: (data) => {
       const payload = transformAutomationToAPI(data, false);
@@ -661,7 +680,7 @@ export const useCreateAutomation = () => {
 
 export const useUpdateAutomation = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: ({ id, ...data }) => {
       const payload = transformAutomationToAPI(data, true);
@@ -686,7 +705,7 @@ export const useSystemDefaults = () => {
 
 export const useSyncSystemDefaults = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
     mutationFn: () => api.post('/automations/sync'),
     onSuccess: () => {

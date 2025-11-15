@@ -13,6 +13,7 @@ import {
   useCreateCampaign, 
   useUpdateCampaign, 
   useSendCampaign,
+  useScheduleCampaign,
   useCampaign,
   useAudiences,
   useDiscounts,
@@ -33,6 +34,7 @@ export default function CampaignCreate() {
   const createCampaign = useCreateCampaign();
   const updateCampaign = useUpdateCampaign();
   const sendCampaign = useSendCampaign();
+  const scheduleCampaign = useScheduleCampaign();
   const { data: existingCampaign, isLoading: isLoadingCampaign } = useCampaign(id);
   const { data: audiencesData } = useAudiences();
   const { data: discountsData } = useDiscounts();
@@ -58,18 +60,30 @@ export default function CampaignCreate() {
   // Load existing campaign data if editing
   useEffect(() => {
     if (isEditMode && existingCampaign) {
+      // Check if campaign can be edited
+      const canEdit = existingCampaign.status === 'draft' || existingCampaign.status === 'scheduled';
+      
+      if (!canEdit) {
+        toast.error('This campaign cannot be edited. Only draft and scheduled campaigns can be modified.');
+        navigate('/app/campaigns');
+        return;
+      }
+      
+      const scheduleType = existingCampaign.scheduleType || 'immediate';
+      const isScheduledCampaign = scheduleType === 'scheduled';
+      
       setFormData({
         name: existingCampaign.name || '',
         message: existingCampaign.message || '',
         audience: existingCampaign.audience || 'all',
-        scheduleType: existingCampaign.scheduleType || 'immediate',
-        scheduleAt: existingCampaign.scheduleAt || '',
+        scheduleType: scheduleType,
+        scheduleAt: existingCampaign.scheduleAt ? new Date(existingCampaign.scheduleAt).toISOString().slice(0, 16) : '',
         discountId: existingCampaign.discountId || null,
         senderId: existingCampaign.senderId || '',
       });
-      setIsScheduled(existingCampaign.scheduleType === 'scheduled');
+      setIsScheduled(isScheduledCampaign);
     }
-  }, [isEditMode, existingCampaign]);
+  }, [isEditMode, existingCampaign, navigate, toast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -136,10 +150,15 @@ export default function CampaignCreate() {
         name: formData.name.trim(),
         message: formData.message.trim(),
         audience: formData.audience,
-        scheduleType: 'immediate',
+        scheduleType: isScheduled ? 'scheduled' : 'immediate', // Preserve scheduleType
         discountId: formData.discountId || null,
         senderId: formData.senderId || undefined,
       };
+      
+      // Include scheduleAt if scheduled
+      if (isScheduled && formData.scheduleAt) {
+        campaignData.scheduleAt = new Date(formData.scheduleAt).toISOString();
+      }
       
       let result;
       if (isEditMode) {
@@ -170,27 +189,70 @@ export default function CampaignCreate() {
         senderId: formData.senderId || undefined,
       };
       
-      if (isScheduled && formData.scheduleAt) {
-        campaignData.scheduleAt = new Date(formData.scheduleAt).toISOString();
-      }
-      
       let result;
       if (isEditMode) {
+        // For edit mode, update the campaign first
         result = await updateCampaign.mutateAsync({ id, ...campaignData });
-      } else {
-        result = await createCampaign.mutateAsync(campaignData);
-      }
-      
-      if (!isScheduled && result?.id) {
-        try {
-          await sendCampaign.mutateAsync(result.id);
-          toast.success('Campaign created and queued for sending!');
-        } catch (sendError) {
-          toast.warning('Campaign created but failed to send. You can send it manually from the campaigns list.');
-          // Error already handled by toast.warning above
+        
+        // If scheduled, use the schedule endpoint to properly set status
+        if (isScheduled && formData.scheduleAt) {
+          try {
+            await scheduleCampaign.mutateAsync({
+              id,
+              scheduleType: 'scheduled',
+              scheduleAt: formData.scheduleAt,
+            });
+            toast.success('Campaign scheduled successfully!');
+            setTimeout(() => navigate('/app/campaigns'), 1500);
+            return;
+          } catch (scheduleError) {
+            toast.error(scheduleError?.message || 'Failed to schedule campaign');
+            return;
+          }
+        } else if (!isScheduled && result?.id) {
+          // For immediate send in edit mode, send the campaign
+          try {
+            await sendCampaign.mutateAsync(result.id);
+            toast.success('Campaign queued for sending!');
+          } catch (sendError) {
+            toast.warning('Campaign updated but failed to send. You can send it manually from the campaigns list.');
+          }
+          setTimeout(() => navigate('/app/campaigns'), 1500);
+          return;
         }
-      } else if (isScheduled) {
-        toast.success('Campaign scheduled successfully!');
+      } else {
+        // For new campaigns
+        if (isScheduled && formData.scheduleAt) {
+          // Create with scheduled data
+          campaignData.scheduleAt = new Date(formData.scheduleAt).toISOString();
+          result = await createCampaign.mutateAsync(campaignData);
+          
+          // Use schedule endpoint to properly set status to 'scheduled'
+          if (result?.id) {
+            try {
+              await scheduleCampaign.mutateAsync({
+                id: result.id,
+                scheduleType: 'scheduled',
+                scheduleAt: formData.scheduleAt,
+              });
+              toast.success('Campaign scheduled successfully!');
+            } catch (scheduleError) {
+              toast.warning('Campaign created but failed to schedule. You can schedule it manually from the campaigns list.');
+            }
+          }
+        } else {
+          // Create and send immediately
+          result = await createCampaign.mutateAsync(campaignData);
+          
+          if (result?.id) {
+            try {
+              await sendCampaign.mutateAsync(result.id);
+              toast.success('Campaign created and queued for sending!');
+            } catch (sendError) {
+              toast.warning('Campaign created but failed to send. You can send it manually from the campaigns list.');
+            }
+          }
+        }
       }
       
       if (result?.id) {
@@ -415,7 +477,7 @@ export default function CampaignCreate() {
                       variant="ghost"
                       size="lg"
                       onClick={handleSaveDraft}
-                      disabled={createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending}
+                      disabled={createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending || scheduleCampaign.isPending}
                       className="flex-1"
                     >
                       {createCampaign.isPending || updateCampaign.isPending ? (
@@ -431,10 +493,10 @@ export default function CampaignCreate() {
                       variant="primary"
                       size="lg"
                       onClick={handleSend}
-                      disabled={createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending}
+                      disabled={createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending || scheduleCampaign.isPending}
                       className="flex-1"
                     >
-                      {createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending ? (
+                      {createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending || scheduleCampaign.isPending ? (
                         <span className="flex items-center gap-2">
                           <LoadingSpinner size="sm" />
                           {isScheduled ? 'Scheduling...' : 'Sending...'}
