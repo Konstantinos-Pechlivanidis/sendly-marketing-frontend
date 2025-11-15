@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
+import GlassBadge from '../components/ui/GlassBadge';
 import Icon from '../components/ui/Icon';
 import IPhonePreviewWithDiscount from '../components/iphone/IPhonePreviewWithDiscount';
 import SEO from '../components/SEO';
@@ -33,6 +34,7 @@ export default function HowItWorks() {
       title: 'Abandoned Cart Recovery',
       description: 'Automatically send SMS when customers leave items in cart. Requires Shopify integration setup.',
       trigger: 'Cart abandoned for 1 hour',
+      badge: 'Setup Required',
     },
     {
       icon: 'sms',
@@ -121,7 +123,14 @@ export default function HowItWorks() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {automations.map((automation, index) => (
-                <GlassCard key={index} className="p-6">
+                <GlassCard key={index} className="p-6 relative">
+                  {automation.badge && (
+                    <div className="absolute top-4 right-4">
+                      <GlassBadge variant="default" className="text-xs">
+                        {automation.badge}
+                      </GlassBadge>
+                    </div>
+                  )}
                   <div className="flex items-start gap-4">
                     <div className="p-3 rounded-xl bg-ice-accent/20 flex-shrink-0">
                       <Icon name={automation.icon} size="lg" variant="ice" />
