@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { getAPIUrl, TOKEN_KEY, STORE_KEY } from '../utils/constants';
+import { API_URL, TOKEN_KEY } from '../utils/constants';
 
-// Create axios instance with runtime API URL detection
+// Create axios instance
 const api = axios.create({
-  baseURL: getAPIUrl(),
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000, // 15 seconds timeout - faster error feedback for better UX
+  timeout: 30000, // 30 seconds timeout
 });
 
 // Request interceptor - add auth token
@@ -59,10 +59,10 @@ api.interceptors.response.use(
     // Handle 401 - Unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(STORE_KEY);
+      localStorage.removeItem('sendly_store_info');
       // Redirect to login if not already there
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/auth/callback')) {
-        window.location.href = '/login';
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/';
       }
     }
     
