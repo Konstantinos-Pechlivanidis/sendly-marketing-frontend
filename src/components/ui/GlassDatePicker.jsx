@@ -23,14 +23,33 @@ export default function GlassDatePicker({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : null);
-  const [tempDate, setTempDate] = useState(value ? new Date(value).toISOString().split('T')[0] : '');
+  const [tempDate, setTempDate] = useState(() => {
+    if (!value) return '';
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  });
   const pickerRef = useRef(null);
 
   useEffect(() => {
-    if (value) {
-      const date = new Date(value);
-      setSelectedDate(date);
-      setTempDate(date.toISOString().split('T')[0]);
+    if (value && value.trim()) {
+      try {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          setSelectedDate(date);
+          setTempDate(date.toISOString().split('T')[0]);
+        } else {
+          setSelectedDate(null);
+          setTempDate('');
+        }
+      } catch {
+        setSelectedDate(null);
+        setTempDate('');
+      }
     } else {
       setSelectedDate(null);
       setTempDate('');
