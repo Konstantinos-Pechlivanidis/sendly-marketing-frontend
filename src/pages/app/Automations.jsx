@@ -60,7 +60,11 @@ export default function Automations() {
     }
   };
 
-  if (isLoading) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = isLoading && !automationsData;
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading automations..." />;
   }
 

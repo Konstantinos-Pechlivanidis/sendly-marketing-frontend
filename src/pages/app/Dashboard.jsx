@@ -18,9 +18,9 @@ import SEO from '../../components/SEO';
 export default function Dashboard() {
   const navigate = useNavigate();
   const storeInfo = useStoreInfo();
-  // Only auto-refetch dashboard when user is on dashboard page
-  const { data: dashboardData, isLoading, error } = useDashboard({
-    refetchInterval: true, // Enable auto-refetch (30s interval)
+  // Use cached data when available - only show loading on initial load
+  const { data: dashboardData, isLoading, isFetching, error } = useDashboard({
+    refetchInterval: false, // Disable auto-refetch - data is cached and fresh for 2 minutes
   });
 
   // Authentication is handled by ProtectedRoute component
@@ -32,7 +32,11 @@ export default function Dashboard() {
     navigate('/login', { replace: true });
   };
 
-  if (isLoading) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = isLoading && !dashboardData;
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading dashboard..." />;
   }
 
@@ -60,7 +64,7 @@ export default function Dashboard() {
           />
         )}
 
-        {/* Dashboard Content */}
+        {/* Dashboard Content - Show cached data immediately, update in background */}
         {dashboardData && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {/* Credits Balance */}

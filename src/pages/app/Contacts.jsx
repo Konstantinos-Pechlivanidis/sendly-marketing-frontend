@@ -20,6 +20,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
+import EmptyState from '../../components/ui/EmptyState';
 import { useContacts, useContactStats, useDeleteContact } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
@@ -86,7 +87,11 @@ export default function Contacts() {
     },
   ];
 
-  if (isLoading) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = isLoading && !data;
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading contacts..." />;
   }
 
@@ -189,29 +194,30 @@ export default function Contacts() {
 
         {/* Contacts Table */}
         {contacts.length === 0 ? (
-          <GlassCard className="p-12 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-4 rounded-xl bg-ice-soft/80">
-                <Icon name="segment" size="xl" variant="ice" />
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">No contacts found</h3>
-            <p className="text-sm text-neutral-text-secondary mb-6">
-              {searchQuery || consentFilter
-                ? 'Try adjusting your filters'
-                : 'Import contacts or add your first contact to get started'}
-            </p>
-            {!searchQuery && !consentFilter && (
+          <EmptyState
+            icon="segment"
+            title="No contacts found"
+            message={searchQuery || consentFilter
+              ? 'Try adjusting your filters'
+              : 'Import contacts or add your first contact to get started'}
+            action={!searchQuery && !consentFilter ? (
               <div className="flex gap-4 justify-center">
                 <GlassButton variant="ghost" size="lg" onClick={() => setIsImportModalOpen(true)}>
-                  Import Contacts
+                  <span className="flex items-center gap-2">
+                    <Icon name="import" size="sm" variant="ice" />
+                    Import Contacts
+                  </span>
                 </GlassButton>
-                <GlassButton variant="primary" size="lg" as={Link} to="/app/contacts/new">
-                  Add Contact
+                <GlassButton variant="primary" size="lg" as={Link} to="/app/contacts/new" className="group">
+                  <span className="flex items-center gap-2">
+                    <Icon name="segment" size="sm" variant="ice" />
+                    Add Contact
+                    <Icon name="arrowRight" size="sm" className="group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </GlassButton>
               </div>
-            )}
-          </GlassCard>
+            ) : undefined}
+          />
         ) : (
           <>
             <GlassCard className="p-0 overflow-hidden">

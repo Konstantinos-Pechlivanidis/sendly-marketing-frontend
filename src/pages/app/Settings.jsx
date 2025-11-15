@@ -68,7 +68,11 @@ export default function Settings() {
     { id: 'account', label: 'Account', icon: 'personal' },
   ];
 
-  if (isLoadingSettings || isLoadingAccount) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = (isLoadingSettings && !settingsData) || (isLoadingAccount && !accountData);
+
+  if (isInitialLoad) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-bg-base">
         <LoadingSpinner size="lg" />

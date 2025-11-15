@@ -72,14 +72,20 @@ export default function AppLayout({ children }) {
                 key={item.path}
                 to={item.path}
                 aria-current={isActive(item.path) ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
                   isActive(item.path)
-                    ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
+                    ? 'bg-gradient-to-r from-ice-soft/80 to-ice-soft/40 text-ice-deep shadow-glow-ice-light border-l-4 border-ice-primary'
                     : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
                 }`}
               >
-                <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} aria-hidden="true" />
-                <span className="text-sm font-medium">{item.label}</span>
+                <Icon 
+                  name={item.icon} 
+                  size="md" 
+                  variant={isActive(item.path) ? 'ice' : 'default'} 
+                  className={isActive(item.path) ? 'text-ice-primary' : ''}
+                  aria-hidden="true" 
+                />
+                <span className={`text-sm ${isActive(item.path) ? 'font-semibold text-ice-deep' : 'font-medium'}`}>{item.label}</span>
               </Link>
             ))}
           </nav>
@@ -179,14 +185,20 @@ export default function AppLayout({ children }) {
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   aria-current={isActive(item.path) ? 'page' : undefined}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
                     isActive(item.path)
-                      ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
+                      ? 'bg-gradient-to-r from-ice-soft/80 to-ice-soft/40 text-ice-deep shadow-glow-ice-light border-l-4 border-ice-primary'
                       : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
                   }`}
                 >
-                  <Icon name={item.icon} size="md" variant={isActive(item.path) ? 'ice' : 'default'} aria-hidden="true" />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <Icon 
+                    name={item.icon} 
+                    size="md" 
+                    variant={isActive(item.path) ? 'ice' : 'default'} 
+                    className={isActive(item.path) ? 'text-ice-primary' : ''}
+                    aria-hidden="true" 
+                  />
+                  <span className={`text-sm ${isActive(item.path) ? 'font-semibold text-ice-deep' : 'font-medium'}`}>{item.label}</span>
                 </Link>
               ))}
             </nav>

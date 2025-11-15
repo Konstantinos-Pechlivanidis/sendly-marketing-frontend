@@ -252,9 +252,13 @@ export default function CampaignCreate() {
     return discount?.code || 'DISCOUNT20';
   }, [formData.discountId, discountsData]);
 
-  if (isEditMode && isLoadingCampaign) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = isEditMode && isLoadingCampaign && !existingCampaign;
+
+  if (isInitialLoad) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-bg-base">
         <LoadingSpinner size="lg" />
       </div>
     );

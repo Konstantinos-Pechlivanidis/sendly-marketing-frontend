@@ -32,7 +32,8 @@ export const useCampaign = (id, options = {}) => {
     staleTime: 2 * 60 * 1000, // 2 minutes - detail data changes less frequently
     gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
-    refetchOnMount: options.refetchOnMount !== false ? 'always' : false, // Always refetch when navigating to detail page
+    refetchOnMount: false, // Use cached data if fresh - only refetch if explicitly requested
+    placeholderData: (previousData) => previousData, // Show cached data while fetching
     ...options,
   });
 };
@@ -111,7 +112,29 @@ export const useContacts = (params = {}) => {
   return useQuery({
     queryKey: ['contacts', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params
+      const backendParams = {};
+      
+      // Copy all params except the ones we need to map
+      Object.keys(params).forEach(key => {
+        if (key !== 'consentStatus' && key !== 'search') {
+          if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+            backendParams[key] = params[key];
+          }
+        }
+      });
+      
+      // Map consentStatus to smsConsent (backend expects smsConsent)
+      if (params.consentStatus) {
+        backendParams.smsConsent = params.consentStatus;
+      }
+      
+      // Map search to q (backend expects q for search)
+      if (params.search) {
+        backendParams.q = params.search;
+      }
+      
+      const queryString = new URLSearchParams(backendParams).toString();
       const response = await api.get(`/contacts?${queryString}`);
       // Normalize response to consistent format
       const normalized = normalizePaginatedResponse(response, 'contacts');
@@ -132,9 +155,11 @@ export const useContactStats = () => {
   return useQuery({
     queryKey: ['contacts', 'stats'],
     queryFn: () => api.get('/contacts/stats'),
-    staleTime: 1 * 60 * 1000, // 1 minute - stats change with imports/updates
-    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
+    staleTime: 2 * 60 * 1000, // 2 minutes - stats don't change that frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Use cached data if fresh
+    placeholderData: (previousData) => previousData, // Show cached stats while fetching
   });
 };
 
@@ -143,9 +168,11 @@ export const useBillingBalance = () => {
   return useQuery({
     queryKey: ['billing', 'balance'],
     queryFn: () => api.get('/billing/balance'),
-    staleTime: 1 * 60 * 1000, // 1 minute - balance changes after purchases
-    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
-    refetchOnWindowFocus: true, // Refetch when user returns (might have purchased)
+    staleTime: 2 * 60 * 1000, // 2 minutes - balance doesn't change that frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
+    refetchOnWindowFocus: false, // Don't refetch on focus - use cached data
+    refetchOnMount: false, // Use cached data if fresh
+    placeholderData: (previousData) => previousData, // Show cached balance while fetching
   });
 };
 
@@ -185,7 +212,11 @@ export const useBillingPackages = () => {
       // Retry once for other errors
       return failureCount < 1;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - packages rarely change
+    gcTime: 30 * 60 * 1000, // 30 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData, // Show cached packages while fetching
   });
 };
 
@@ -206,10 +237,12 @@ export const useCampaignMetrics = (id, options = {}) => {
     queryFn: () => api.get(`/campaigns/${id}/metrics`),
     enabled: !!id,
     staleTime: 30 * 1000, // 30 seconds - metrics update frequently for active campaigns
-    gcTime: 2 * 60 * 1000, // 2 minutes (React Query v5)
+    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
     refetchOnWindowFocus: false,
-    refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Auto-refetch every 30s for live updates
-    refetchIntervalInBackground: false,
+    refetchOnMount: false, // Use cached data if fresh
+    refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Auto-refetch every 30s for live updates (only when enabled)
+    refetchIntervalInBackground: false, // Don't refetch in background tabs
+    placeholderData: (previousData) => previousData, // Show cached metrics while fetching
     ...options,
   });
 };
@@ -246,11 +279,12 @@ export const useDashboard = (options = {}) => {
       // Backend returns { success: true, data: { credits, totalCampaigns, totalContacts, totalMessagesSent, ... } }
       return response;
     },
-    staleTime: 1 * 60 * 1000, // 1 minute - dashboard data changes frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
-    refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Auto-refetch every 30s (can be disabled)
-    refetchIntervalInBackground: false, // Don't refetch in background tabs
+    staleTime: 2 * 60 * 1000, // 2 minutes - dashboard data changes less frequently than we thought
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5) - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on focus - use cached data
+    refetchOnMount: false, // Use cached data if fresh
+    refetchInterval: false, // Disable auto-refetch by default - only enable when explicitly needed
+    placeholderData: (previousData) => previousData, // Show cached data while fetching
     ...options,
   });
 };
@@ -259,6 +293,11 @@ export const useDashboardOverview = () => {
   return useQuery({
     queryKey: ['dashboard', 'overview'],
     queryFn: () => api.get('/dashboard/overview'),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -266,6 +305,11 @@ export const useDashboardQuickStats = () => {
   return useQuery({
     queryKey: ['dashboard', 'quick-stats'],
     queryFn: () => api.get('/dashboard/quick-stats'),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -361,7 +405,8 @@ export const useContact = (id, options = {}) => {
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
-    refetchOnMount: options.refetchOnMount !== false ? 'always' : false,
+    refetchOnMount: false, // Use cached data if fresh - only refetch if explicitly requested
+    placeholderData: (previousData) => previousData, // Show cached data while fetching
     ...options,
   });
 };
@@ -496,6 +541,11 @@ export const useDiscount = (id) => {
     queryKey: ['discount', id],
     queryFn: () => api.get(`/discounts/${id}`),
     enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -531,6 +581,11 @@ export const useAudienceDetails = (id, params = {}) => {
       return api.get(`/audiences/${id}/details?${queryString}`);
     },
     enabled: !!id,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -557,9 +612,11 @@ export const useAutomationStats = () => {
   return useQuery({
     queryKey: ['automations', 'stats'],
     queryFn: () => api.get('/automations/stats'),
-    staleTime: 1 * 60 * 1000, // 1 minute - stats change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes (React Query v5)
+    staleTime: 2 * 60 * 1000, // 2 minutes - stats don't change that frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Use cached data if fresh
+    placeholderData: (previousData) => previousData, // Show cached stats while fetching
   });
 };
 
@@ -612,7 +669,12 @@ export const useReportsOverview = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'overview', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/overview?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - reports are expensive to compute
@@ -627,8 +689,9 @@ export const useReportsKPIs = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'kpis', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
-      return api.get(`/reports/kpis?${queryString}`);
+      // KPIs endpoint doesn't take date parameters, so we don't send them
+      // Backend kpis endpoint doesn't accept query params
+      return api.get(`/reports/kpis`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
@@ -642,7 +705,16 @@ export const useCampaignReports = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'campaigns', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+        ...(params.status && { status: params.status }),
+        ...(params.type && { type: params.type }),
+        ...(params.page && { page: params.page }),
+        ...(params.limit && { limit: params.limit }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/campaigns?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -669,7 +741,12 @@ export const useAutomationReports = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'automations', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/automations?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -684,7 +761,12 @@ export const useMessagingReports = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'messaging', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/messaging?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -699,7 +781,12 @@ export const useCreditsReports = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'credits', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/credits?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -714,7 +801,12 @@ export const useContactsReports = (params = {}) => {
   return useQuery({
     queryKey: ['reports', 'contacts', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/contacts?${queryString}`);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -728,7 +820,14 @@ export const useContactsReports = (params = {}) => {
 export const useExportData = () => {
   return useMutation({
     mutationFn: (params) => {
-      const queryString = new URLSearchParams(params).toString();
+      // Map frontend params to backend params (startDate/endDate -> from/to)
+      const backendParams = {
+        ...(params.startDate && { from: params.startDate }),
+        ...(params.endDate && { to: params.endDate }),
+        ...(params.type && { type: params.type }),
+        ...(params.format && { format: params.format }),
+      };
+      const queryString = new URLSearchParams(backendParams).toString();
       return api.get(`/reports/export?${queryString}`);
     },
   });
@@ -740,11 +839,13 @@ export const useCampaignDeliveryStatus = (id, options = {}) => {
     queryKey: ['tracking', 'campaign', id],
     queryFn: () => api.get(`/tracking/campaign/${id}`),
     enabled: !!id,
-    staleTime: 0, // Always stale - tracking data is real-time
+    staleTime: 15 * 1000, // 15 seconds - tracking data is near real-time
     gcTime: 2 * 60 * 1000, // 2 minutes (React Query v5)
-    refetchOnWindowFocus: true, // Refetch when user returns
-    refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Refetch every 30 seconds for live updates
+    refetchOnWindowFocus: false, // Don't refetch on focus - use cached data
+    refetchOnMount: false, // Use cached data if fresh
+    refetchInterval: options.refetchInterval !== false ? 30 * 1000 : false, // Refetch every 30 seconds for live updates (only when enabled)
     refetchIntervalInBackground: false, // Don't refetch in background tabs
+    placeholderData: (previousData) => previousData, // Show cached tracking data while fetching
     ...options,
   });
 };
@@ -754,6 +855,11 @@ export const useMittoMessageStatus = (messageId) => {
     queryKey: ['tracking', 'mitto', messageId],
     queryFn: () => api.get(`/tracking/mitto/${messageId}`),
     enabled: !!messageId,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes (React Query v5)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: (previousData) => previousData,
   });
 };
 

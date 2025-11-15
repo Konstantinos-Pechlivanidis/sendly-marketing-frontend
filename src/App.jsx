@@ -38,21 +38,24 @@ const Billing = lazy(() => import('./pages/app/Billing'));
 const Settings = lazy(() => import('./pages/app/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Create a client with retry logic
+// Create a client with optimized retry logic and caching
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false, // Don't refetch on window focus - use cached data
+      refetchOnMount: false, // Use cached data if fresh - don't refetch on mount
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
         if (error?.status >= 400 && error?.status < 500) {
           return false;
         }
-        // Retry up to 2 times for network errors and 5xx errors
-        return failureCount < 2;
+        // Retry up to 1 time for network errors and 5xx errors (reduced from 2)
+        return failureCount < 1;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Max 10s delay (reduced from 30s)
+      staleTime: 2 * 60 * 1000, // 2 minutes default (reduced from 5 minutes for faster updates)
+      gcTime: 10 * 60 * 1000, // 10 minutes default cache time (React Query v5)
+      placeholderData: (previousData) => previousData, // Show cached data while fetching by default
     },
     mutations: {
       retry: (failureCount, error) => {

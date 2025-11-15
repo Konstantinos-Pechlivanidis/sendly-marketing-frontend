@@ -89,7 +89,7 @@ export default function CampaignReports() {
           )}
 
           {/* Reports Table */}
-          {!error && isLoading ? (
+          {!error && isLoading && !reportsData ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" />
             </div>

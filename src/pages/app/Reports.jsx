@@ -9,6 +9,7 @@ import PieChart from '../../components/charts/PieChart';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
+import EmptyState from '../../components/ui/EmptyState';
 import { useReportsOverview, useReportsKPIs, useExportData } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
@@ -49,27 +50,27 @@ export default function Reports() {
   const kpis = kpisData || {};
   const overview = overviewData || {};
 
-  // Prepare chart data
-  const messagesOverTime = overview.messagesOverTime || [
-    { name: 'Week 1', messages: 120 },
-    { name: 'Week 2', messages: 150 },
-    { name: 'Week 3', messages: 180 },
-    { name: 'Week 4', messages: 200 },
-  ];
+  // Check if we have any data
+  const hasData = 
+    (kpis.totalMessagesSent && kpis.totalMessagesSent > 0) ||
+    (overview.overview && overview.overview.totalSmsSent > 0) ||
+    (overview.campaignPerformance && Object.keys(overview.campaignPerformance).length > 0);
 
+  // Prepare chart data - use actual data or empty arrays
+  const messagesOverTime = overview.messagesOverTime || [];
   const deliveryStatusData = [
     { name: 'Delivered', value: kpis.delivered || 0 },
     { name: 'Failed', value: kpis.failed || 0 },
     { name: 'Pending', value: kpis.pending || 0 },
-  ];
+  ].filter(item => item.value > 0); // Only show non-zero values
 
-  const campaignPerformance = overview.campaignPerformance || [
-    { name: 'Campaign 1', sent: 100, delivered: 95 },
-    { name: 'Campaign 2', sent: 150, delivered: 140 },
-    { name: 'Campaign 3', sent: 80, delivered: 75 },
-  ];
+  const campaignPerformance = overview.campaignPerformance || [];
 
-  if (isLoadingOverview || isLoadingKPIs) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = (isLoadingOverview && !overviewData) || (isLoadingKPIs && !kpisData);
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading reports..." />;
   }
 
@@ -119,8 +120,20 @@ export default function Reports() {
           />
         )}
 
+        {/* Empty State */}
+        {!error && !hasData && (
+          <EmptyState
+            icon="chart"
+            title="No report data available"
+            message="There's no data to display for the selected date range. Try adjusting your date filters or create your first campaign to start generating reports."
+            actionTo="/app/campaigns/new"
+            actionLabel="Create Campaign"
+            actionIcon="campaign"
+          />
+        )}
+
         {/* KPIs */}
-        {!error && (
+        {!error && hasData && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <GlassCard variant="ice" className="p-5 hover:shadow-glass-light-lg transition-shadow">
             <div className="flex items-center justify-between mb-3">
@@ -185,7 +198,7 @@ export default function Reports() {
         )}
 
         {/* Charts */}
-        {!error && (
+        {!error && hasData && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Messages Over Time */}
           <GlassCard className="p-6">
@@ -211,7 +224,7 @@ export default function Reports() {
         )}
 
         {/* Campaign Performance */}
-        {!error && (
+        {!error && hasData && campaignPerformance.length > 0 && (
           <GlassCard className="p-6">
           <h3 className="text-xl font-semibold mb-4 text-neutral-text-primary">Campaign Performance</h3>
           <BarChart

@@ -14,6 +14,7 @@ import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusBadge from '../../components/ui/StatusBadge';
+import EmptyState from '../../components/ui/EmptyState';
 import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurchase } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
@@ -60,7 +61,11 @@ export default function Billing() {
     { name: 'Week 4', credits: 180 },
   ];
 
-  if (isLoadingBalance || isLoadingPackages) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = (isLoadingBalance && !balanceData) || (isLoadingPackages && !packagesData);
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading billing information..." />;
   }
 
@@ -183,17 +188,11 @@ export default function Billing() {
               <LoadingSpinner size="lg" />
             </div>
           ) : history.length === 0 ? (
-            <GlassCard className="p-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-xl bg-ice-soft/80">
-                  <Icon name="billing" size="xl" variant="ice" />
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">No purchase history</h3>
-              <p className="text-sm text-neutral-text-secondary">
-                Your purchase history will appear here
-              </p>
-            </GlassCard>
+            <EmptyState
+              icon="billing"
+              title="No purchase history"
+              message="Your purchase history will appear here once you make your first credit purchase."
+            />
           ) : (
             <>
               <GlassCard className="p-0 overflow-hidden">

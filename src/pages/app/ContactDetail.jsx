@@ -121,7 +121,11 @@ export default function ContactDetail() {
     }
   };
 
-  if (!isNewContact && isLoading) {
+  // Only show full loading state on initial load (no cached data)
+  // If we have cached data, show it immediately even if fetching
+  const isInitialLoad = !isNewContact && isLoading && !contactData;
+
+  if (isInitialLoad) {
     return <LoadingState size="lg" />;
   }
 
