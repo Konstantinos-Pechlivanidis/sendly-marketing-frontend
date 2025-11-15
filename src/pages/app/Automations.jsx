@@ -5,6 +5,7 @@ import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
+import GlassBadge from '../../components/ui/GlassBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
@@ -58,6 +59,13 @@ export default function Automations() {
       toast.error(error?.message || 'Failed to delete automation');
       setDeleteTarget(null);
     }
+  };
+
+  // Helper function to check if automation is coming soon
+  const isComingSoon = (automation) => {
+    const comingSoonTriggers = ['cart_abandoned', 'customer_inactive', 'abandoned_cart'];
+    const trigger = automation.trigger || automation.triggerEvent;
+    return comingSoonTriggers.includes(trigger);
   };
 
   // Only show full loading state on initial load (no cached data)
@@ -167,8 +175,17 @@ export default function Automations() {
           />
         ) : !hasError && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredAutomations.map((automation) => (
-              <GlassCard key={automation.id} className="p-6 hover:shadow-glass-light-lg transition-shadow">
+            {filteredAutomations.map((automation) => {
+              const comingSoon = isComingSoon(automation);
+              return (
+              <GlassCard key={automation.id} className="p-6 hover:shadow-glass-light-lg transition-shadow relative">
+                {comingSoon && (
+                  <div className="absolute top-4 right-4">
+                    <GlassBadge variant="default" className="text-xs">
+                      Coming Soon
+                    </GlassBadge>
+                  </div>
+                )}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold mb-2 text-neutral-text-primary">{automation.name}</h3>
@@ -201,29 +218,48 @@ export default function Automations() {
 
                 <div className="flex gap-2 pt-4 border-t border-neutral-border/60">
                   <button
-                    onClick={() => navigate(`/app/automations/${automation.id}`)}
-                    className="flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px]"
+                    onClick={() => !comingSoon && navigate(`/app/automations/${automation.id}`)}
+                    disabled={comingSoon}
+                    className={`flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px] ${
+                      comingSoon 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:border-ice-primary hover:text-ice-primary'
+                    }`}
                     aria-label="View automation"
+                    aria-disabled={comingSoon}
                   >
                     View
                   </button>
                   <button
-                    onClick={() => handleToggleStatus(automation.id, automation.status)}
-                    className="flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px]"
+                    onClick={() => !comingSoon && handleToggleStatus(automation.id, automation.status)}
+                    disabled={comingSoon}
+                    className={`flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px] ${
+                      comingSoon 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:border-ice-primary hover:text-ice-primary'
+                    }`}
                     aria-label={automation.status === 'active' ? 'Pause automation' : 'Activate automation'}
+                    aria-disabled={comingSoon}
                   >
                     {automation.status === 'active' ? 'Pause' : 'Activate'}
                   </button>
                   <button
-                    onClick={() => handleDeleteClick(automation.id, automation.name)}
-                    className="px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-red-200 hover:border-red-500 hover:bg-red-50 transition-colors text-red-500 focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    onClick={() => !comingSoon && handleDeleteClick(automation.id, automation.name)}
+                    disabled={comingSoon}
+                    className={`px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                      comingSoon 
+                        ? 'opacity-50 cursor-not-allowed border-neutral-border text-neutral-text-secondary' 
+                        : 'border-red-200 hover:border-red-500 hover:bg-red-50 text-red-500'
+                    }`}
                     aria-label="Delete automation"
+                    aria-disabled={comingSoon}
                   >
                     <Icon name="delete" size="sm" />
                   </button>
                 </div>
               </GlassCard>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

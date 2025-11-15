@@ -163,28 +163,33 @@ export default function GlassSelectCustom({
               filteredOptions.map((option, index) => {
                 const optionValue = typeof option === 'object' ? option.value : option;
                 const optionLabel = typeof option === 'object' ? option.label : option;
+                const isDisabled = typeof option === 'object' ? option.disabled : false;
                 const isSelected = optionValue === value;
 
                 return (
                   <button
                     key={optionValue || index}
                     type="button"
-                    onClick={() => handleSelect(optionValue)}
+                    onClick={() => !isDisabled && handleSelect(optionValue)}
+                    disabled={isDisabled}
                     className={`
                       w-full px-4 py-3 text-left text-sm
                       transition-colors
-                      ${isSelected 
-                        ? 'bg-ice-primary/10 text-ice-primary font-medium' 
-                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                      ${isDisabled 
+                        ? 'opacity-50 cursor-not-allowed text-neutral-text-secondary' 
+                        : isSelected 
+                          ? 'bg-ice-primary/10 text-ice-primary font-medium' 
+                          : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
                       }
                       ${index !== filteredOptions.length - 1 ? 'border-b border-neutral-border/30' : ''}
                     `}
                     role="option"
                     aria-selected={isSelected}
+                    aria-disabled={isDisabled}
                   >
                     <div className="flex items-center justify-between">
                       <span>{optionLabel}</span>
-                      {isSelected && (
+                      {isSelected && !isDisabled && (
                         <Icon name="check" size="sm" variant="ice" />
                       )}
                     </div>

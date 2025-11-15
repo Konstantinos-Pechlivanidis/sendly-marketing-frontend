@@ -57,6 +57,13 @@ export default function AutomationForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Prevent selecting disabled/coming soon triggers
+    const selectedOption = triggerOptions.find(opt => opt.value === value);
+    if (selectedOption?.disabled) {
+      return; // Don't allow selection of disabled options
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
     
     if (errors[name]) {
@@ -102,8 +109,8 @@ export default function AutomationForm() {
     { value: 'order_placed', label: 'Order Placed' },
     { value: 'order_fulfilled', label: 'Order Fulfilled' },
     { value: 'birthday', label: 'Birthday' },
-    { value: 'abandoned_cart', label: 'Abandoned Cart', note: 'Requires Shopify integration setup' },
-    { value: 'customer_inactive', label: 'Customer Re-engagement', note: 'Coming soon' },
+    { value: 'abandoned_cart', label: 'Abandoned Cart', note: 'Coming soon', disabled: true },
+    { value: 'customer_inactive', label: 'Customer Re-engagement', note: 'Coming soon', disabled: true },
   ];
 
   if (isEditMode && !existingAutomation) {
@@ -155,7 +162,11 @@ export default function AutomationForm() {
                   name="trigger"
                   value={formData.trigger}
                   onChange={handleChange}
-                  options={triggerOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                  options={triggerOptions.map(opt => ({ 
+                    value: opt.value, 
+                    label: opt.label,
+                    disabled: opt.disabled 
+                  }))}
                 />
                 {triggerOptions.find(opt => opt.value === formData.trigger)?.note && (
                   <p className="text-xs text-neutral-text-secondary mt-2 flex items-center gap-1">

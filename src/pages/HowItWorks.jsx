@@ -32,9 +32,9 @@ export default function HowItWorks() {
     {
       icon: 'workflow',
       title: 'Abandoned Cart Recovery',
-      description: 'Automatically send SMS when customers leave items in cart. Requires Shopify integration setup.',
+      description: 'Automatically send SMS when customers leave items in cart.',
       trigger: 'Cart abandoned for 1 hour',
-      badge: 'Setup Required',
+      badge: 'Coming Soon',
     },
     {
       icon: 'sms',
@@ -53,6 +53,13 @@ export default function HowItWorks() {
       title: 'Birthday Messages',
       description: 'Send personalized birthday wishes with discount codes.',
       trigger: 'Customer birthday',
+    },
+    {
+      icon: 'reengage',
+      title: 'Customer Re-engagement',
+      description: 'Send SMS to inactive customers to encourage them to return.',
+      trigger: 'No orders in 90 days',
+      badge: 'Coming Soon',
     },
   ];
 
