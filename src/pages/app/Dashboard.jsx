@@ -127,7 +127,20 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <GlassCard variant="ice" className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer" onClick={() => navigate('/app/campaigns/new')}>
+          <GlassCard 
+            variant="ice" 
+            className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer focus-ring" 
+            onClick={() => navigate('/app/campaigns/new')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate('/app/campaigns/new');
+              }
+            }}
+            aria-label="Create Campaign - Start a new SMS campaign"
+          >
             <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-ice-soft/80 group-hover:bg-ice-primary/20 transition-colors">
                 <Icon name="campaign" size="xl" variant="ice" />
@@ -140,7 +153,19 @@ export default function Dashboard() {
             </div>
           </GlassCard>
 
-          <GlassCard className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer" onClick={() => navigate('/app/contacts')}>
+          <GlassCard 
+            className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer focus-ring" 
+            onClick={() => navigate('/app/contacts')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate('/app/contacts');
+              }
+            }}
+            aria-label="Manage Contacts - View and manage your contacts"
+          >
             <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-ice-soft/80 group-hover:bg-ice-primary/20 transition-colors">
                 <Icon name="segment" size="xl" variant="ice" />
@@ -153,7 +178,19 @@ export default function Dashboard() {
             </div>
           </GlassCard>
 
-          <GlassCard className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer" onClick={() => navigate('/app/automations')}>
+          <GlassCard 
+            className="p-6 group hover:scale-[1.02] hover:shadow-glass-light-lg transition-all cursor-pointer focus-ring" 
+            onClick={() => navigate('/app/automations')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate('/app/automations');
+              }
+            }}
+            aria-label="Automations - Set up automated workflows"
+          >
             <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-ice-soft/80 group-hover:bg-ice-primary/20 transition-colors">
                 <Icon name="automation" size="xl" variant="ice" />

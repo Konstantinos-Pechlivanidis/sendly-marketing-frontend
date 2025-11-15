@@ -9,6 +9,7 @@ import GlassInput from '../../components/ui/GlassInput';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassDatePicker from '../../components/ui/GlassDatePicker';
 import PageHeader from '../../components/ui/PageHeader';
+import BackButton from '../../components/ui/BackButton';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -68,6 +69,37 @@ export default function ContactDetail() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleBlur = (fieldName) => {
+    // Real-time validation on blur
+    const newErrors = { ...errors };
+    
+    if (fieldName === 'phone') {
+      if (!formData.phone?.trim()) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!isValidPhoneNumber(formData.phone)) {
+        newErrors.phone = 'Please enter a valid phone number with country code';
+      } else {
+        delete newErrors.phone;
+      }
+    } else if (fieldName === 'email' && formData.email?.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = 'Please enter a valid email address';
+      } else {
+        delete newErrors.email;
+      }
+    } else if (fieldName === 'birthDate' && formData.birthDate) {
+      const birthDate = new Date(formData.birthDate);
+      if (birthDate > new Date()) {
+        newErrors.birthDate = 'Birth date cannot be in the future';
+      } else {
+        delete newErrors.birthDate;
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   const validate = () => {
@@ -205,13 +237,7 @@ export default function ContactDetail() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <GlassButton
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/app/contacts')}
-              >
-                <Icon name="arrowRight" size="sm" className="rotate-180" />
-              </GlassButton>
+              <BackButton to="/app/contacts" label="Back" />
             </div>
             <PageHeader
               title={
@@ -297,34 +323,40 @@ export default function ContactDetail() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('firstName')}
+                        error={errors.firstName}
                       />
                       <GlassInput
                         label="Last Name"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        onBlur={() => handleBlur('lastName')}
+                        error={errors.lastName}
                       />
                     </div>
                     <div>
                       <label className="text-sm font-semibold text-neutral-text-secondary mb-1.5 block">
                         Phone Number <span className="text-red-500">*</span>
                       </label>
-                      <PhoneInput
-                        international
-                        defaultCountry="US"
-                        value={formData.phone}
-                        onChange={(value) => {
-                          setFormData((prev) => ({ ...prev, phone: value || '' }));
-                          if (errors.phone) {
-                            setErrors((prev) => ({ ...prev, phone: '' }));
-                          }
-                        }}
-                        className="glass-phone-input"
-                      />
+                      <div onBlur={() => handleBlur('phone')}>
+                        <PhoneInput
+                          international
+                          defaultCountry="US"
+                          value={formData.phone}
+                          onChange={(value) => {
+                            setFormData((prev) => ({ ...prev, phone: value || '' }));
+                            if (errors.phone) {
+                              setErrors((prev) => ({ ...prev, phone: '' }));
+                            }
+                          }}
+                          className="glass-phone-input"
+                        />
+                      </div>
                       {errors.phone && (
                         <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
                       )}
-                      <style jsx global>{`
+                      <style>{`
                         .glass-phone-input {
                           width: 100%;
                         }
@@ -365,6 +397,7 @@ export default function ContactDetail() {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={() => handleBlur('email')}
                       error={errors.email}
                     />
                     

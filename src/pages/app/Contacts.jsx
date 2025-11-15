@@ -135,53 +135,6 @@ export default function Contacts() {
           </div>
         </PageHeader>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
-          {statsCards.map((stat) => (
-            <GlassCard key={stat.label} variant={stat.variant} className="p-5 hover:shadow-glass-light-lg transition-shadow">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2.5 rounded-xl bg-ice-soft/80">
-                  <Icon name={stat.icon} size="md" variant="ice" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-neutral-text-primary mb-1">
-                {stat.value.toLocaleString()}
-              </p>
-              <p className="text-xs font-medium text-neutral-text-secondary uppercase tracking-wider">{stat.label}</p>
-            </GlassCard>
-          ))}
-        </div>
-
-        {/* Filters and Search */}
-        <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <GlassInput
-              label="Search Contacts"
-              type="text"
-              placeholder="Search by name, phone, or email..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
-            <GlassSelectCustom
-              label="Filter by Consent Status"
-              value={consentFilter}
-              onChange={(e) => {
-                setConsentFilter(e.target.value);
-                setPage(1);
-              }}
-              options={[
-                { value: '', label: 'All Statuses' },
-                { value: 'opted_in', label: 'Opted In' },
-                { value: 'opted_out', label: 'Opted Out' },
-                { value: 'pending', label: 'Pending' },
-              ]}
-            />
-          </div>
-        </GlassCard>
-
         {/* Error State */}
         {error && (
           <ErrorState
@@ -192,8 +145,57 @@ export default function Contacts() {
           />
         )}
 
-        {/* Contacts Table */}
-        {contacts.length === 0 ? (
+        {/* Stats Cards */}
+        {!error && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
+              {statsCards.map((stat) => (
+                <GlassCard key={stat.label} variant={stat.variant} className="p-5 hover:shadow-glass-light-lg transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2.5 rounded-xl bg-ice-soft/80">
+                      <Icon name={stat.icon} size="md" variant="ice" />
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-neutral-text-primary mb-1">
+                    {stat.value.toLocaleString()}
+                  </p>
+                  <p className="text-xs font-medium text-neutral-text-secondary uppercase tracking-wider">{stat.label}</p>
+                </GlassCard>
+              ))}
+            </div>
+
+            {/* Filters and Search */}
+            <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <GlassInput
+                  label="Search Contacts"
+                  type="text"
+                  placeholder="Search by name, phone, or email..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                />
+                <GlassSelectCustom
+                  label="Filter by Consent Status"
+                  value={consentFilter}
+                  onChange={(e) => {
+                    setConsentFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  options={[
+                    { value: '', label: 'All Statuses' },
+                    { value: 'opted_in', label: 'Opted In' },
+                    { value: 'opted_out', label: 'Opted Out' },
+                    { value: 'pending', label: 'Pending' },
+                  ]}
+                />
+              </div>
+            </GlassCard>
+
+            {/* Contacts Table */}
+            {contacts.length === 0 ? (
           <EmptyState
             icon="segment"
             title="No contacts found"
@@ -277,21 +279,21 @@ export default function Contacts() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => navigate(`/app/contacts/${contact.id}`)}
-                            className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                            className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                             aria-label="View contact"
                           >
                             <Icon name="view" size="sm" variant="ice" />
                           </button>
                           <button
                             onClick={() => navigate(`/app/contacts/${contact.id}/edit`)}
-                            className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                            className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                             aria-label="Edit contact"
                           >
                             <Icon name="edit" size="sm" variant="ice" />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(contact.id, contact.name || contact.firstName || 'this contact')}
-                            className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                            className="p-2.5 rounded-lg hover:bg-red-50 transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                             aria-label="Delete contact"
                           >
                             <Icon name="delete" size="sm" className="text-red-500" />
@@ -316,24 +318,26 @@ export default function Contacts() {
             )}
           </>
         )}
-      </div>
+          </>
+        )}
 
-      {/* Import Modal */}
-      <ImportContactsModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-      />
-      
-      <ConfirmDialog
-        isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        title="Delete Contact"
-        message={deleteTarget ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.` : ''}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        destructive={true}
-      />
+        {/* Import Modal */}
+        <ImportContactsModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+        />
+        
+        <ConfirmDialog
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDelete}
+          title="Delete Contact"
+          message={deleteTarget ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.` : ''}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          destructive={true}
+        />
+      </div>
     </>
   );
 }

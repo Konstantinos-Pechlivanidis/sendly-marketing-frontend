@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
+import BackButton from '../../components/ui/BackButton';
+import PageHeader from '../../components/ui/PageHeader';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassTable, {
   GlassTableHeader,
@@ -43,23 +45,14 @@ export default function CampaignReports() {
       <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1400px] mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <GlassButton
-                  variant="ghost"
-                  size="sm"
-                  as={Link}
-                  to="/app/reports"
-                >
-                  <Icon name="arrowRight" size="sm" className="rotate-180" />
-                </GlassButton>
-                <h1 className="text-3xl md:text-4xl font-bold text-neutral-text-primary">Campaign Reports</h1>
-              </div>
-              <p className="text-base text-neutral-text-secondary">
-                Detailed performance metrics for your campaigns
-              </p>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <BackButton to="/app/reports" label="Back" />
             </div>
+            <PageHeader
+              title="Campaign Reports"
+              subtitle="Detailed performance metrics for your campaigns"
+            />
           </div>
 
           {/* Filter */}
@@ -152,7 +145,7 @@ export default function CampaignReports() {
                       <GlassTableCell>
                         <Link
                           to={`/app/campaigns/${report.campaignId || report.id}`}
-                          className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors inline-block"
+                          className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors inline-block focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                         >
                           <Icon name="view" size="sm" variant="ice" />
                         </Link>

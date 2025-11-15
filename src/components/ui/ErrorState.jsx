@@ -7,6 +7,8 @@ import Icon from './Icon';
  * ErrorState Component
  * Standardized error display component with consistent styling
  * iOS 26 style with proper spacing and visual hierarchy
+ * 
+ * Supports both page reload and React Query refetch for retry
  */
 export default function ErrorState({
   title = 'Error',
@@ -14,9 +16,24 @@ export default function ErrorState({
   action,
   actionLabel,
   onAction,
+  onRetry, // React Query refetch function
   className,
   variant = 'default',
+  showRetry = true,
 }) {
+  const handleRetry = () => {
+    if (onRetry) {
+      // Use React Query refetch if provided
+      onRetry();
+    } else if (onAction) {
+      // Use custom action if provided
+      onAction();
+    } else {
+      // Fallback to page reload
+      window.location.reload();
+    }
+  };
+
   return (
     <GlassCard 
       variant={variant} 
@@ -34,13 +51,13 @@ export default function ErrorState({
           <p className="text-sm text-neutral-text-secondary mb-4">
             {message || 'An error occurred. Please try again.'}
           </p>
-          {(action || actionLabel || onAction) && (
+          {showRetry && (action || actionLabel || onAction || onRetry) && (
             <div className="flex gap-2">
               {action || (
                 <GlassButton 
                   variant="primary" 
                   size="md" 
-                  onClick={onAction}
+                  onClick={handleRetry}
                 >
                   {actionLabel || 'Try Again'}
                 </GlassButton>

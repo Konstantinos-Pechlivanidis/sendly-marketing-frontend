@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
@@ -24,6 +24,19 @@ export default function AppLayout({ children }) {
     navigate('/login', { replace: true });
   };
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   const navItems = [
     { path: '/app/dashboard', label: 'Dashboard', icon: 'dashboard' },
     { path: '/app/campaigns', label: 'Campaigns', icon: 'campaign' },
@@ -45,7 +58,7 @@ export default function AppLayout({ children }) {
   return (
     <div className="min-h-screen bg-neutral-bg-base flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:z-40">
+      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:z-30">
         <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border/60 shadow-glass-light">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-6 border-b border-neutral-border/60">
@@ -110,7 +123,7 @@ export default function AppLayout({ children }) {
 
       {/* Mobile Menu Button */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-neutral-surface-primary backdrop-blur-[24px] border border-neutral-border/60 shadow-glass-light text-neutral-text-primary focus-ring hover:shadow-glass-light-lg transition-all"
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl bg-neutral-surface-primary backdrop-blur-[24px] border border-neutral-border/60 shadow-glass-light text-neutral-text-primary focus-ring hover:shadow-glass-light-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label="Toggle menu"
         aria-expanded={isMobileMenuOpen}
@@ -136,16 +149,17 @@ export default function AppLayout({ children }) {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40">
+        <div className="lg:hidden fixed inset-0 z-40 animate-fade-in">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-sm animate-fade-in"
             onClick={() => setIsMobileMenuOpen(false)}
+            aria-hidden="true"
           />
           
           {/* Sidebar */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-72 bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border/60 shadow-glass-light-lg flex flex-col"
+            className="absolute left-0 top-0 bottom-0 w-72 bg-neutral-surface-primary backdrop-blur-[24px] border-r border-neutral-border/60 shadow-glass-light-lg flex flex-col transform transition-transform duration-300 ease-out animate-slide-up"
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
@@ -160,7 +174,7 @@ export default function AppLayout({ children }) {
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center focus-ring"
                 aria-label="Close menu"
               >
                 <Icon name="arrowRight" size="md" className="rotate-180" />
@@ -185,7 +199,7 @@ export default function AppLayout({ children }) {
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   aria-current={isActive(item.path) ? 'page' : undefined}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring ${
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 focus-ring min-h-[44px] ${
                     isActive(item.path)
                       ? 'bg-gradient-to-r from-ice-soft/80 to-ice-soft/40 text-ice-deep shadow-glow-ice-light border-l-4 border-ice-primary'
                       : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
+import BackButton from '../../components/ui/BackButton';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -90,13 +91,7 @@ export default function CampaignDetail() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <GlassButton
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/app/campaigns')}
-              >
-                <Icon name="arrowRight" size="sm" className="rotate-180" />
-              </GlassButton>
+              <BackButton to="/app/campaigns" label="Back" />
             </div>
             <PageHeader
               title={campaign.name}

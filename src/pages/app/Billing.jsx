@@ -13,6 +13,7 @@ import GlassPagination from '../../components/ui/GlassPagination';
 import Icon from '../../components/ui/Icon';
 import LoadingState from '../../components/ui/LoadingState';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import ErrorState from '../../components/ui/ErrorState';
 import StatusBadge from '../../components/ui/StatusBadge';
 import EmptyState from '../../components/ui/EmptyState';
 import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurchase } from '../../services/queries';
@@ -26,9 +27,9 @@ export default function Billing() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const { data: balanceData, isLoading: isLoadingBalance } = useBillingBalance();
-  const { data: packagesData, isLoading: isLoadingPackages } = useBillingPackages();
-  const { data: historyData, isLoading: isLoadingHistory } = useBillingHistory({
+  const { data: balanceData, isLoading: isLoadingBalance, error: balanceError } = useBillingBalance();
+  const { data: packagesData, isLoading: isLoadingPackages, error: packagesError } = useBillingPackages();
+  const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useBillingHistory({
     page,
     pageSize,
   });
@@ -79,6 +80,7 @@ export default function Billing() {
   // Only show full loading state on initial load (no cached data)
   // If we have cached data, show it immediately even if fetching
   const isInitialLoad = (isLoadingBalance && !balanceData) || (isLoadingPackages && !packagesData);
+  const hasError = balanceError || packagesError || historyError;
 
   if (isInitialLoad) {
     return <LoadingState size="lg" message="Loading billing information..." />;
@@ -100,7 +102,19 @@ export default function Billing() {
           subtitle="Manage your SMS credits and purchase history"
         />
 
+        {/* Error State */}
+        {hasError && (
+          <ErrorState
+            title="Error Loading Billing Information"
+            message={balanceError?.message || packagesError?.message || historyError?.message || 'Failed to load billing information. Please try refreshing the page.'}
+            onAction={() => window.location.reload()}
+            actionLabel="Refresh Page"
+          />
+        )}
+
         {/* Current Balance */}
+        {!hasError && (
+          <>
         <GlassCard variant={isLowBalance ? 'default' : 'ice'} className={`p-4 sm:p-6 mb-6 sm:mb-8 ${isLowBalance ? 'border-2 border-red-300 bg-red-50/60' : ''}`}>
           <div className="flex items-center justify-between">
             <div>
@@ -268,6 +282,8 @@ export default function Billing() {
             </>
           )}
         </div>
+          </>
+        )}
       </div>
     </>
   );

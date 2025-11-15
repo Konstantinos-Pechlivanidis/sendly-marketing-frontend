@@ -202,19 +202,22 @@ export default function Automations() {
                 <div className="flex gap-2 pt-4 border-t border-neutral-border/60">
                   <button
                     onClick={() => navigate(`/app/automations/${automation.id}`)}
-                    className="flex-1 px-3 py-2 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium"
+                    className="flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px]"
+                    aria-label="View automation"
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleToggleStatus(automation.id, automation.status)}
-                    className="flex-1 px-3 py-2 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium"
+                    className="flex-1 px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-neutral-border hover:border-ice-primary hover:text-ice-primary transition-colors text-neutral-text-primary font-medium focus-ring min-h-[44px]"
+                    aria-label={automation.status === 'active' ? 'Pause automation' : 'Activate automation'}
                   >
                     {automation.status === 'active' ? 'Pause' : 'Activate'}
                   </button>
                   <button
                     onClick={() => handleDeleteClick(automation.id, automation.name)}
-                    className="px-3 py-2 text-sm rounded-lg bg-neutral-surface-secondary border border-red-200 hover:border-red-500 hover:bg-red-50 transition-colors text-red-500"
+                    className="px-3 py-2.5 text-sm rounded-lg bg-neutral-surface-secondary border border-red-200 hover:border-red-500 hover:bg-red-50 transition-colors text-red-500 focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    aria-label="Delete automation"
                   >
                     <Icon name="delete" size="sm" />
                   </button>

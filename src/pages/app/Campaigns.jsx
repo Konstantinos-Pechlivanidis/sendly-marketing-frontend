@@ -249,7 +249,7 @@ export default function Campaigns() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => navigate(`/app/campaigns/${campaign.id}`)}
-                            className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                            className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                             aria-label="View campaign"
                           >
                             <Icon name="view" size="sm" variant="ice" />
@@ -257,7 +257,7 @@ export default function Campaigns() {
                           {campaign.status === 'draft' && (
                             <button
                               onClick={() => handleSend(campaign.id)}
-                              className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                              className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                               aria-label="Send campaign"
                             >
                               <Icon name="send" size="sm" variant="ice" />
@@ -266,7 +266,7 @@ export default function Campaigns() {
                           {campaign.status === 'draft' && (
                             <button
                               onClick={() => navigate(`/app/campaigns/${campaign.id}/edit`)}
-                              className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
+                              className="p-2.5 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                               aria-label="Edit campaign"
                             >
                               <Icon name="edit" size="sm" variant="ice" />
@@ -275,7 +275,7 @@ export default function Campaigns() {
                           {(campaign.status === 'draft' || campaign.status === 'cancelled') && (
                             <button
                               onClick={() => handleDeleteClick(campaign.id, campaign.name)}
-                              className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                              className="p-2.5 rounded-lg hover:bg-red-50 transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
                               aria-label="Delete campaign"
                             >
                               <Icon name="delete" size="sm" className="text-red-500" />

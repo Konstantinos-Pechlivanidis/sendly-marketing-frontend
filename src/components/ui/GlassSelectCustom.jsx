@@ -131,7 +131,7 @@ export default function GlassSelectCustom({
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-xl glass border border-neutral-border/60 z-50 shadow-glass-light-lg overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-2 rounded-xl glass border border-neutral-border/60 z-10 shadow-glass-light-lg overflow-hidden">
           {/* Search Input (if searchable) */}
           {searchable && (
             <div className="p-3 border-b border-neutral-border/60">

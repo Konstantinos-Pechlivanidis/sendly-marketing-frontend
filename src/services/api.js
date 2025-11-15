@@ -37,15 +37,17 @@ api.interceptors.request.use(
       }
     }
     
-    // Log request details
-    console.log('[API Request]', {
-      method: config.method?.toUpperCase() || 'GET',
-      url: fullUrl,
-      headers: maskedHeaders,
-      params: config.params || null,
-      data: config.data || null,
-      timestamp: new Date().toISOString(),
-    });
+    // Log request details (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API Request]', {
+        method: config.method?.toUpperCase() || 'GET',
+        url: fullUrl,
+        headers: maskedHeaders,
+        params: config.params || null,
+        data: config.data || null,
+        timestamp: new Date().toISOString(),
+      });
+    }
     
     return config;
   },
@@ -70,17 +72,19 @@ api.interceptors.response.use(
       ? `${response.config.baseURL}${response.config.url}` 
       : response.config.url;
     
-    // Log successful response
-    console.log('[API Response]', {
-      method: response.config.method?.toUpperCase() || 'GET',
-      url: fullUrl,
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-      data: response.data,
-      duration: duration ? `${duration}ms` : 'N/A',
-      timestamp: new Date().toISOString(),
-    });
+    // Log successful response (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API Response]', {
+        method: response.config.method?.toUpperCase() || 'GET',
+        url: fullUrl,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: response.data,
+        duration: duration ? `${duration}ms` : 'N/A',
+        timestamp: new Date().toISOString(),
+      });
+    }
     
     // Backend returns { success: true, data: {...} }
     // Extract the data object for easier access in components
@@ -102,6 +106,7 @@ api.interceptors.response.use(
     
     // Handle network errors
     if (!error.response) {
+      // Always log errors (even in production)
       console.error('[API Error]', {
         method: error.config?.method?.toUpperCase() || 'GET',
         url: fullUrl,
@@ -124,6 +129,7 @@ api.interceptors.response.use(
 
     // Handle timeout errors
     if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      // Always log errors (even in production)
       console.error('[API Error]', {
         method: error.config?.method?.toUpperCase() || 'GET',
         url: fullUrl,
@@ -144,7 +150,7 @@ api.interceptors.response.use(
       });
     }
 
-    // Log error response
+    // Log error response (always log errors, even in production)
     console.error('[API Error]', {
       method: error.config?.method?.toUpperCase() || 'GET',
       url: fullUrl,
@@ -167,11 +173,44 @@ api.interceptors.response.use(
       }
     }
     
+    // Extract error message from backend response
+    // Backend format: { success: false, error: 'error_code', message: 'error message', details?: [...] }
+    let errorMessage = error.message || 'An error occurred';
+    let errorDetails = null;
+    
+    if (error.response?.data) {
+      const errorData = error.response.data;
+      
+      // Try to extract message from backend error format
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      } else if (errorData.error) {
+        // If no message, use error code as fallback
+        errorMessage = errorData.error;
+      }
+      
+      // Extract validation details if present
+      if (errorData.details && Array.isArray(errorData.details)) {
+        errorDetails = errorData.details;
+        // If validation errors, create a more descriptive message
+        if (errorData.details.length > 0) {
+          const firstError = errorData.details[0];
+          if (firstError.field && firstError.message) {
+            errorMessage = `${firstError.field}: ${firstError.message}`;
+          } else if (firstError.message) {
+            errorMessage = firstError.message;
+          }
+        }
+      }
+    }
+    
     // Return error in consistent format
     return Promise.reject({
-      message: error.response?.data?.message || error.message || 'An error occurred',
+      message: errorMessage,
       status: error.response?.status,
       data: error.response?.data,
+      details: errorDetails,
+      code: error.response?.data?.error,
     });
   }
 );

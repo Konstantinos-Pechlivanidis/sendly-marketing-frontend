@@ -8,6 +8,7 @@ import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import ErrorState from '../../components/ui/ErrorState';
 import { useSettings, useAccountInfo, useUpdateSettings } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useStoreInfo } from '../../hooks/useStoreInfo';
@@ -24,8 +25,8 @@ export default function Settings() {
     currency: 'EUR',
   });
 
-  const { data: settingsData, isLoading: isLoadingSettings } = useSettings();
-  const { data: accountData, isLoading: isLoadingAccount } = useAccountInfo();
+  const { data: settingsData, isLoading: isLoadingSettings, error: settingsError } = useSettings();
+  const { data: accountData, isLoading: isLoadingAccount, error: accountError } = useAccountInfo();
   const updateSettings = useUpdateSettings();
 
   useEffect(() => {
@@ -38,15 +39,45 @@ export default function Settings() {
     }
   }, [settingsData]);
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    
+    // Clear error for this field if it exists
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    
+    // Validate senderId if provided
+    if (formData.senderId && formData.senderId.trim()) {
+      const senderId = formData.senderId.trim();
+      // Check if it's E.164 format (phone number) or alphanumeric (sender name)
+      const isE164 = /^\+[1-9]\d{1,14}$/.test(senderId);
+      const isAlphanumeric = /^[a-zA-Z0-9]{3,11}$/.test(senderId);
+      
+      if (!isE164 && !isAlphanumeric) {
+        newErrors.senderId = 'Sender ID must be either a valid E.164 phone number (e.g., +1234567890) or 3-11 alphanumeric characters';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
+    if (!validate()) {
+      return;
+    }
+
     try {
       // Check if anything has changed
       const hasChanges = 
@@ -88,6 +119,7 @@ export default function Settings() {
   // Only show full loading state on initial load (no cached data)
   // If we have cached data, show it immediately even if fetching
   const isInitialLoad = (isLoadingSettings && !settingsData) || (isLoadingAccount && !accountData);
+  const hasError = settingsError || accountError;
 
   if (isInitialLoad) {
     return (
@@ -111,6 +143,17 @@ export default function Settings() {
           subtitle="Manage your account and SMS settings"
         />
 
+        {/* Error State */}
+        {hasError && (
+          <ErrorState
+            title="Error Loading Settings"
+            message={settingsError?.message || accountError?.message || 'Failed to load settings. Please try refreshing the page.'}
+            onAction={() => window.location.reload()}
+            actionLabel="Refresh Page"
+          />
+        )}
+
+        {!hasError && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Tabs Sidebar */}
           <div className="lg:col-span-1">
@@ -120,11 +163,13 @@ export default function Settings() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all focus-ring min-h-[44px] ${
                       activeTab === tab.id
                         ? 'bg-ice-soft text-ice-primary shadow-sm border border-ice-primary/20'
                         : 'text-neutral-text-primary hover:bg-neutral-surface-secondary hover:text-ice-primary'
                     }`}
+                    aria-label={tab.label}
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                   >
                     <Icon name={tab.icon} size="md" variant={activeTab === tab.id ? 'ice' : 'default'} />
                     <span className="text-sm font-medium">{tab.label}</span>
@@ -146,7 +191,24 @@ export default function Settings() {
                       name="senderId"
                       value={formData.senderId}
                       onChange={handleChange}
-                      placeholder="Your Store Name"
+                      onBlur={() => {
+                        // Validate on blur
+                        if (formData.senderId && formData.senderId.trim()) {
+                          const senderId = formData.senderId.trim();
+                          const isE164 = /^\+[1-9]\d{1,14}$/.test(senderId);
+                          const isAlphanumeric = /^[a-zA-Z0-9]{3,11}$/.test(senderId);
+                          if (!isE164 && !isAlphanumeric) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              senderId: 'Sender ID must be either a valid E.164 phone number (e.g., +1234567890) or 3-11 alphanumeric characters',
+                            }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, senderId: '' }));
+                          }
+                        }
+                      }}
+                      placeholder="Your Store Name or +1234567890"
+                      error={errors.senderId}
                     />
                     <GlassSelectCustom
                       label="Default Timezone"
@@ -324,6 +386,7 @@ export default function Settings() {
             )}
           </div>
         </div>
+        )}
       </div>
     </>
   );

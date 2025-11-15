@@ -202,7 +202,7 @@ export default function GlassDateTimePicker({
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 p-6 rounded-xl glass border border-neutral-border/60 z-50 min-w-[400px] shadow-glass-light-lg">
+        <div className="absolute top-full left-0 mt-2 p-6 rounded-xl glass border border-neutral-border/60 z-10 min-w-[400px] shadow-glass-light-lg">
           <div className="space-y-6">
             {/* Preset Buttons */}
             <div>

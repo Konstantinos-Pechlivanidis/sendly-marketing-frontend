@@ -72,14 +72,14 @@ export default function ImportContactsModal({ isOpen, onClose }) {
     >
       <div className="space-y-6">
         <div>
-          <p className="text-sm text-border-subtle mb-4">
+          <p className="text-sm text-neutral-text-secondary mb-4">
             Upload a CSV file with your contacts. The file should include columns for:
             phone, firstName (optional), lastName (optional), email (optional).
           </p>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-primary-light mb-2">
+              <label className="block text-sm font-medium text-neutral-text-primary mb-2">
                 CSV File
               </label>
               <div className="flex items-center gap-4">
@@ -91,8 +91,8 @@ export default function ImportContactsModal({ isOpen, onClose }) {
                     className="hidden"
                     disabled={isUploading}
                   />
-                  <div className="px-4 py-3 rounded-lg glass border border-glass-border hover:border-ice-accent transition-colors flex items-center justify-between">
-                    <span className="text-sm text-primary-light">
+                  <div className="px-4 py-3 rounded-xl bg-neutral-surface-primary backdrop-blur-[24px] border border-neutral-border/60 hover:border-ice-primary transition-colors flex items-center justify-between min-h-[44px] spring-smooth shadow-sm">
+                    <span className="text-sm text-neutral-text-primary">
                       {fileName || 'Choose CSV file...'}
                     </span>
                     <Icon name="import" size="sm" variant="ice" />
@@ -100,7 +100,7 @@ export default function ImportContactsModal({ isOpen, onClose }) {
                 </label>
               </div>
               {file && (
-                <p className="mt-2 text-xs text-ice-accent">
+                <p className="mt-2 text-xs text-ice-primary">
                   Selected: {fileName} ({(file.size / 1024).toFixed(2)} KB)
                 </p>
               )}
@@ -108,7 +108,7 @@ export default function ImportContactsModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="flex gap-4 pt-4 border-t border-glass-border">
+        <div className="flex gap-4 pt-4 border-t border-neutral-border/60">
           <GlassButton
             variant="ghost"
             size="lg"

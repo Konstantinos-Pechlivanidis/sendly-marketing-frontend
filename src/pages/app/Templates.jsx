@@ -82,8 +82,19 @@ export default function Templates() {
           subtitle="Browse and use pre-built SMS message templates"
         />
 
+        {/* Error State */}
+        {error && (
+          <ErrorState
+            title="Error Loading Templates"
+            message={error.message || 'Failed to load templates. Please try refreshing the page.'}
+            onAction={() => window.location.reload()}
+            actionLabel="Refresh Page"
+          />
+        )}
+
         {/* Filters */}
-        <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+        {!error && (
+          <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <GlassInput
               label="Search Templates"
@@ -106,15 +117,6 @@ export default function Templates() {
             />
           </div>
         </GlassCard>
-
-        {/* Error State */}
-        {error && (
-          <ErrorState
-            title="Error Loading Templates"
-            message={error.message || 'Failed to load templates. Please try refreshing the page.'}
-            onAction={() => window.location.reload()}
-            actionLabel="Refresh Page"
-          />
         )}
 
         {/* Templates Grid */}

@@ -7,6 +7,8 @@ import GlassTextarea from '../../components/ui/GlassTextarea';
 import GlassSelect from '../../components/ui/GlassSelect';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassDateTimePicker from '../../components/ui/GlassDateTimePicker';
+import BackButton from '../../components/ui/BackButton';
+import PageHeader from '../../components/ui/PageHeader';
 import IPhonePreviewWithDiscount from '../../components/iphone/IPhonePreviewWithDiscount';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { 
@@ -92,6 +94,44 @@ export default function CampaignCreate() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleBlur = (fieldName) => {
+    // Real-time validation on blur
+    const newErrors = { ...errors };
+    
+    if (fieldName === 'name' && !formData.name.trim()) {
+      newErrors.name = 'Campaign name is required';
+    } else if (fieldName === 'name') {
+      delete newErrors.name;
+    }
+    
+    if (fieldName === 'message') {
+      if (!formData.message.trim()) {
+        newErrors.message = 'Message is required';
+      } else if (formData.message.trim().length < 10) {
+        newErrors.message = 'Message must be at least 10 characters';
+      } else if (formData.message.trim().length > 1600) {
+        newErrors.message = 'Message is too long (max 1600 characters)';
+      } else {
+        delete newErrors.message;
+      }
+    }
+    
+    if (fieldName === 'scheduleAt' && isScheduled) {
+      if (!formData.scheduleAt) {
+        newErrors.scheduleAt = 'Scheduled date and time is required';
+      } else {
+        const scheduleDate = new Date(formData.scheduleAt);
+        if (scheduleDate <= new Date()) {
+          newErrors.scheduleAt = 'Schedule date must be in the future';
+        } else {
+          delete newErrors.scheduleAt;
+        }
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   const handleScheduleToggle = () => {
@@ -336,14 +376,17 @@ export default function CampaignCreate() {
       <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-10 bg-neutral-bg-base">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-neutral-text-primary">
-              {isEditMode ? 'Edit Campaign' : 'Create Campaign'}
-            </h1>
-            <p className="text-base text-neutral-text-secondary">
-              {isEditMode 
-                ? 'Update your SMS campaign and preview it in real-time'
-                : 'Create a new SMS campaign and preview it in real-time'}
-            </p>
+            <div className="flex items-center gap-3 mb-4">
+              <BackButton to="/app/campaigns" label="Back" />
+            </div>
+            <PageHeader
+              title={isEditMode ? 'Edit Campaign' : 'Create Campaign'}
+              subtitle={
+                isEditMode 
+                  ? 'Update your SMS campaign and preview it in real-time'
+                  : 'Create a new SMS campaign and preview it in real-time'
+              }
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
