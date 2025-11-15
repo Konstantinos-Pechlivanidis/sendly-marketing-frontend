@@ -89,8 +89,12 @@ export const useSendCampaign = () => {
 
   return useMutation({
     mutationFn: (id) => {
-      // Send POST request without body - use empty object to avoid null serialization issues
-      return api.post(`/campaigns/${id}/send`, {});
+      // Send POST request without body - explicitly set Content-Type and send empty object
+      return api.post(`/campaigns/${id}/send`, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     },
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'], exact: false });
