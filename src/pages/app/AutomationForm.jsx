@@ -9,6 +9,7 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import Icon from '../../components/ui/Icon';
 import { useAutomations, useCreateAutomation, useUpdateAutomation } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
+import { transformAutomationFromAPI } from '../../utils/apiAdapters';
 import SEO from '../../components/SEO';
 
 export default function AutomationForm() {
@@ -40,12 +41,14 @@ export default function AutomationForm() {
 
   useEffect(() => {
     if (isEditMode && existingAutomation) {
+      // Use adapter to ensure consistent format
+      const normalized = transformAutomationFromAPI(existingAutomation);
       setFormData({
-        name: existingAutomation.name || '',
-        trigger: existingAutomation.trigger || 'order_placed',
-        triggerConditions: existingAutomation.triggerConditions || {},
-        message: existingAutomation.message || '',
-        status: existingAutomation.status || 'draft',
+        name: normalized.name || '',
+        trigger: normalized.trigger || 'order_placed',
+        triggerConditions: normalized.triggerConditions || {},
+        message: normalized.message || '',
+        status: normalized.status || 'draft',
       });
     }
   }, [isEditMode, existingAutomation]);

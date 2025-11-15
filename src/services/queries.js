@@ -1,14 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from './api';
 import { normalizePaginatedResponse } from '../utils/apiHelpers';
+import { transformAutomationsFromAPI, transformAutomationToAPI } from '../utils/apiAdapters';
 
 // Campaigns
 export const useCampaigns = (params = {}) => {
   return useQuery({
     queryKey: ['campaigns', params],
     queryFn: async () => {
-      const queryString = new URLSearchParams(params).toString();
-      const response = await api.get(`/campaigns?${queryString}`);
+      // Filter out undefined, null, and empty string values
+      const cleanParams = {};
+      Object.keys(params).forEach(key => {
+        const value = params[key];
+        if (value !== undefined && value !== null && value !== '') {
+          cleanParams[key] = value;
+        }
+      });
+
+      const queryString = new URLSearchParams(cleanParams).toString();
+      const response = await api.get(`/campaigns${queryString ? `?${queryString}` : ''}`);
       // Normalize response to consistent format
       const normalized = normalizePaginatedResponse(response, 'campaigns');
       return {
@@ -40,7 +50,7 @@ export const useCampaign = (id, options = {}) => {
 
 export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data) => api.post('/campaigns', data),
     onSuccess: () => {
@@ -51,7 +61,7 @@ export const useCreateCampaign = () => {
 
 export const useUpdateCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, ...data }) => api.put(`/campaigns/${id}`, data),
     onSuccess: (_, variables) => {
@@ -64,7 +74,7 @@ export const useUpdateCampaign = () => {
 
 export const useDeleteCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id) => api.delete(`/campaigns/${id}`),
     onSuccess: () => {
@@ -76,9 +86,9 @@ export const useDeleteCampaign = () => {
 
 export const useSendCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id) => api.post(`/campaigns/${id}/send`),
+    mutationFn: (id) => api.post(`/campaigns/${id}/send`, null), // Explicitly send null body
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['campaign', id] });
@@ -91,7 +101,7 @@ export const useSendCampaign = () => {
 
 export const useScheduleCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, scheduleType, scheduleAt, recurringDays }) => {
       const scheduleData = {
@@ -114,7 +124,7 @@ export const useContacts = (params = {}) => {
     queryFn: async () => {
       // Map frontend params to backend params
       const backendParams = {};
-      
+
       // Copy all params except the ones we need to map
       Object.keys(params).forEach(key => {
         if (key !== 'consentStatus' && key !== 'search') {
@@ -123,17 +133,17 @@ export const useContacts = (params = {}) => {
           }
         }
       });
-      
+
       // Map consentStatus to smsConsent (backend expects smsConsent)
       if (params.consentStatus) {
         backendParams.smsConsent = params.consentStatus;
       }
-      
+
       // Map search to q (backend expects q for search)
       if (params.search) {
         backendParams.q = params.search;
       }
-      
+
       const queryString = new URLSearchParams(backendParams).toString();
       const response = await api.get(`/contacts?${queryString}`);
       // Normalize response to consistent format
@@ -249,7 +259,7 @@ export const useCampaignMetrics = (id, options = {}) => {
 
 export const usePrepareCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id) => api.post(`/campaigns/${id}/prepare`),
     onSuccess: () => {
@@ -260,7 +270,7 @@ export const usePrepareCampaign = () => {
 
 export const useRetryFailedCampaign = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id) => api.post(`/campaigns/${id}/retry-failed`),
     onSuccess: (_, id) => {
@@ -361,7 +371,7 @@ export const useTrackTemplateUsage = () => {
 // Contacts - CRUD
 export const useCreateContact = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data) => api.post('/contacts', data),
     onSuccess: () => {
@@ -374,7 +384,7 @@ export const useCreateContact = () => {
 
 export const useUpdateContact = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, ...data }) => api.put(`/contacts/${id}`, data),
     onSuccess: (_, variables) => {
@@ -386,7 +396,7 @@ export const useUpdateContact = () => {
 
 export const useDeleteContact = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id) => api.delete(`/contacts/${id}`),
     onSuccess: () => {
@@ -413,7 +423,7 @@ export const useContact = (id, options = {}) => {
 
 export const useImportContacts = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (formData) => {
       // Use axios for consistency with other API calls
@@ -449,7 +459,7 @@ export const useBirthdayContacts = (params = {}) => {
 // Billing
 export const useCreatePurchase = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data) => api.post('/billing/purchase', data),
     onSuccess: () => {
@@ -515,7 +525,7 @@ export const useAccountInfo = () => {
 
 export const useUpdateSenderNumber = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data) => api.put('/settings/sender', data),
     onSuccess: () => {
@@ -528,7 +538,7 @@ export const useUpdateSenderNumber = () => {
 export const useDiscounts = () => {
   return useQuery({
     queryKey: ['discounts'],
-    queryFn: () => api.get('/discounts'),
+    queryFn: () => api.get('/shopify/discounts'),
     staleTime: 10 * 60 * 1000, // 10 minutes - discounts change occasionally
     gcTime: 20 * 60 * 1000, // 20 minutes (React Query v5)
     refetchOnWindowFocus: false,
@@ -539,7 +549,7 @@ export const useDiscounts = () => {
 export const useDiscount = (id) => {
   return useQuery({
     queryKey: ['discount', id],
-    queryFn: () => api.get(`/discounts/${id}`),
+    queryFn: () => api.get(`/shopify/discounts/${id}`),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)
@@ -599,7 +609,12 @@ export const useValidateAudience = () => {
 export const useAutomations = () => {
   return useQuery({
     queryKey: ['automations'],
-    queryFn: () => api.get('/automations'),
+    queryFn: async () => {
+      const response = await api.get('/automations');
+      // Backend returns array directly, transform for consistency
+      const automations = Array.isArray(response) ? response : (response.automations || []);
+      return transformAutomationsFromAPI(automations);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5)
     refetchOnWindowFocus: false,
@@ -620,11 +635,17 @@ export const useAutomationStats = () => {
   });
 };
 
+/**
+ * Create automation
+ */
 export const useCreateAutomation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data) => api.post('/automations', data),
+    mutationFn: (data) => {
+      const payload = transformAutomationToAPI(data, false);
+      return api.post('/automations', payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automations'], exact: false });
     },
@@ -633,9 +654,12 @@ export const useCreateAutomation = () => {
 
 export const useUpdateAutomation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, ...data }) => api.put(`/automations/${id}`, data),
+    mutationFn: ({ id, ...data }) => {
+      const payload = transformAutomationToAPI(data, true);
+      return api.put(`/automations/${id}`, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automations'], exact: false });
     },
@@ -655,7 +679,7 @@ export const useSystemDefaults = () => {
 
 export const useSyncSystemDefaults = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: () => api.post('/automations/sync'),
     onSuccess: () => {
@@ -691,7 +715,7 @@ export const useReportsKPIs = (params = {}) => {
     queryFn: async () => {
       // KPIs endpoint doesn't take date parameters, so we don't send them
       // Backend kpis endpoint doesn't accept query params
-      return api.get(`/reports/kpis`);
+      return api.get('/reports/kpis');
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes (React Query v5)

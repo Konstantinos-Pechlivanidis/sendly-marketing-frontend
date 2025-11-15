@@ -41,7 +41,7 @@ export default function ContactDetail() {
       setFormData({
         firstName: contact.firstName || '',
         lastName: contact.lastName || '',
-        phone: contact.phone || '',
+        phone: contact.phoneE164 || '', // Backend returns phoneE164
         email: contact.email || '',
         tags: contact.tags || [],
       });
@@ -87,17 +87,43 @@ export default function ContactDetail() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Normalize phone number to E.164 format
+  const normalizePhoneToE164 = (phone) => {
+    if (!phone) return phone;
+    // Remove all non-digit characters except +
+    let normalized = phone.replace(/[^\d+]/g, '');
+    // Ensure it starts with +
+    if (!normalized.startsWith('+')) {
+      normalized = `+${normalized}`;
+    }
+    return normalized;
+  };
+
   const handleSave = async () => {
     if (!validate()) return;
     try {
       if (isNewContact) {
-        const result = await createContact.mutateAsync(formData);
+        // Convert phone to phoneE164 format for backend
+        const payload = {
+          ...formData,
+          phoneE164: normalizePhoneToE164(formData.phone),
+        };
+        // Remove the phone field as backend expects phoneE164
+        delete payload.phone;
+        
+        const result = await createContact.mutateAsync(payload);
         toast.success('Contact created successfully');
         if (result?.id) {
           navigate(`/app/contacts/${result.id}`, { replace: true });
         }
       } else {
-        await updateContact.mutateAsync({ id, ...formData });
+        // For updates, also convert phone to phoneE164 if phone is being updated
+        const payload = { ...formData };
+        if (payload.phone) {
+          payload.phoneE164 = normalizePhoneToE164(payload.phone);
+          delete payload.phone;
+        }
+        await updateContact.mutateAsync({ id, ...payload });
         toast.success('Contact updated successfully');
         setIsEditing(false);
       }
@@ -284,7 +310,7 @@ export default function ContactDetail() {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-neutral-text-secondary mb-1">Phone</label>
-                      <p className="text-neutral-text-primary mt-1">{contact?.phone || '-'}</p>
+                      <p className="text-neutral-text-primary mt-1">{contact?.phoneE164 || '-'}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-neutral-text-secondary mb-1">Email</label>

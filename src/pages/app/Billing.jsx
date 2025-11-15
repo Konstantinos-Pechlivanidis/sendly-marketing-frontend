@@ -42,10 +42,21 @@ export default function Billing() {
 
   const handlePurchase = async (packageId) => {
     try {
-      const result = await createPurchase.mutateAsync({ packageId });
+      // Build success and cancel URLs based on current location
+      const baseUrl = window.location.origin;
+      const successUrl = `${baseUrl}/app/billing?success=true`;
+      const cancelUrl = `${baseUrl}/app/billing?canceled=true`;
+      
+      const result = await createPurchase.mutateAsync({ 
+        packageId,
+        successUrl,
+        cancelUrl,
+      });
       toast.success('Purchase initiated. Redirecting to payment...');
-      // In a real app, you'd redirect to Stripe checkout
-      if (result.checkoutUrl) {
+      // Redirect to Stripe checkout
+      if (result.sessionUrl) {
+        window.location.href = result.sessionUrl;
+      } else if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       }
     } catch (error) {
