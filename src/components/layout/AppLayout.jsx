@@ -57,9 +57,9 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-neutral-bg-base flex">
-      {/* Desktop Sidebar - Right Side */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:right-0 lg:z-30">
-        <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[30px] -webkit-backdrop-blur-[30px] border-l border-neutral-border/40 shadow-glass-light-lg">
+      {/* Desktop Sidebar - Left Side */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30">
+        <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[30px] -webkit-backdrop-blur-[30px] border-r border-neutral-border/40 shadow-glass-light-lg">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-6 border-b border-neutral-border/40 bg-gradient-to-r from-neutral-surface-primary to-neutral-surface-secondary/30">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-ice-primary via-ice-primary to-ice-deep flex items-center justify-center shadow-glow-ice-light transition-all hover:shadow-glow-ice-light-lg">
@@ -87,7 +87,7 @@ export default function AppLayout({ children }) {
                 aria-current={isActive(item.path) ? 'page' : undefined}
                 className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 focus-ring min-h-[44px] ${
                   isActive(item.path)
-                    ? 'bg-gradient-to-r from-ice-primary/20 to-ice-deep/20 text-ice-primary shadow-glow-ice-light'
+                    ? 'bg-gradient-to-r from-ice-primary/25 to-ice-deep/25 text-ice-deep shadow-glow-ice-light'
                     : 'text-neutral-text-primary/80 hover:bg-neutral-surface-secondary/60 hover:text-ice-primary'
                 }`}
               >
@@ -98,7 +98,7 @@ export default function AppLayout({ children }) {
                   className={isActive(item.path) ? 'text-ice-primary' : 'text-neutral-text-secondary'}
                   aria-hidden="true" 
                 />
-                <span className={`text-sm ${isActive(item.path) ? 'font-bold text-ice-primary' : 'font-semibold'}`}>{item.label}</span>
+                <span className={`text-sm ${isActive(item.path) ? 'font-bold text-ice-deep' : 'font-semibold'}`}>{item.label}</span>
               </Link>
             ))}
           </nav>
@@ -123,7 +123,7 @@ export default function AppLayout({ children }) {
 
       {/* Mobile Menu Button */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl bg-neutral-surface-primary backdrop-blur-[30px] -webkit-backdrop-blur-[30px] border border-neutral-border/40 shadow-glass-light-lg text-neutral-text-primary focus-ring hover:shadow-glass-light-lg hover:bg-neutral-surface-secondary/80 transition-all min-w-[48px] min-h-[48px] flex items-center justify-center"
+        className="lg:hidden fixed top-4 right-4 z-50 p-3 rounded-xl bg-neutral-surface-primary backdrop-blur-[30px] -webkit-backdrop-blur-[30px] border border-neutral-border/40 shadow-glass-light-lg text-neutral-text-primary focus-ring hover:shadow-glass-light-lg hover:bg-neutral-surface-secondary/80 transition-all min-w-[48px] min-h-[48px] flex items-center justify-center"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label="Toggle menu"
         aria-expanded={isMobileMenuOpen}
@@ -159,7 +159,7 @@ export default function AppLayout({ children }) {
           
           {/* Sidebar */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-neutral-surface-primary backdrop-blur-[40px] -webkit-backdrop-blur-[40px] border-r border-neutral-border/40 shadow-glass-light-lg flex flex-col transform transition-transform duration-300 ease-out"
+            className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-neutral-surface-primary backdrop-blur-[40px] -webkit-backdrop-blur-[40px] border-l border-neutral-border/40 shadow-glass-light-lg flex flex-col transform transition-transform duration-300 ease-out"
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
@@ -201,7 +201,7 @@ export default function AppLayout({ children }) {
                   aria-current={isActive(item.path) ? 'page' : undefined}
                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 focus-ring min-h-[52px] ${
                     isActive(item.path)
-                      ? 'bg-gradient-to-r from-ice-primary/20 to-ice-deep/20 text-ice-primary shadow-glow-ice-light'
+                      ? 'bg-gradient-to-r from-ice-primary/25 to-ice-deep/25 text-ice-deep shadow-glow-ice-light'
                       : 'text-neutral-text-primary/80 hover:bg-neutral-surface-secondary/60 hover:text-ice-primary'
                   }`}
                   style={{ animationDelay: `${index * 30}ms` }}
@@ -213,7 +213,7 @@ export default function AppLayout({ children }) {
                     className={isActive(item.path) ? 'text-ice-primary' : 'text-neutral-text-secondary'}
                     aria-hidden="true" 
                   />
-                  <span className={`text-sm ${isActive(item.path) ? 'font-bold text-ice-primary' : 'font-semibold'}`}>{item.label}</span>
+                  <span className={`text-sm ${isActive(item.path) ? 'font-bold text-ice-deep' : 'font-semibold'}`}>{item.label}</span>
                 </Link>
               ))}
             </nav>
@@ -241,7 +241,7 @@ export default function AppLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 lg:pr-72 bg-neutral-bg-base">
+      <main className="flex-1 lg:pl-72 bg-neutral-bg-base">
         <div className="min-h-screen">
           <div className="max-w-[1600px] mx-auto">
             {children}
