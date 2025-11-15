@@ -56,7 +56,7 @@ export default function AppLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-bg-base flex">
+    <div className="min-h-screen bg-neutral-bg-base flex overflow-x-hidden">
       {/* Desktop Sidebar - Left Side */}
       <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30">
         <div className="flex-1 flex flex-col bg-neutral-surface-primary backdrop-blur-[30px] -webkit-backdrop-blur-[30px] border-r border-neutral-border/40 shadow-glass-light-lg">
@@ -241,11 +241,9 @@ export default function AppLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 lg:pl-72 bg-neutral-bg-base">
-        <div className="min-h-screen">
-          <div className="max-w-[1600px] mx-auto">
-            {children}
-          </div>
+      <main className="flex-1 lg:pl-72 bg-neutral-bg-base overflow-x-hidden w-full min-w-0">
+        <div className="min-h-screen w-full max-w-full">
+          {children}
         </div>
       </main>
     </div>
