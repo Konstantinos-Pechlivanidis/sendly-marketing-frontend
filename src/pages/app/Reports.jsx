@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import DateRangePicker from '../../components/ui/DateRangePicker';
 import LineChart from '../../components/charts/LineChart';
@@ -257,7 +256,7 @@ export default function Reports() {
         description="View analytics and performance reports"
         path="/app/reports"
       />
-      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
+      <div className="min-h-screen pt-4 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
         <div className="max-w-[1400px] mx-auto w-full">
           {/* Header */}
           <PageHeader
@@ -385,7 +384,7 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {campaignTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Messages Over Time</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
                           <LineChart
                             data={campaignTrends}
                             dataKey="messages"
@@ -397,7 +396,7 @@ export default function Reports() {
 
                       {deliveryStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Delivery Status</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Delivery Status</h3>
                           <PieChart
                             data={deliveryStatusData}
                             dataKey="value"
@@ -462,7 +461,7 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {campaignTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Campaign Messages Over Time</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Messages Over Time</h3>
                           <LineChart
                             data={campaignTrends}
                             dataKey="messages"
@@ -474,7 +473,7 @@ export default function Reports() {
 
                       {campaignStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Campaign Status Breakdown</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Status Breakdown</h3>
                           <PieChart
                             data={campaignStatusData}
                             dataKey="value"
@@ -628,7 +627,7 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {messagingTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Messages Over Time</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
                           <LineChart
                             data={messagingTrends}
                             dataKey="messages"
@@ -640,7 +639,7 @@ export default function Reports() {
 
                       {messagingStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Status Breakdown</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Status Breakdown</h3>
                           <PieChart
                             data={messagingStatusData}
                             dataKey="value"
@@ -651,7 +650,7 @@ export default function Reports() {
 
                       {messagingDirectionData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Direction Breakdown</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Direction Breakdown</h3>
                           <PieChart
                             data={messagingDirectionData}
                             dataKey="value"
@@ -717,7 +716,7 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {creditsTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Credits Usage Over Time</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Credits Usage Over Time</h3>
                           <LineChart
                             data={creditsTrends}
                             dataKey="creditsUsed"
@@ -729,7 +728,7 @@ export default function Reports() {
 
                       {creditsUsageData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Usage Breakdown</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Usage Breakdown</h3>
                           <PieChart
                             data={creditsUsageData}
                             dataKey="value"
@@ -834,7 +833,7 @@ export default function Reports() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {genderDistributionData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Gender Distribution</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Gender Distribution</h3>
                           <PieChart
                             data={genderDistributionData}
                             dataKey="value"
@@ -845,7 +844,7 @@ export default function Reports() {
 
                       {consentBreakdownData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
-                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Consent Breakdown</h3>
+                          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Consent Breakdown</h3>
                           <PieChart
                             data={consentBreakdownData}
                             dataKey="value"

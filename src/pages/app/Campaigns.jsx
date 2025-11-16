@@ -161,7 +161,7 @@ export default function Campaigns() {
         description="Manage your SMS marketing campaigns"
         path="/app/campaigns"
       />
-      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
+      <div className="min-h-screen pt-4 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
         {/* Header */}
         <PageHeader
           title="Campaigns"
@@ -185,7 +185,7 @@ export default function Campaigns() {
         {/* Stats Cards */}
         {!error && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 lg:mb-8">
               {stats.map((stat) => (
                 <GlassCard 
                   key={stat.label} 
@@ -221,7 +221,7 @@ export default function Campaigns() {
             </div>
 
             {/* Filters and Search */}
-            <GlassCard className="p-4 sm:p-6 mb-6 sm:mb-8">
+            <GlassCard className="p-4 sm:p-6 mb-4 sm:mb-6 lg:mb-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Icon name="filter" size="sm" variant="ice" />

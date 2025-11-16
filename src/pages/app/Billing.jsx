@@ -16,7 +16,7 @@ import ErrorState from '../../components/ui/ErrorState';
 import StatusBadge from '../../components/ui/StatusBadge';
 import EmptyState from '../../components/ui/EmptyState';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
-import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurchase } from '../../services/queries';
+import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurchase, useSettings } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format } from 'date-fns';
@@ -28,6 +28,7 @@ export default function Billing() {
   const pageSize = 20;
 
   const { data: balanceData, isLoading: isLoadingBalance, error: balanceError } = useBillingBalance();
+  const { data: settingsData } = useSettings();
   const { data: packagesData, isLoading: isLoadingPackages, error: packagesError } = useBillingPackages(selectedCurrency);
   const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useBillingHistory({
     page,
@@ -38,9 +39,13 @@ export default function Billing() {
   // Normalize response data
   const balanceResponse = balanceData?.data || balanceData || {};
   const balance = balanceResponse.credits || balanceResponse.balance || 0;
-  const defaultCurrency = balanceResponse.currency || 'EUR';
+  const settings = settingsData?.data || settingsData || {};
+  // Get currency from settings first, then balance, then default to EUR
+  const settingsCurrency = settings.currency || 'EUR';
+  const balanceCurrency = balanceResponse.currency || settingsCurrency;
+  const defaultCurrency = balanceCurrency || 'EUR';
   
-  // Use selected currency if set, otherwise use default from balance
+  // Use selected currency if set, otherwise use default from settings/balance
   const currency = selectedCurrency || defaultCurrency;
   
   const packagesResponse = packagesData?.data || packagesData || {};
@@ -50,9 +55,9 @@ export default function Billing() {
   const history = historyResponse.transactions || historyResponse.items || [];
   const pagination = historyResponse.pagination || {};
 
-  // Update selected currency when balance currency changes
+  // Update selected currency when settings or balance currency changes
   useEffect(() => {
-    if (defaultCurrency && !selectedCurrency) {
+    if (defaultCurrency && selectedCurrency !== defaultCurrency) {
       setSelectedCurrency(defaultCurrency);
     }
   }, [defaultCurrency, selectedCurrency]);
@@ -103,7 +108,7 @@ export default function Billing() {
         description="Manage your SMS credits and billing"
         path="/app/billing"
       />
-      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
+      <div className="min-h-screen pt-4 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
         <div className="max-w-[1400px] mx-auto w-full">
           {/* Header */}
           <PageHeader

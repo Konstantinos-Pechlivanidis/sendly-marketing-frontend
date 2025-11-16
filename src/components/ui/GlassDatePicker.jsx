@@ -21,7 +21,6 @@ export default function GlassDatePicker({
   className,
   minDate,
   maxDate,
-  showPresets = false, // For birthday fields, set to false to hide presets
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -57,15 +56,14 @@ export default function GlassDatePicker({
         const scrollY = window.scrollY || window.pageYOffset;
         const scrollX = window.scrollX || window.pageXOffset;
         
-        // Calculate position below the button
-        const top = rect.bottom + scrollY + 8; // 8px gap
-        const left = rect.left + scrollX;
-        const width = rect.width;
-
-        // Check if dropdown would go off-screen on mobile
         const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const width = rect.width;
         const dropdownWidth = Math.min(width, 360); // Max width for calendar
+        const estimatedDropdownHeight = 400; // Approximate height of calendar
         
+        // Calculate horizontal position
+        const left = rect.left + scrollX;
         let adjustedLeft = left;
         if (left + dropdownWidth > viewportWidth) {
           adjustedLeft = viewportWidth - dropdownWidth - 16; // 16px padding from edge
@@ -74,8 +72,35 @@ export default function GlassDatePicker({
           adjustedLeft = 16;
         }
 
+        // Calculate vertical position - check if we should open above or below
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const gap = 8; // Gap between button and dropdown
+        
+        let adjustedTop;
+        if (spaceBelow >= estimatedDropdownHeight + gap) {
+          // Enough space below - position below the button
+          adjustedTop = rect.bottom + scrollY + gap;
+        } else if (spaceAbove >= estimatedDropdownHeight + gap) {
+          // Not enough space below, but enough above - position above the button
+          adjustedTop = rect.top + scrollY - estimatedDropdownHeight - gap;
+        } else {
+          // Not enough space either way - position where there's more space
+          if (spaceBelow > spaceAbove) {
+            // More space below, but still not enough - position below with max-height
+            adjustedTop = rect.bottom + scrollY + gap;
+          } else {
+            // More space above - position above with max-height
+            adjustedTop = rect.top + scrollY - estimatedDropdownHeight - gap;
+          }
+          // Ensure it doesn't go outside viewport
+          if (adjustedTop < scrollY + 16) {
+            adjustedTop = scrollY + 16;
+          }
+        }
+
         setDropdownPosition({
-          top,
+          top: adjustedTop,
           left: adjustedLeft,
           width: dropdownWidth,
         });
@@ -262,9 +287,10 @@ export default function GlassDatePicker({
               left: `${dropdownPosition.left}px`,
               width: dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : 'auto',
               maxWidth: 'calc(100vw - 32px)',
+              maxHeight: 'calc(100vh - 32px)',
             }}
           >
-            <div className="p-2 sm:p-4">
+            <div className="p-2 sm:p-4 overflow-y-auto max-h-[calc(100vh-64px)]">
               <GlassCalendar
                 selectedDate={selectedDate}
                 onDateSelect={handleDateSelect}

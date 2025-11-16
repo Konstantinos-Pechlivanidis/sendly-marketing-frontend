@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { format, setHours, setMinutes, setSeconds, setMilliseconds, startOfDay, endOfDay } from 'date-fns';
+import { format, setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import GlassCalendar from './GlassCalendar';
 import GlassButton from './GlassButton';
 import Icon from './Icon';

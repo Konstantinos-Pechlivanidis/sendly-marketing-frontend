@@ -135,7 +135,7 @@ export default function Settings() {
         description="Manage your account and SMS settings"
         path="/app/settings"
       />
-      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
+      <div className="min-h-screen pt-4 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
         <div className="max-w-[1400px] mx-auto w-full">
           {/* Header */}
           <PageHeader
@@ -276,15 +276,13 @@ export default function Settings() {
                             options={[
                               { value: 'EUR', label: 'EUR (€)' },
                               { value: 'USD', label: 'USD ($)' },
-                              { value: 'GBP', label: 'GBP (£)' },
-                              { value: 'JPY', label: 'JPY (¥)' },
                             ]}
                           />
                         </div>
 
                         {/* Store Information */}
                         {storeInfo && (
-                          <div>
+                          <div className="pt-4">
                             <label className="block text-sm font-medium text-neutral-text-secondary mb-3">
                               Store Information
                             </label>

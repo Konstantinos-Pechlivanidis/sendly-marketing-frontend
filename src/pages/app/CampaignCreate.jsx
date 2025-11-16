@@ -42,6 +42,10 @@ export default function CampaignCreate() {
   const { data: settingsData } = useSettings();
   const toast = useToastContext();
   
+  // Get shop timezone from settings
+  const settings = useMemo(() => settingsData?.data || settingsData || {}, [settingsData]);
+  const shopTimezone = settings.timezone || 'UTC';
+  
   // Check for template from Templates page
   const templateFromState = location.state?.template;
   
@@ -198,10 +202,45 @@ export default function CampaignCreate() {
         // If scheduled, use the schedule endpoint to properly set status
         if (isScheduled && formData.scheduleAt) {
           try {
+            // Convert scheduled time from shop's timezone to UTC
+            let scheduleAtUTC;
+            try {
+              const dateStr = formData.scheduleAt;
+              const [datePart, timePart] = dateStr.split('T');
+              const [year, month, day] = datePart.split('-').map(Number);
+              const [hour, minute] = timePart.split(':').map(Number);
+              
+              const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+              
+              const shopDisplay = new Intl.DateTimeFormat('en-US', {
+                timeZone: shopTimezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              }).formatToParts(utcDate);
+              
+              const shopYear = parseInt(shopDisplay.find(p => p.type === 'year').value);
+              const shopMonth = parseInt(shopDisplay.find(p => p.type === 'month').value);
+              const shopDay = parseInt(shopDisplay.find(p => p.type === 'day').value);
+              const shopHour = parseInt(shopDisplay.find(p => p.type === 'hour').value);
+              const shopMinute = parseInt(shopDisplay.find(p => p.type === 'minute').value);
+              
+              const desiredShopTime = new Date(year, month - 1, day, hour, minute);
+              const actualShopTime = new Date(shopYear, shopMonth - 1, shopDay, shopHour, shopMinute);
+              const diff = desiredShopTime.getTime() - actualShopTime.getTime();
+              
+              scheduleAtUTC = new Date(utcDate.getTime() - diff).toISOString();
+            } catch (error) {
+              scheduleAtUTC = new Date(formData.scheduleAt + 'Z').toISOString();
+            }
+            
             await scheduleCampaign.mutateAsync({
               id,
               scheduleType: 'scheduled',
-              scheduleAt: formData.scheduleAt,
+              scheduleAt: scheduleAtUTC,
             });
             toast.success('Campaign scheduled successfully!');
             setTimeout(() => navigate('/app/campaigns'), 1500);
@@ -224,8 +263,50 @@ export default function CampaignCreate() {
       } else {
         // For new campaigns
         if (isScheduled && formData.scheduleAt) {
-          // Create with scheduled data
-          campaignData.scheduleAt = new Date(formData.scheduleAt).toISOString();
+          // Convert scheduled time from shop's timezone to UTC
+          // The date picker gives us a datetime-local string (YYYY-MM-DDTHH:mm)
+          // We need to interpret this time as being in the shop's timezone, then convert to UTC
+          let scheduleAtUTC;
+          try {
+            const dateStr = formData.scheduleAt; // Format: YYYY-MM-DDTHH:mm
+            // Parse the date string to extract components
+            const [datePart, timePart] = dateStr.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
+            
+            // Create a date object representing this time in UTC first
+            const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+            
+            // Get what this UTC time would be displayed as in the shop's timezone
+            const shopDisplay = new Intl.DateTimeFormat('en-US', {
+              timeZone: shopTimezone,
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            }).formatToParts(utcDate);
+            
+            const shopYear = parseInt(shopDisplay.find(p => p.type === 'year').value);
+            const shopMonth = parseInt(shopDisplay.find(p => p.type === 'month').value);
+            const shopDay = parseInt(shopDisplay.find(p => p.type === 'day').value);
+            const shopHour = parseInt(shopDisplay.find(p => p.type === 'hour').value);
+            const shopMinute = parseInt(shopDisplay.find(p => p.type === 'minute').value);
+            
+            // Calculate the difference between what we want (shop time) and what we got
+            const desiredShopTime = new Date(year, month - 1, day, hour, minute);
+            const actualShopTime = new Date(shopYear, shopMonth - 1, shopDay, shopHour, shopMinute);
+            const diff = desiredShopTime.getTime() - actualShopTime.getTime();
+            
+            // Adjust the UTC date by the difference
+            scheduleAtUTC = new Date(utcDate.getTime() - diff).toISOString();
+          } catch (error) {
+            // Fallback: treat the date as UTC (not ideal but safe)
+            scheduleAtUTC = new Date(formData.scheduleAt + 'Z').toISOString();
+          }
+          
+          campaignData.scheduleAt = scheduleAtUTC;
           result = await createCampaign.mutateAsync(campaignData);
           
           // Use schedule endpoint to properly set status to 'scheduled'
@@ -234,7 +315,7 @@ export default function CampaignCreate() {
               await scheduleCampaign.mutateAsync({
                 id: result.id,
                 scheduleType: 'scheduled',
-                scheduleAt: formData.scheduleAt,
+                scheduleAt: scheduleAtUTC,
               });
               toast.success('Campaign scheduled successfully!');
             } catch (scheduleError) {
@@ -334,7 +415,7 @@ export default function CampaignCreate() {
         description="Create a new SMS campaign and preview it in real-time"
         path={isEditMode ? `/app/campaigns/${id}/edit` : '/app/campaigns/new'}
       />
-      <div className="min-h-screen pt-6 pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
+      <div className="min-h-screen pt-4 sm:pt-6 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-neutral-bg-base w-full max-w-full">
         <div className="max-w-[1400px] mx-auto w-full">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -350,7 +431,7 @@ export default function CampaignCreate() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             {/* Campaign Form */}
             <div>
               <GlassCard>
