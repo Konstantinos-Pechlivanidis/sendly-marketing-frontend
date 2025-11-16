@@ -95,13 +95,31 @@ export default function DateRangePicker({
 
     if (isOpen) {
       updatePosition();
+      
       // Update position on scroll and resize to keep it aligned with the button
-      window.addEventListener('scroll', updatePosition, true);
+      const scrollOptions = { passive: true, capture: true };
+      window.addEventListener('scroll', updatePosition, scrollOptions);
       window.addEventListener('resize', updatePosition);
       
+      // Also listen to scroll on all scrollable parents
+      let parent = buttonRef.current?.parentElement;
+      const scrollableParents = [];
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+            style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          parent.addEventListener('scroll', updatePosition, scrollOptions);
+          scrollableParents.push(parent);
+        }
+        parent = parent.parentElement;
+      }
+      
       return () => {
-        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('scroll', updatePosition, scrollOptions);
         window.removeEventListener('resize', updatePosition);
+        scrollableParents.forEach(p => {
+          p.removeEventListener('scroll', updatePosition, scrollOptions);
+        });
       };
     }
   }, [isOpen]);

@@ -37,16 +37,20 @@ export default function GlassTimePicker({
   const minuteOptions = Array.from({ length: 60 }, (_, i) => i);
 
   const handleHourChange = (hour) => {
-    setHours(hour);
+    const newHours = hour;
+    setHours(newHours);
     setIsHourPickerOpen(false);
-    const newTime = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    const newTime = `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    // Update internal state immediately for responsive UI
     onChange({ target: { value: newTime } });
   };
 
   const handleMinuteChange = (minute) => {
-    setMinutes(minute);
+    const newMinutes = minute;
+    setMinutes(newMinutes);
     setIsMinutePickerOpen(false);
-    const newTime = `${String(hours).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    const newTime = `${String(hours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+    // Update internal state immediately for responsive UI
     onChange({ target: { value: newTime } });
   };
 
@@ -64,25 +68,123 @@ export default function GlassTimePicker({
   const [hourPickerPosition, setHourPickerPosition] = useState({ top: 0, left: 0, width: 0 });
   const [minutePickerPosition, setMinutePickerPosition] = useState({ top: 0, left: 0, width: 0 });
 
+  // Update hour picker position on scroll/resize
   useEffect(() => {
     if (isHourPickerOpen && hourPickerRef.current) {
-      const rect = hourPickerRef.current.getBoundingClientRect();
-      setHourPickerPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
-      });
+      const updatePosition = () => {
+        if (!hourPickerRef.current) return;
+        const rect = hourPickerRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const estimatedHeight = 200;
+        const gap = 8;
+        
+        let top = rect.bottom + gap;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Check if we should position above
+        if (spaceBelow < estimatedHeight + gap && spaceAbove >= estimatedHeight + gap) {
+          top = rect.top - estimatedHeight - gap;
+        }
+        
+        // Ensure it stays within viewport
+        if (top < 16) top = 16;
+        if (top + estimatedHeight > viewportHeight - 16) {
+          top = viewportHeight - estimatedHeight - 16;
+        }
+        
+        setHourPickerPosition({
+          top,
+          left: rect.left,
+          width: rect.width,
+        });
+      };
+
+      updatePosition();
+      const scrollOptions = { passive: true, capture: true };
+      window.addEventListener('scroll', updatePosition, scrollOptions);
+      window.addEventListener('resize', updatePosition);
+      
+      // Listen to scroll on scrollable parents
+      let parent = hourPickerRef.current.parentElement;
+      const scrollableParents = [];
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+            style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          parent.addEventListener('scroll', updatePosition, scrollOptions);
+          scrollableParents.push(parent);
+        }
+        parent = parent.parentElement;
+      }
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, scrollOptions);
+        window.removeEventListener('resize', updatePosition);
+        scrollableParents.forEach(p => {
+          p.removeEventListener('scroll', updatePosition, scrollOptions);
+        });
+      };
     }
   }, [isHourPickerOpen]);
 
+  // Update minute picker position on scroll/resize
   useEffect(() => {
     if (isMinutePickerOpen && minutePickerRef.current) {
-      const rect = minutePickerRef.current.getBoundingClientRect();
-      setMinutePickerPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
-      });
+      const updatePosition = () => {
+        if (!minutePickerRef.current) return;
+        const rect = minutePickerRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const estimatedHeight = 200;
+        const gap = 8;
+        
+        let top = rect.bottom + gap;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Check if we should position above
+        if (spaceBelow < estimatedHeight + gap && spaceAbove >= estimatedHeight + gap) {
+          top = rect.top - estimatedHeight - gap;
+        }
+        
+        // Ensure it stays within viewport
+        if (top < 16) top = 16;
+        if (top + estimatedHeight > viewportHeight - 16) {
+          top = viewportHeight - estimatedHeight - 16;
+        }
+        
+        setMinutePickerPosition({
+          top,
+          left: rect.left,
+          width: rect.width,
+        });
+      };
+
+      updatePosition();
+      const scrollOptions = { passive: true, capture: true };
+      window.addEventListener('scroll', updatePosition, scrollOptions);
+      window.addEventListener('resize', updatePosition);
+      
+      // Listen to scroll on scrollable parents
+      let parent = minutePickerRef.current.parentElement;
+      const scrollableParents = [];
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+            style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          parent.addEventListener('scroll', updatePosition, scrollOptions);
+          scrollableParents.push(parent);
+        }
+        parent = parent.parentElement;
+      }
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, scrollOptions);
+        window.removeEventListener('resize', updatePosition);
+        scrollableParents.forEach(p => {
+          p.removeEventListener('scroll', updatePosition, scrollOptions);
+        });
+      };
     }
   }, [isMinutePickerOpen]);
 
@@ -119,10 +221,44 @@ export default function GlassTimePicker({
     };
   }, [isHourPickerOpen, isMinutePickerOpen]);
 
+  // Format time for display - use internal state for immediate feedback
+  const formatDisplayTime = () => {
+    // Use internal state (hours, minutes) for immediate display, fallback to value prop
+    const h = hours;
+    const m = minutes;
+    if (isNaN(h) || isNaN(m)) {
+      // Fallback to value prop if state is invalid
+      if (value && typeof value === 'string') {
+        const [hVal, mVal] = value.split(':').map(Number);
+        if (!isNaN(hVal) && !isNaN(mVal)) {
+          const hour12 = hVal === 0 ? 12 : hVal > 12 ? hVal - 12 : hVal;
+          const ampm = hVal >= 12 ? 'PM' : 'AM';
+          return `${hour12}:${String(mVal).padStart(2, '0')} ${ampm}`;
+        }
+      }
+      return 'Select time';
+    }
+    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
+
+  // Determine if we have a valid time selection
+  const hasValidTime = (hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59);
+
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {/* Hour Picker */}
-      <div className="flex-1 relative" ref={hourPickerRef}>
+    <div className={`flex flex-col gap-3 ${className}`}>
+      {/* Display Selected Time */}
+      {hasValidTime && (
+        <div className="px-4 py-2.5 rounded-lg bg-ice-primary/10 border border-ice-primary/30 text-center animate-in fade-in duration-200">
+          <p className="text-xs text-neutral-text-secondary mb-1 font-medium uppercase tracking-wider">Selected Time</p>
+          <p className="text-xl font-bold text-ice-primary">{formatDisplayTime()}</p>
+        </div>
+      )}
+      
+      <div className="flex items-center gap-3">
+        {/* Hour Picker */}
+        <div className="flex-1 relative" ref={hourPickerRef}>
         <button
           type="button"
           onClick={() => {
@@ -226,12 +362,13 @@ export default function GlassTimePicker({
         )}
       </div>
 
-      {/* AM/PM Display */}
-      <div className="px-3 py-3 text-center">
-        <div className="text-lg font-semibold text-neutral-text-primary">
-          {getAmPm(hours)}
+        {/* AM/PM Display */}
+        <div className="px-3 py-3 text-center">
+          <div className="text-lg font-semibold text-neutral-text-primary">
+            {getAmPm(hours)}
+          </div>
+          <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
         </div>
-        <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
       </div>
     </div>
   );

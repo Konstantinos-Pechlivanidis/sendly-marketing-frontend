@@ -44,7 +44,7 @@ export default function GlassSelectCustom({
       })
     : options;
 
-  // Calculate dropdown position when opening
+  // Calculate dropdown position when opening and update on scroll/resize
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const updatePosition = () => {
@@ -106,14 +106,34 @@ export default function GlassSelectCustom({
         setDropdownPosition({ top: adjustedTop, left: adjustedLeft, width });
       };
 
+      // Initial position calculation
       updatePosition();
+      
       // Update position on scroll and resize to keep it aligned with the button
-      window.addEventListener('scroll', updatePosition, true);
+      // Use both capture and bubble phases to catch all scroll events
+      const scrollOptions = { passive: true, capture: true };
+      window.addEventListener('scroll', updatePosition, scrollOptions);
       window.addEventListener('resize', updatePosition);
+      
+      // Also listen to scroll on all scrollable parents
+      let parent = buttonRef.current.parentElement;
+      const scrollableParents = [];
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+            style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          parent.addEventListener('scroll', updatePosition, scrollOptions);
+          scrollableParents.push(parent);
+        }
+        parent = parent.parentElement;
+      }
 
       return () => {
-        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('scroll', updatePosition, scrollOptions);
         window.removeEventListener('resize', updatePosition);
+        scrollableParents.forEach(p => {
+          p.removeEventListener('scroll', updatePosition, scrollOptions);
+        });
       };
     }
   }, [isOpen]);
