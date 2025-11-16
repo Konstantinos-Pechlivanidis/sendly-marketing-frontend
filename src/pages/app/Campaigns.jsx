@@ -238,25 +238,23 @@ export default function Campaigns() {
                       setPage(1);
                     }}
                   />
-                  <div className="relative z-[60]">
-                    <GlassSelectCustom
-                      label="Filter by Status"
-                      value={statusFilter}
-                      onChange={(e) => {
-                        setStatusFilter(e.target.value);
-                        setPage(1);
-                      }}
-                      options={[
-                        { value: '', label: 'All Statuses' },
-                        { value: 'draft', label: 'Draft' },
-                        { value: 'scheduled', label: 'Scheduled' },
-                        { value: 'sending', label: 'Sending' },
-                        { value: 'sent', label: 'Sent' },
-                        { value: 'failed', label: 'Failed' },
-                        { value: 'cancelled', label: 'Cancelled' },
-                      ]}
-                    />
-                  </div>
+                  <GlassSelectCustom
+                    label="Filter by Status"
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setPage(1);
+                    }}
+                    options={[
+                      { value: '', label: 'All Statuses' },
+                      { value: 'draft', label: 'Draft' },
+                      { value: 'scheduled', label: 'Scheduled' },
+                      { value: 'sending', label: 'Sending' },
+                      { value: 'sent', label: 'Sent' },
+                      { value: 'failed', label: 'Failed' },
+                      { value: 'cancelled', label: 'Cancelled' },
+                    ]}
+                  />
                 </div>
               </div>
             </GlassCard>

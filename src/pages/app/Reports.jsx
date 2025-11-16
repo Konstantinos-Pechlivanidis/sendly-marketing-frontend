@@ -13,6 +13,7 @@ import GlassTable, {
   GlassTableCell,
 } from '../../components/ui/GlassTable';
 import Icon from '../../components/ui/Icon';
+import StatusBadge from '../../components/ui/StatusBadge';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
 import EmptyState from '../../components/ui/EmptyState';
@@ -186,6 +187,30 @@ export default function Reports() {
       { name: 'Pending', value: Math.max(0, sent - delivered - failed) },
     ].filter(item => item.value > 0);
   }, [overview.campaignPerformance?.summary, campaigns.campaignStats]);
+
+  // Campaign status breakdown data for pie chart
+  // Maps backend campaign statuses to display names (aligned with campaign status handling)
+  const campaignStatusData = useMemo(() => {
+    const breakdown = campaigns.statusBreakdown || [];
+    if (!Array.isArray(breakdown) || breakdown.length === 0) {
+      return [];
+    }
+    // Status mapping: matches backend CampaignStatus enum (draft, scheduled, sending, sent, failed, cancelled)
+    const statusMap = {
+      draft: 'Draft',
+      scheduled: 'Scheduled',
+      sending: 'Sending',
+      sent: 'Sent',
+      failed: 'Failed',
+      cancelled: 'Cancelled',
+    };
+    return breakdown
+      .map(item => ({
+        name: statusMap[item.status] || item.status,
+        value: item.count || 0,
+      }))
+      .filter(item => item.value > 0);
+  }, [campaigns.statusBreakdown]);
 
   const messagingStatusData = useMemo(() => {
     const byStatus = messaging.byStatus || {};
@@ -462,6 +487,34 @@ export default function Reports() {
                     </div>
                   )}
 
+                  {/* Charts */}
+                  {hasData && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                      {campaignTrends.length > 0 && (
+                        <GlassCard className="p-4 sm:p-6">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Campaign Messages Over Time</h3>
+                          <LineChart
+                            data={campaignTrends}
+                            dataKey="messages"
+                            name="Messages"
+                            stroke="#4E8FB8"
+                          />
+                        </GlassCard>
+                      )}
+
+                      {campaignStatusData.length > 0 && (
+                        <GlassCard className="p-4 sm:p-6">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-neutral-text-primary">Campaign Status Breakdown</h3>
+                          <PieChart
+                            data={campaignStatusData}
+                            dataKey="value"
+                            nameKey="name"
+                          />
+                        </GlassCard>
+                      )}
+                    </div>
+                  )}
+
                   {/* Top Performers */}
                   {campaigns.topPerformers && campaigns.topPerformers.length > 0 && (
                     <GlassCard className="p-4 sm:p-6">
@@ -488,7 +541,7 @@ export default function Reports() {
                                   </Link>
                                 </GlassTableCell>
                                 <GlassTableCell>
-                                  <span className="text-sm text-neutral-text-secondary">{campaign.status}</span>
+                                  <StatusBadge status={campaign.status} />
                                 </GlassTableCell>
                                 <GlassTableCell>
                                   <span className="text-neutral-text-primary font-medium">{campaign.delivered || 0}</span>
@@ -534,7 +587,7 @@ export default function Reports() {
                                   </Link>
                                 </GlassTableCell>
                                 <GlassTableCell>
-                                  <span className="text-sm text-neutral-text-secondary">{campaign.status}</span>
+                                  <StatusBadge status={campaign.status} />
                                 </GlassTableCell>
                                 <GlassTableCell>
                                   <span className="text-neutral-text-primary font-medium">{campaign.messageCount || 0}</span>
