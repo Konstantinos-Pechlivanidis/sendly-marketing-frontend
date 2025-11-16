@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { clsx } from 'clsx';
+import { useEffect, useCallback } from 'react';
 import GlassModal from './GlassModal';
 import GlassButton from './GlassButton';
 import Icon from './Icon';
@@ -21,10 +20,10 @@ export default function ConfirmDialog({
   destructive = false,
   className,
 }) {
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     onConfirm();
     onClose();
-  };
+  }, [onConfirm, onClose]);
 
   useEffect(() => {
     const handleEscape = (e) => {

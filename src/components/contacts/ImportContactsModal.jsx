@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import GlassModal from '../ui/GlassModal';
 import GlassButton from '../ui/GlassButton';
-import GlassInput from '../ui/GlassInput';
 import Icon from '../ui/Icon';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { useImportContacts } from '../../services/queries';

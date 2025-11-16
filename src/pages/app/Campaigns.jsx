@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassTable, {
   GlassTableHeader,
@@ -19,7 +18,7 @@ import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import EmptyState from '../../components/ui/EmptyState';
-import { useCampaigns, useDeleteCampaign, useSendCampaign, useScheduleCampaign, useCampaignStats } from '../../services/queries';
+import { useCampaigns, useDeleteCampaign, useSendCampaign, useCampaignStats } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format } from 'date-fns';
@@ -45,9 +44,8 @@ export default function Campaigns() {
 
   const deleteCampaign = useDeleteCampaign();
   const sendCampaign = useSendCampaign();
-  const scheduleCampaign = useScheduleCampaign();
 
-  const campaigns = data?.campaigns || [];
+  const campaigns = useMemo(() => data?.campaigns || [], [data?.campaigns]);
   const pagination = data?.pagination || {};
 
   const handleDeleteClick = (id, name) => {

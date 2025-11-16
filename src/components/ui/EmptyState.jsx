@@ -19,7 +19,6 @@ export default function EmptyState({
   onAction,
   actionTo,
   className,
-  variant = 'default',
 }) {
   return (
     <GlassCard className={clsx('p-12 text-center', className)}>

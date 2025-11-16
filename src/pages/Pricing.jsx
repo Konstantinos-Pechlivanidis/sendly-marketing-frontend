@@ -54,7 +54,7 @@ const FALLBACK_PACKAGES = [
 export default function Pricing() {
   // Detect user's currency preference (default to EUR)
   const userCurrency = navigator.language?.includes('US') ? 'USD' : 'EUR';
-  const { data: packagesData, isLoading, error } = usePublicPackages(userCurrency);
+  const { data: packagesData, isLoading } = usePublicPackages(userCurrency);
   
   // Use fallback packages if API fails or no data
   // If we have packages from API, use them; otherwise use fallback

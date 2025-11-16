@@ -1,13 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import Icon from '../../components/ui/Icon';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
 import { useDashboard } from '../../services/queries';
-import { TOKEN_KEY, STORE_KEY } from '../../utils/constants';
 import { useStoreInfo } from '../../hooks/useStoreInfo';
 import SEO from '../../components/SEO';
 
@@ -19,18 +16,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const storeInfo = useStoreInfo();
   // Use cached data when available - only show loading on initial load
-  const { data: dashboardData, isLoading, isFetching, error } = useDashboard({
+  const { data: dashboardData, isLoading, error } = useDashboard({
     refetchInterval: false, // Disable auto-refetch - data is cached and fresh for 2 minutes
   });
-
-  // Authentication is handled by ProtectedRoute component
-  // No need for redundant check here
-
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(STORE_KEY);
-    navigate('/login', { replace: true });
-  };
 
   // Only show full loading state on initial load (no cached data)
   // If we have cached data, show it immediately even if fetching

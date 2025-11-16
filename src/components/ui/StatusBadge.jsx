@@ -28,10 +28,8 @@ const StatusBadge = memo(function StatusBadge({ status, className }) {
     // Automation statuses
     paused: { label: 'Paused', variant: 'default', color: 'neutral-text-secondary' },
     
-    // Message statuses
-    sent: { label: 'Sent', variant: 'ice', color: 'ice-deep' },
+    // Message statuses (sent and failed already defined above for campaigns)
     delivered: { label: 'Delivered', variant: 'ice', color: 'ice-deep' },
-    failed: { label: 'Failed', variant: 'default', color: 'red-600' },
   };
 
   const config = statusConfig[status?.toLowerCase()] || {

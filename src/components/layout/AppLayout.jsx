@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import Icon from '../ui/Icon';
 import { TOKEN_KEY, STORE_KEY } from '../../utils/constants';

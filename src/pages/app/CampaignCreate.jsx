@@ -4,7 +4,6 @@ import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
-import GlassSelect from '../../components/ui/GlassSelect';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassDateTimePicker from '../../components/ui/GlassDateTimePicker';
 import BackButton from '../../components/ui/BackButton';
@@ -94,44 +93,6 @@ export default function CampaignCreate() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
-  };
-
-  const handleBlur = (fieldName) => {
-    // Real-time validation on blur
-    const newErrors = { ...errors };
-    
-    if (fieldName === 'name' && !formData.name.trim()) {
-      newErrors.name = 'Campaign name is required';
-    } else if (fieldName === 'name') {
-      delete newErrors.name;
-    }
-    
-    if (fieldName === 'message') {
-      if (!formData.message.trim()) {
-        newErrors.message = 'Message is required';
-      } else if (formData.message.trim().length < 10) {
-        newErrors.message = 'Message must be at least 10 characters';
-      } else if (formData.message.trim().length > 1600) {
-        newErrors.message = 'Message is too long (max 1600 characters)';
-      } else {
-        delete newErrors.message;
-      }
-    }
-    
-    if (fieldName === 'scheduleAt' && isScheduled) {
-      if (!formData.scheduleAt) {
-        newErrors.scheduleAt = 'Scheduled date and time is required';
-      } else {
-        const scheduleDate = new Date(formData.scheduleAt);
-        if (scheduleDate <= new Date()) {
-          newErrors.scheduleAt = 'Schedule date must be in the future';
-        } else {
-          delete newErrors.scheduleAt;
-        }
-      }
-    }
-    
-    setErrors(newErrors);
   };
 
   const handleScheduleToggle = () => {

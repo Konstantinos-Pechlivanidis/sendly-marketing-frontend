@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
 import BackButton from '../../components/ui/BackButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
@@ -19,12 +18,10 @@ import ErrorState from '../../components/ui/ErrorState';
 import EmptyState from '../../components/ui/EmptyState';
 import { useCampaignReports, useCampaigns } from '../../services/queries';
 import { normalizeArrayResponse } from '../../utils/apiHelpers';
-import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format } from 'date-fns';
 
 export default function CampaignReports() {
-  const toast = useToastContext();
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
 
   const { data: campaignsData } = useCampaigns();

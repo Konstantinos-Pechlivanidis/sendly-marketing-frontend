@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
-import GlassInput from './GlassInput';
 import GlassButton from './GlassButton';
 import Icon from './Icon';
 
@@ -19,7 +18,6 @@ export default function GlassDateTimePicker({
   className,
   minDate,
   maxDate,
-  ...props
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState(value ? new Date(value) : null);

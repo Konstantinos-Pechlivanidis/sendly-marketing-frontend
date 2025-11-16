@@ -6,7 +6,6 @@ import PageHeader from '../../components/ui/PageHeader';
 import BackButton from '../../components/ui/BackButton';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Icon from '../../components/ui/Icon';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -14,7 +13,6 @@ import {
   useCampaign,
   useDeleteCampaign,
   useSendCampaign,
-  useScheduleCampaign,
   useCampaignMetrics,
 } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -31,7 +29,6 @@ export default function CampaignDetail() {
   const { data: metrics } = useCampaignMetrics(id);
   const deleteCampaign = useDeleteCampaign();
   const sendCampaign = useSendCampaign();
-  const scheduleCampaign = useScheduleCampaign();
 
   const handleDelete = async () => {
     try {

@@ -14,7 +14,6 @@ import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassPagination from '../../components/ui/GlassPagination';
 import StatusBadge from '../../components/ui/StatusBadge';
-import GlassModal from '../../components/ui/GlassModal';
 import ImportContactsModal from '../../components/contacts/ImportContactsModal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import Icon from '../../components/ui/Icon';
@@ -24,7 +23,6 @@ import EmptyState from '../../components/ui/EmptyState';
 import { useContacts, useContactStats, useDeleteContact } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
-import { format } from 'date-fns';
 
 export default function Contacts() {
   const navigate = useNavigate();

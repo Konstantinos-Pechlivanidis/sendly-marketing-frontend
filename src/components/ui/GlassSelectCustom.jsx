@@ -17,7 +17,6 @@ export default function GlassSelectCustom({
   required,
   className,
   searchable = false,
-  ...props
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

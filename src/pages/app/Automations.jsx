@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -15,7 +14,6 @@ import { useAutomations, useAutomationStats, useUpdateAutomation, useDeleteCampa
 import { useToastContext } from '../../contexts/ToastContext';
 import { normalizeArrayResponse } from '../../utils/apiHelpers';
 import SEO from '../../components/SEO';
-import { format } from 'date-fns';
 
 export default function Automations() {
   const navigate = useNavigate();
