@@ -96,27 +96,42 @@ export default function GlassDatePicker({
 
   // Close picker when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isOpen &&
-        buttonRef.current &&
-        dropdownRef.current &&
-        !buttonRef.current.contains(event.target) &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
+    if (!isOpen) return;
 
-    if (isOpen) {
+    // Use a small delay to prevent immediate closing when opening
+    let cleanup = null;
+    const timeoutId = setTimeout(() => {
+      const handleClickOutside = (event) => {
+        if (
+          buttonRef.current &&
+          dropdownRef.current &&
+          !buttonRef.current.contains(event.target) &&
+          !dropdownRef.current.contains(event.target)
+        ) {
+          setIsOpen(false);
+          // Call onBlur after closing if provided
+          if (onBlur) {
+            onBlur();
+          }
+        }
+      };
+
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
-      return () => {
+
+      cleanup = () => {
         document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('touchstart', handleClickOutside);
       };
-    }
-  }, [isOpen]);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, [isOpen, onBlur]);
 
   const handleDateSelect = (date) => {
     // Ensure time is set to midnight for date-only fields
@@ -131,12 +146,15 @@ export default function GlassDatePicker({
       },
     };
     onChange(syntheticEvent);
-    setIsOpen(false);
     
-    // Call onBlur if provided (for validation)
-    if (onBlur) {
-      onBlur();
-    }
+    // Close picker after a small delay to allow the click event to complete
+    setTimeout(() => {
+      setIsOpen(false);
+      // Call onBlur after closing if provided
+      if (onBlur) {
+        onBlur();
+      }
+    }, 100);
   };
 
   const handleClear = () => {
@@ -168,8 +186,17 @@ export default function GlassDatePicker({
         <button
           ref={buttonRef}
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          onBlur={onBlur}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          onMouseDown={(e) => {
+            // Prevent blur when clicking the button
+            if (isOpen) {
+              e.preventDefault();
+            }
+          }}
           className={`
             w-full px-4 py-3 rounded-xl
             bg-neutral-surface-primary backdrop-blur-[24px]

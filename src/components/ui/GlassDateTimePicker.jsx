@@ -101,26 +101,37 @@ export default function GlassDateTimePicker({
 
   // Close picker when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isOpen &&
-        buttonRef.current &&
-        dropdownRef.current &&
-        !buttonRef.current.contains(event.target) &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
+    if (!isOpen) return;
 
-    if (isOpen) {
+    // Use a small delay to prevent immediate closing when opening
+    let cleanup = null;
+    const timeoutId = setTimeout(() => {
+      const handleClickOutside = (event) => {
+        if (
+          buttonRef.current &&
+          dropdownRef.current &&
+          !buttonRef.current.contains(event.target) &&
+          !dropdownRef.current.contains(event.target)
+        ) {
+          setIsOpen(false);
+        }
+      };
+
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
-      return () => {
+
+      cleanup = () => {
         document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('touchstart', handleClickOutside);
       };
-    }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, [isOpen]);
 
   const handleDateSelect = (date) => {
@@ -256,7 +267,17 @@ export default function GlassDateTimePicker({
         <button
           ref={buttonRef}
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+          onMouseDown={(e) => {
+            // Prevent blur when clicking the button
+            if (isOpen) {
+              e.preventDefault();
+            }
+          }}
           className={`
             w-full px-4 py-3 rounded-xl
             bg-neutral-surface-primary backdrop-blur-[24px]
@@ -322,9 +343,10 @@ export default function GlassDateTimePicker({
               left: `${dropdownPosition.left}px`,
               width: dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : 'auto',
               maxWidth: 'calc(100vw - 32px)',
+              maxHeight: 'calc(100vh - 32px)',
             }}
           >
-            <div className="p-2 sm:p-4 space-y-4 sm:space-y-6">
+            <div className="p-2 sm:p-4 space-y-4 sm:space-y-6 overflow-y-auto max-h-[calc(100vh-64px)]">
               {/* Preset Buttons */}
               <div>
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Quick Select</p>

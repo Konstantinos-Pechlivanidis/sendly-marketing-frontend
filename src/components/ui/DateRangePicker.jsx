@@ -47,10 +47,12 @@ export default function DateRangePicker({
         const left = rect.left + scrollX;
         const width = rect.width;
 
-        // Check if dropdown would go off-screen on mobile
+        // Check if dropdown would go off-screen
         const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
         const dropdownWidth = Math.min(Math.max(width, 360), 420); // Min 360px, max 420px
         
+        // Adjust horizontal position
         let adjustedLeft = left;
         if (left + dropdownWidth > viewportWidth) {
           adjustedLeft = viewportWidth - dropdownWidth - 16; // 16px padding from edge
@@ -59,8 +61,20 @@ export default function DateRangePicker({
           adjustedLeft = 16;
         }
 
+        // Adjust vertical position if dropdown would go off-screen
+        let adjustedTop = top;
+        const estimatedDropdownHeight = 600; // Approximate height of the dropdown
+        if (top + estimatedDropdownHeight > viewportHeight + scrollY) {
+          // Position above the button if there's not enough space below
+          adjustedTop = rect.top + scrollY - estimatedDropdownHeight - 8;
+          // Ensure it doesn't go above viewport
+          if (adjustedTop < scrollY + 16) {
+            adjustedTop = scrollY + 16;
+          }
+        }
+
         setDropdownPosition({
-          top,
+          top: adjustedTop,
           left: adjustedLeft,
           width: dropdownWidth,
         });
@@ -81,26 +95,37 @@ export default function DateRangePicker({
 
   // Close picker when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isOpen &&
-        buttonRef.current &&
-        dropdownRef.current &&
-        !buttonRef.current.contains(event.target) &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
+    if (!isOpen) return;
 
-    if (isOpen) {
+    // Use a small delay to prevent immediate closing when opening
+    let cleanup = null;
+    const timeoutId = setTimeout(() => {
+      const handleClickOutside = (event) => {
+        if (
+          buttonRef.current &&
+          dropdownRef.current &&
+          !buttonRef.current.contains(event.target) &&
+          !dropdownRef.current.contains(event.target)
+        ) {
+          setIsOpen(false);
+        }
+      };
+
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
-      return () => {
+
+      cleanup = () => {
         document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('touchstart', handleClickOutside);
       };
-    }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, [isOpen]);
 
   const handleStartDateSelect = (date) => {
@@ -233,7 +258,17 @@ export default function DateRangePicker({
     <div className={`relative ${className}`}>
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        onMouseDown={(e) => {
+          // Prevent blur when clicking the button
+          if (isOpen) {
+            e.preventDefault();
+          }
+        }}
         className="flex items-center gap-2 px-4 py-3 rounded-xl bg-neutral-surface-primary border border-neutral-border/60 hover:border-ice-primary focus-ring focus:shadow-glow-ice-light spring-smooth shadow-sm text-sm text-neutral-text-primary font-medium min-h-[44px] w-full sm:w-auto"
         aria-label="Select date range"
         aria-expanded={isOpen}
@@ -269,9 +304,10 @@ export default function DateRangePicker({
               left: `${dropdownPosition.left}px`,
               width: dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : 'auto',
               maxWidth: 'calc(100vw - 32px)',
+              maxHeight: 'calc(100vh - 32px)',
             }}
           >
-            <div className="p-2 sm:p-4 space-y-4 sm:space-y-6">
+            <div className="p-2 sm:p-4 space-y-4 sm:space-y-6 overflow-y-auto max-h-[calc(100vh-64px)]">
               {/* Preset Buttons */}
               <div>
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Quick Select</p>
