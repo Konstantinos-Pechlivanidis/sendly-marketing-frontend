@@ -223,10 +223,15 @@ export const usePublicPackages = (currency = 'EUR') => {
  * Get billing packages (authenticated - requires store context)
  * Used for authenticated users in the app
  */
-export const useBillingPackages = () => {
+export const useBillingPackages = (currency = null) => {
   return useQuery({
-    queryKey: ['billing', 'packages'],
-    queryFn: () => api.get('/billing/packages'),
+    queryKey: ['billing', 'packages', currency],
+    queryFn: () => {
+      const url = currency 
+        ? `/billing/packages?currency=${encodeURIComponent(currency)}`
+        : '/billing/packages';
+      return api.get(url);
+    },
     retry: (failureCount, error) => {
       // Don't retry on network errors (backend not available)
       if (error?.isNetworkError || error?.status === 0) {

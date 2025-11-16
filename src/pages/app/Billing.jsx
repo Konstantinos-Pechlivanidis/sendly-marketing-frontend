@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import PageHeader from '../../components/ui/PageHeader';
@@ -15,6 +15,7 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ErrorState from '../../components/ui/ErrorState';
 import StatusBadge from '../../components/ui/StatusBadge';
 import EmptyState from '../../components/ui/EmptyState';
+import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurchase } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
@@ -23,10 +24,11 @@ import { format } from 'date-fns';
 export default function Billing() {
   const toast = useToastContext();
   const [page, setPage] = useState(1);
+  const [selectedCurrency, setSelectedCurrency] = useState('EUR');
   const pageSize = 20;
 
   const { data: balanceData, isLoading: isLoadingBalance, error: balanceError } = useBillingBalance();
-  const { data: packagesData, isLoading: isLoadingPackages, error: packagesError } = useBillingPackages();
+  const { data: packagesData, isLoading: isLoadingPackages, error: packagesError } = useBillingPackages(selectedCurrency);
   const { data: historyData, isLoading: isLoadingHistory, error: historyError } = useBillingHistory({
     page,
     pageSize,
@@ -36,7 +38,10 @@ export default function Billing() {
   // Normalize response data
   const balanceResponse = balanceData?.data || balanceData || {};
   const balance = balanceResponse.credits || balanceResponse.balance || 0;
-  const currency = balanceResponse.currency || 'EUR';
+  const defaultCurrency = balanceResponse.currency || 'EUR';
+  
+  // Use selected currency if set, otherwise use default from balance
+  const currency = selectedCurrency || defaultCurrency;
   
   const packagesResponse = packagesData?.data || packagesData || {};
   const packages = packagesResponse.packages || (Array.isArray(packagesResponse) ? packagesResponse : []);
@@ -44,6 +49,13 @@ export default function Billing() {
   const historyResponse = historyData?.data || historyData || {};
   const history = historyResponse.transactions || historyResponse.items || [];
   const pagination = historyResponse.pagination || {};
+
+  // Update selected currency when balance currency changes
+  useEffect(() => {
+    if (defaultCurrency && !selectedCurrency) {
+      setSelectedCurrency(defaultCurrency);
+    }
+  }, [defaultCurrency, selectedCurrency]);
 
   const handlePurchase = async (packageId) => {
     try {
@@ -56,6 +68,7 @@ export default function Billing() {
         packageId,
         successUrl,
         cancelUrl,
+        currency: selectedCurrency, // Include selected currency
       });
       
       // Redirect to Stripe checkout
@@ -148,13 +161,26 @@ export default function Billing() {
 
               {/* Purchase Packages */}
               <div className="mb-8 sm:mb-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2.5 rounded-xl bg-ice-soft/80">
-                    <Icon name="billing" size="md" variant="ice" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-ice-soft/80">
+                      <Icon name="billing" size="md" variant="ice" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-bold text-neutral-text-primary">Purchase Credits</h2>
+                      <p className="text-sm text-neutral-text-secondary mt-1">Choose a package to add credits to your account</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-text-primary">Purchase Credits</h2>
-                    <p className="text-sm text-neutral-text-secondary mt-1">Choose a package to add credits to your account</p>
+                  <div className="w-full sm:w-auto sm:min-w-[200px]">
+                    <GlassSelectCustom
+                      label="Currency"
+                      value={selectedCurrency}
+                      onChange={(e) => setSelectedCurrency(e.target.value)}
+                      options={[
+                        { value: 'EUR', label: 'EUR (€)' },
+                        { value: 'USD', label: 'USD ($)' },
+                      ]}
+                    />
                   </div>
                 </div>
                 
