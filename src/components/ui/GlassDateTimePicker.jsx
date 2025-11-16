@@ -308,7 +308,7 @@ export default function GlassDateTimePicker({
         <>
           {/* Mobile Backdrop */}
           <div
-            className="fixed inset-0 bg-neutral-text-primary/20 backdrop-blur-sm z-[9998] lg:hidden"
+            className="fixed inset-0 bg-neutral-text-primary/20 backdrop-blur-sm z-[99998] lg:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -316,7 +316,7 @@ export default function GlassDateTimePicker({
           {/* Date Time Picker Dropdown */}
           <div
             ref={dropdownRef}
-            className="fixed rounded-xl glass border border-neutral-border/60 z-[9999] shadow-glass-light-lg overflow-hidden"
+            className="fixed rounded-xl glass border border-neutral-border/60 z-[99999] shadow-glass-light-lg overflow-hidden"
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,

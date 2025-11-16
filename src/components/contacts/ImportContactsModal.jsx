@@ -13,7 +13,7 @@ export default function ImportContactsModal({ isOpen, onClose }) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(false); // Collapsed by default
 
   // Generate sample CSV content
   const generateSampleCSV = () => {
@@ -217,12 +217,12 @@ export default function ImportContactsModal({ isOpen, onClose }) {
       isOpen={isOpen}
       onClose={handleClose}
       title="Import Contacts"
-      size="lg"
+      size="md"
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Instructions Toggle */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-neutral-text-primary">Import Instructions</h3>
+        <div className="flex items-center justify-between pb-2 border-b border-neutral-border/60">
+          <h3 className="text-base font-semibold text-neutral-text-primary">Import Instructions</h3>
           <button
             onClick={() => setShowInstructions(!showInstructions)}
             className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors"
@@ -239,92 +239,92 @@ export default function ImportContactsModal({ isOpen, onClose }) {
 
         {/* Step-by-Step Instructions */}
         {showInstructions && (
-          <GlassCard className="p-4 sm:p-6 space-y-4">
-            <div className="space-y-4">
+          <GlassCard className="p-3 sm:p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-3">
               <div>
-                <h4 className="text-base font-semibold text-neutral-text-primary mb-3 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-ice-primary text-primary-dark text-sm font-bold">1</span>
+                <h4 className="text-sm font-semibold text-neutral-text-primary mb-2 flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-ice-primary text-primary-dark text-xs font-bold">1</span>
                   Prepare Your CSV File
                 </h4>
-                <p className="text-sm text-neutral-text-secondary ml-8 mb-3">
+                <p className="text-xs text-neutral-text-secondary ml-7 mb-2">
                   Create a CSV file with the following columns. The first row should contain column headers.
                 </p>
                 
                 {/* Field Requirements Table */}
-                <div className="ml-8 overflow-x-auto">
-                  <table className="w-full text-sm border-collapse">
+                <div className="ml-7 overflow-x-auto -mx-2">
+                  <table className="w-full text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-neutral-border/60">
-                        <th className="text-left py-2 px-3 font-semibold text-neutral-text-primary">Column Name</th>
-                        <th className="text-left py-2 px-3 font-semibold text-neutral-text-primary">Required</th>
-                        <th className="text-left py-2 px-3 font-semibold text-neutral-text-primary">Format</th>
-                        <th className="text-left py-2 px-3 font-semibold text-neutral-text-primary">Example</th>
+                        <th className="text-left py-1.5 px-2 font-semibold text-neutral-text-primary text-xs">Column</th>
+                        <th className="text-left py-1.5 px-2 font-semibold text-neutral-text-primary text-xs">Required</th>
+                        <th className="text-left py-1.5 px-2 font-semibold text-neutral-text-primary text-xs">Format</th>
+                        <th className="text-left py-1.5 px-2 font-semibold text-neutral-text-primary text-xs">Example</th>
                       </tr>
                     </thead>
                     <tbody className="text-neutral-text-secondary">
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">phoneE164</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-50 text-red-600">Required</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">phoneE164</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-600">Required</span>
                         </td>
-                        <td className="py-2 px-3">E.164 format</td>
-                        <td className="py-2 px-3 font-mono text-xs">+306977123456</td>
+                        <td className="py-1.5 px-2 text-xs">E.164</td>
+                        <td className="py-1.5 px-2 font-mono text-[10px]">+306977123456</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">firstName</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">firstName</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">Text (max 100 chars)</td>
-                        <td className="py-2 px-3">John</td>
+                        <td className="py-1.5 px-2 text-xs">Text</td>
+                        <td className="py-1.5 px-2 text-xs">John</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">lastName</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">lastName</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">Text (max 100 chars)</td>
-                        <td className="py-2 px-3">Doe</td>
+                        <td className="py-1.5 px-2 text-xs">Text</td>
+                        <td className="py-1.5 px-2 text-xs">Doe</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">email</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">email</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">Valid email format</td>
-                        <td className="py-2 px-3">john@example.com</td>
+                        <td className="py-1.5 px-2 text-xs">Email</td>
+                        <td className="py-1.5 px-2 text-xs">john@example.com</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">gender</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">gender</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">male, female, or other</td>
-                        <td className="py-2 px-3">male</td>
+                        <td className="py-1.5 px-2 text-xs">male/female/other</td>
+                        <td className="py-1.5 px-2 text-xs">male</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">birthDate</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">birthDate</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">ISO 8601 date</td>
-                        <td className="py-2 px-3 font-mono text-xs">1990-05-15</td>
+                        <td className="py-1.5 px-2 text-xs">YYYY-MM-DD</td>
+                        <td className="py-1.5 px-2 font-mono text-[10px]">1990-05-15</td>
                       </tr>
                       <tr className="border-b border-neutral-border/30">
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">smsConsent</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">smsConsent</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">opted_in, opted_out, or unknown</td>
-                        <td className="py-2 px-3">opted_in</td>
+                        <td className="py-1.5 px-2 text-xs">opted_in/out/unknown</td>
+                        <td className="py-1.5 px-2 text-xs">opted_in</td>
                       </tr>
                       <tr>
-                        <td className="py-2 px-3 font-medium text-neutral-text-primary">tags</td>
-                        <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
+                        <td className="py-1.5 px-2 font-medium text-neutral-text-primary text-xs">tags</td>
+                        <td className="py-1.5 px-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-surface-secondary text-neutral-text-secondary">Optional</span>
                         </td>
-                        <td className="py-2 px-3">Comma-separated list</td>
-                        <td className="py-2 px-3">VIP,Customer</td>
+                        <td className="py-1.5 px-2 text-xs">Comma-separated</td>
+                        <td className="py-1.5 px-2 text-xs">VIP,Customer</td>
                       </tr>
                     </tbody>
                   </table>
@@ -332,64 +332,45 @@ export default function ImportContactsModal({ isOpen, onClose }) {
               </div>
 
               <div>
-                <h4 className="text-base font-semibold text-neutral-text-primary mb-3 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-ice-primary text-primary-dark text-sm font-bold">2</span>
+                <h4 className="text-sm font-semibold text-neutral-text-primary mb-2 flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-ice-primary text-primary-dark text-xs font-bold">2</span>
                   Download Sample File
                 </h4>
-                <div className="ml-8 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <GlassButton
-                      variant="ghost"
-                      size="md"
-                      onClick={downloadSampleCSV}
-                      className="min-h-[44px]"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Icon name="export" size="sm" variant="ice" />
-                        Download Sample CSV
-                      </span>
-                    </GlassButton>
-                    <p className="text-sm text-neutral-text-secondary">
-                      Use this as a template for your import file
-                    </p>
-                  </div>
-                  <div className="bg-neutral-surface-secondary/50 rounded-lg p-3 border border-neutral-border/30">
-                    <p className="text-xs font-mono text-neutral-text-secondary whitespace-pre-wrap">
+                <div className="ml-7 space-y-2">
+                  <GlassButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={downloadSampleCSV}
+                    className="min-h-[36px] text-xs"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon name="export" size="xs" variant="ice" />
+                      Download Sample CSV
+                    </span>
+                  </GlassButton>
+                  <div className="bg-neutral-surface-secondary/50 rounded-lg p-2 border border-neutral-border/30">
+                    <p className="text-[10px] font-mono text-neutral-text-secondary whitespace-pre-wrap leading-tight">
 {`phoneE164,firstName,lastName,email,gender,birthDate,smsConsent,tags
-+306977123456,John,Doe,john@example.com,male,1990-05-15,opted_in,"VIP,Customer"
-+306977123457,Jane,Smith,jane@example.com,female,1985-08-22,opted_in,Customer`}
++306977123456,John,Doe,john@example.com,male,1990-05-15,opted_in,"VIP,Customer"`}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-base font-semibold text-neutral-text-primary mb-3 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-ice-primary text-primary-dark text-sm font-bold">3</span>
+                <h4 className="text-sm font-semibold text-neutral-text-primary mb-2 flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-ice-primary text-primary-dark text-xs font-bold">3</span>
                   Important Notes
                 </h4>
-                <ul className="ml-8 space-y-2 text-sm text-neutral-text-secondary list-disc list-inside">
-                  <li><strong>Phone numbers</strong> must be in E.164 format (e.g., +306977123456). The system will automatically normalize phone numbers, but including the + prefix is recommended.</li>
-                  <li><strong>Column names</strong> are case-insensitive and support both camelCase (phoneE164, firstName) and snake_case (phone_e164, first_name) formats</li>
-                  <li><strong>Maximum 1000 contacts</strong> per import file</li>
-                  <li><strong>Duplicate handling:</strong> If a contact with the same phone number already exists, it will be updated with the new data</li>
-                  <li><strong>Empty cells</strong> are allowed for optional fields</li>
-                  <li><strong>Tags</strong> should be comma-separated within the cell (e.g., "VIP,Customer,Newsletter")</li>
-                  <li><strong>Birth dates</strong> should be in YYYY-MM-DD format (e.g., 1990-05-15)</li>
-                  <li><strong>SMS Consent</strong> defaults to "unknown" if not provided. Valid values: opted_in, opted_out, unknown</li>
-                  <li><strong>Gender</strong> must be one of: male, female, or other (if provided)</li>
-                  <li><strong>Quoted fields:</strong> If your data contains commas, wrap the field in double quotes (e.g., "Smith, John")</li>
+                <ul className="ml-7 space-y-1 text-xs text-neutral-text-secondary list-disc list-inside">
+                  <li><strong>Phone:</strong> E.164 format required (e.g., +306977123456)</li>
+                  <li><strong>Column names:</strong> Case-insensitive, supports camelCase/snake_case</li>
+                  <li><strong>Max 1000 contacts</strong> per import</li>
+                  <li><strong>Duplicates:</strong> Existing contacts will be updated</li>
+                  <li><strong>Tags:</strong> Comma-separated (e.g., "VIP,Customer")</li>
+                  <li><strong>Dates:</strong> YYYY-MM-DD format (e.g., 1990-05-15)</li>
+                  <li><strong>Consent:</strong> opted_in, opted_out, or unknown (defaults to unknown)</li>
                 </ul>
-              </div>
-
-              <div>
-                <h4 className="text-base font-semibold text-neutral-text-primary mb-3 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-ice-primary text-primary-dark text-sm font-bold">4</span>
-                  Upload Your File
-                </h4>
-                <p className="text-sm text-neutral-text-secondary ml-8">
-                  Select your CSV file below and click "Import Contacts" to begin the import process.
-                </p>
               </div>
             </div>
           </GlassCard>
