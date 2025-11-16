@@ -25,15 +25,12 @@ import {
   useCreditsReports,
   useContactsReports,
   useAutomationReports,
-  useExportData,
 } from '../../services/queries';
-import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format, subDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 
 export default function Reports() {
-  const toast = useToastContext();
   const [activeTab, setActiveTab] = useState('overview');
   const [startDate, setStartDate] = useState(subDays(new Date(), 30));
   const [endDate, setEndDate] = useState(new Date());
@@ -52,21 +49,6 @@ export default function Reports() {
   const { data: creditsData, isLoading: isLoadingCredits, error: creditsError } = useCreditsReports(dateParams);
   const { data: contactsData, isLoading: isLoadingContacts, error: contactsError } = useContactsReports(dateParams);
   const { data: automationsData, isLoading: isLoadingAutomations, error: automationsError } = useAutomationReports(dateParams);
-
-  const exportData = useExportData();
-
-  const handleExport = async () => {
-    try {
-      await exportData.mutateAsync({
-        type: activeTab === 'overview' ? 'overview' : activeTab,
-        format: 'csv',
-        ...dateParams,
-      });
-      toast.success('Report exported successfully');
-    } catch (error) {
-      toast.error(error?.message || 'Failed to export report');
-    }
-  };
 
   // Normalize API responses - memoize to prevent unnecessary re-renders
   const overview = useMemo(() => overviewData?.data || overviewData || {}, [overviewData]);
@@ -289,18 +271,6 @@ export default function Reports() {
                 onStartDateChange={setStartDate}
                 onEndDateChange={setEndDate}
               />
-              <GlassButton
-                variant="ghost"
-                size="lg"
-                onClick={handleExport}
-                disabled={exportData.isPending}
-                className="min-h-[44px]"
-              >
-                <span className="flex items-center gap-2">
-                  <Icon name="export" size="sm" variant="ice" />
-                  Export
-                </span>
-              </GlassButton>
             </div>
           </PageHeader>
 

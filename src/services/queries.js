@@ -448,12 +448,12 @@ export const useImportContacts = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (formData) => {
+    mutationFn: (data) => {
+      // Data should be { contacts: [...] } - parsed from CSV on client side
       // Use axios for consistency with other API calls
-      // Axios automatically handles FormData and adds auth token via interceptor
-      return api.post('/contacts/import', formData, {
+      return api.post('/contacts/import', data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
     },
