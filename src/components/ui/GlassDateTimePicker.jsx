@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { format, setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import GlassCalendar from './GlassCalendar';
@@ -100,41 +100,57 @@ export default function GlassDateTimePicker({
   }, [isOpen]);
 
   const handleDateSelect = (date) => {
-    // Update date but keep existing time, or use tempTime if no existing time
-    const [hours, minutes] = tempTime.split(':').map(Number);
-    const newDateTime = setMilliseconds(
-      setSeconds(
-        setMinutes(
-          setHours(date, hours || 9),
-          minutes || 0
+    try {
+      // Update date but keep existing time, or use tempTime if no existing time
+      const [hours, minutes] = tempTime.split(':').map(Number);
+      const newDateTime = setMilliseconds(
+        setSeconds(
+          setMinutes(
+            setHours(new Date(date), hours || 9),
+            minutes || 0
+          ),
+          0
         ),
         0
-      ),
-      0
-    );
-    setSelectedDateTime(newDateTime);
-    updateDateTime(newDateTime);
+      );
+      // Update state immediately for UI feedback
+      setSelectedDateTime(newDateTime);
+      // Update parent component
+      updateDateTime(newDateTime);
+    } catch (error) {
+      console.error('Error in handleDateSelect:', error);
+    }
   };
 
   const handleTimeChange = (e) => {
-    const timeValue = e.target.value; // Format: "HH:mm"
-    setTempTime(timeValue);
-    
-    const [hours, minutes] = timeValue.split(':').map(Number);
-    const baseDate = selectedDateTime || new Date();
-    
-    const newDateTime = setMilliseconds(
-      setSeconds(
-        setMinutes(
-          setHours(baseDate, hours || 9),
-          minutes || 0
+    try {
+      const timeValue = e?.target?.value || ''; // Format: "HH:mm"
+      if (!timeValue) return;
+      
+      setTempTime(timeValue);
+      
+      const [hours, minutes] = timeValue.split(':').map(Number);
+      // Use current date if no date is selected, otherwise use selected date
+      const baseDate = selectedDateTime || new Date();
+      
+      const newDateTime = setMilliseconds(
+        setSeconds(
+          setMinutes(
+            setHours(new Date(baseDate), hours || 9),
+            minutes || 0
+          ),
+          0
         ),
         0
-      ),
-      0
-    );
-    setSelectedDateTime(newDateTime);
-    updateDateTime(newDateTime);
+      );
+      
+      // Update state immediately for UI feedback
+      setSelectedDateTime(newDateTime);
+      // Update parent component
+      updateDateTime(newDateTime);
+    } catch (error) {
+      console.error('Error in handleTimeChange:', error);
+    }
   };
 
   const updateDateTime = (dateTime) => {
@@ -198,7 +214,14 @@ export default function GlassDateTimePicker({
     onChange(syntheticEvent);
   };
 
-  const displayValue = selectedDateTime ? format(selectedDateTime, 'MMM d, yyyy h:mm a') : '';
+  // Calculate display value - ensure it updates when time changes
+  // Use useMemo to ensure it recalculates when selectedDateTime or tempTime changes
+  const displayValue = useMemo(() => {
+    if (selectedDateTime) {
+      return format(selectedDateTime, 'MMM d, yyyy h:mm a');
+    }
+    return '';
+  }, [selectedDateTime]);
 
   // Parse minDate and maxDate to Date objects if they're strings
   const minDateObj = minDate ? new Date(minDate) : null;

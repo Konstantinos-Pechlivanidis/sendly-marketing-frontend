@@ -37,29 +37,43 @@ export default function GlassTimePicker({
   const minuteOptions = Array.from({ length: 60 }, (_, i) => i);
 
   const handleHourChange = (hour) => {
-    const newHours = hour;
-    const newTime = `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    // Update state immediately
-    setHours(newHours);
-    // Call onChange immediately with the new time value
-    onChange({ target: { value: newTime } });
-    // Close modal after a small delay to allow state updates
-    setTimeout(() => {
+    try {
+      const newHours = hour;
+      const newTime = `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      // Update state immediately for UI feedback
+      setHours(newHours);
+      // Call onChange immediately with the new time value
+      if (onChange && typeof onChange === 'function') {
+        onChange({ target: { value: newTime } });
+      }
+      // Close modal after a small delay to allow state updates
+      setTimeout(() => {
+        setIsHourPickerOpen(false);
+      }, 100);
+    } catch (error) {
+      console.error('Error in handleHourChange:', error);
       setIsHourPickerOpen(false);
-    }, 100);
+    }
   };
 
   const handleMinuteChange = (minute) => {
-    const newMinutes = minute;
-    const newTime = `${String(hours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
-    // Update state immediately
-    setMinutes(newMinutes);
-    // Call onChange immediately with the new time value
-    onChange({ target: { value: newTime } });
-    // Close modal after a small delay to allow state updates
-    setTimeout(() => {
+    try {
+      const newMinutes = minute;
+      const newTime = `${String(hours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+      // Update state immediately for UI feedback
+      setMinutes(newMinutes);
+      // Call onChange immediately with the new time value
+      if (onChange && typeof onChange === 'function') {
+        onChange({ target: { value: newTime } });
+      }
+      // Close modal after a small delay to allow state updates
+      setTimeout(() => {
+        setIsMinutePickerOpen(false);
+      }, 100);
+    } catch (error) {
+      console.error('Error in handleMinuteChange:', error);
       setIsMinutePickerOpen(false);
-    }, 100);
+    }
   };
 
   const formatHour = (h) => {

@@ -43,76 +43,12 @@ export default function GlassSelectCustom({
       })
     : options;
 
-  // Calculate dropdown position when opening
+  // Prevent body scroll when modal is open
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const updatePosition = () => {
-        if (!buttonRef.current) return;
-        const buttonRect = buttonRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        // Calculate width (viewport-relative for fixed positioning)
-        let width = buttonRect.width;
-        
-        // On mobile, use full button width
-        if (viewportWidth < 640) {
-          width = buttonRect.width;
-        }
-        
-        // Calculate horizontal position (viewport-relative for fixed positioning)
-        let adjustedLeft = buttonRect.left;
-        const estimatedDropdownWidth = viewportWidth < 640 ? width : Math.max(width, 200); // min-w-[200px] on desktop
-        
-        if (adjustedLeft + estimatedDropdownWidth > viewportWidth) {
-          adjustedLeft = viewportWidth - estimatedDropdownWidth - 16; // 16px padding from edge
-        }
-        if (adjustedLeft < 16) {
-          adjustedLeft = 16;
-        }
-        
-        // Calculate vertical position - check if we should open above or below
-        const spaceBelow = viewportHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-        const gap = 8; // Gap between button and dropdown
-        const estimatedDropdownHeight = 240; // max-h-60 = 240px (can be more with many options)
-        
-        let adjustedTop;
-        if (spaceBelow >= estimatedDropdownHeight + gap) {
-          // Enough space below - position below the button (viewport-relative)
-          adjustedTop = buttonRect.bottom + gap;
-        } else if (spaceAbove >= estimatedDropdownHeight + gap) {
-          // Not enough space below, but enough above - position above the button
-          adjustedTop = buttonRect.top - estimatedDropdownHeight - gap;
-        } else {
-          // Not enough space either way - position where there's more space
-          if (spaceBelow > spaceAbove) {
-            // More space below - position below with max-height constraint
-            adjustedTop = buttonRect.bottom + gap;
-          } else {
-            // More space above - position above with max-height constraint
-            adjustedTop = buttonRect.top - estimatedDropdownHeight - gap;
-          }
-          // Ensure it doesn't go outside viewport
-          if (adjustedTop < 16) {
-            adjustedTop = 16;
-          }
-          if (adjustedTop + estimatedDropdownHeight > viewportHeight - 16) {
-            adjustedTop = viewportHeight - estimatedDropdownHeight - 16;
-          }
-        }
-        
-        setDropdownPosition({ top: adjustedTop, left: adjustedLeft, width });
-      };
-
-      updatePosition();
-      // Update position on scroll and resize to keep it aligned with the button
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
-
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
       return () => {
-        window.removeEventListener('scroll', updatePosition, true);
-        window.removeEventListener('resize', updatePosition);
+        document.body.style.overflow = 'unset';
       };
     }
   }, [isOpen]);
@@ -164,15 +100,31 @@ export default function GlassSelectCustom({
   }, [isOpen]);
 
   const handleSelect = (optionValue) => {
-    const syntheticEvent = {
-      target: {
-        name,
-        value: optionValue,
-      },
-    };
-    onChange(syntheticEvent);
-    setIsOpen(false);
-    setSearchQuery('');
+    try {
+      // Close modal first to prevent any interaction issues
+      setIsOpen(false);
+      setSearchQuery('');
+      
+      // Create synthetic event with proper structure
+      const syntheticEvent = {
+        target: {
+          name: name || '',
+          value: optionValue,
+        },
+        preventDefault: () => {},
+        stopPropagation: () => {},
+      };
+      
+      // Call onChange with error handling
+      if (onChange && typeof onChange === 'function') {
+        onChange(syntheticEvent);
+      }
+    } catch (error) {
+      console.error('Error in handleSelect:', error);
+      // Still close the modal even if there's an error
+      setIsOpen(false);
+      setSearchQuery('');
+    }
   };
 
   return (
