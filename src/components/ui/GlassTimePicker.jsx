@@ -19,14 +19,22 @@ export default function GlassTimePicker({
   const hourPickerRef = useRef(null);
   const minutePickerRef = useRef(null);
 
-  // Parse value prop
+  // Parse value prop and update internal state
+  // This syncs the internal state with the value prop from parent
   useEffect(() => {
     if (value && typeof value === 'string') {
       const [h, m] = value.split(':').map(Number);
       if (!isNaN(h) && !isNaN(m)) {
-        setHours(h >= 0 && h <= 23 ? h : 9);
-        setMinutes(m >= 0 && m <= 59 ? m : 0);
+        const validHours = h >= 0 && h <= 23 ? h : 9;
+        const validMinutes = m >= 0 && m <= 59 ? m : 0;
+        // Always update to sync with prop value (value prop is source of truth)
+        setHours(validHours);
+        setMinutes(validMinutes);
       }
+    } else if (!value) {
+      // Reset to default if value is empty
+      setHours(9);
+      setMinutes(0);
     }
   }, [value]);
 
@@ -97,23 +105,42 @@ export default function GlassTimePicker({
   }, [isHourPickerOpen, isMinutePickerOpen]);
 
 
+  // Determine if we have a valid time selection
+  const hasValidTime = (hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59);
+  const displayTime = hasValidTime 
+    ? `${String(formatHour(hours)).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${getAmPm(hours)}`
+    : '';
+
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {/* Hour Picker */}
-      <div className="flex-1 relative" ref={hourPickerRef}>
-        <button
-          type="button"
-          onClick={() => {
-            setIsHourPickerOpen(!isHourPickerOpen);
-            setIsMinutePickerOpen(false);
-          }}
-          className="w-full px-4 py-3 rounded-xl bg-neutral-surface-primary border border-neutral-border/60 text-neutral-text-primary focus-ring focus:border-ice-primary focus:shadow-glow-ice-light text-center text-lg font-semibold min-h-[44px] hover:border-neutral-border transition-colors"
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-2xl">{String(formatHour(hours)).padStart(2, '0')}</span>
-            <span className="text-xs text-neutral-text-secondary mt-0.5">Hour</span>
-          </div>
-        </button>
+    <div className={`flex flex-col gap-3 ${className}`}>
+      {/* Display Selected Time */}
+      {hasValidTime && displayTime && (
+        <div className="px-4 py-2.5 rounded-lg bg-ice-primary/10 border border-ice-primary/30 text-center animate-in fade-in duration-200">
+          <p className="text-xs text-neutral-text-secondary mb-1 font-medium uppercase tracking-wider">Selected Time</p>
+          <p className="text-xl font-bold text-ice-primary">{displayTime}</p>
+        </div>
+      )}
+      
+      <div className="flex items-center gap-3">
+        {/* Hour Picker */}
+        <div className="flex-1 relative" ref={hourPickerRef}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsHourPickerOpen(!isHourPickerOpen);
+              setIsMinutePickerOpen(false);
+            }}
+            className={`w-full px-4 py-3 rounded-xl border text-neutral-text-primary focus-ring focus:shadow-glow-ice-light text-center text-lg font-semibold min-h-[44px] hover:border-neutral-border transition-colors ${
+              hasValidTime 
+                ? 'bg-ice-primary/10 border-ice-primary/30' 
+                : 'bg-neutral-surface-primary border-neutral-border/60'
+            }`}
+          >
+            <div className="flex flex-col items-center">
+              <span className="text-2xl">{String(formatHour(hours)).padStart(2, '0')}</span>
+              <span className="text-xs text-neutral-text-secondary mt-0.5">Hour</span>
+            </div>
+          </button>
 
         {isHourPickerOpen && createPortal(
           <div
@@ -174,26 +201,30 @@ export default function GlassTimePicker({
           </div>,
           document.body
         )}
-      </div>
+        </div>
 
-      {/* Separator */}
-      <div className="text-2xl font-bold text-neutral-text-primary py-3">:</div>
+        {/* Separator */}
+        <div className="text-2xl font-bold text-neutral-text-primary py-3">:</div>
 
-      {/* Minute Picker */}
-      <div className="flex-1 relative" ref={minutePickerRef}>
-        <button
-          type="button"
-          onClick={() => {
-            setIsMinutePickerOpen(!isMinutePickerOpen);
-            setIsHourPickerOpen(false);
-          }}
-          className="w-full px-4 py-3 rounded-xl bg-neutral-surface-primary border border-neutral-border/60 text-neutral-text-primary focus-ring focus:border-ice-primary focus:shadow-glow-ice-light text-center text-lg font-semibold min-h-[44px] hover:border-neutral-border transition-colors"
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-2xl">{String(minutes).padStart(2, '0')}</span>
-            <span className="text-xs text-neutral-text-secondary mt-0.5">Minute</span>
-          </div>
-        </button>
+        {/* Minute Picker */}
+        <div className="flex-1 relative" ref={minutePickerRef}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsMinutePickerOpen(!isMinutePickerOpen);
+              setIsHourPickerOpen(false);
+            }}
+            className={`w-full px-4 py-3 rounded-xl border text-neutral-text-primary focus-ring focus:shadow-glow-ice-light text-center text-lg font-semibold min-h-[44px] hover:border-neutral-border transition-colors ${
+              hasValidTime 
+                ? 'bg-ice-primary/10 border-ice-primary/30' 
+                : 'bg-neutral-surface-primary border-neutral-border/60'
+            }`}
+          >
+            <div className="flex flex-col items-center">
+              <span className="text-2xl">{String(minutes).padStart(2, '0')}</span>
+              <span className="text-xs text-neutral-text-secondary mt-0.5">Minute</span>
+            </div>
+          </button>
 
         {isMinutePickerOpen && createPortal(
           <div
@@ -256,12 +287,17 @@ export default function GlassTimePicker({
         )}
       </div>
 
-      {/* AM/PM Display */}
-      <div className="px-3 py-3 text-center">
-        <div className="text-lg font-semibold text-neutral-text-primary">
-          {getAmPm(hours)}
+        {/* AM/PM Display */}
+        <div className={`px-3 py-3 text-center rounded-xl border min-h-[44px] flex flex-col items-center justify-center ${
+          hasValidTime 
+            ? 'bg-ice-primary/10 border-ice-primary/30' 
+            : 'border-transparent'
+        }`}>
+          <div className="text-lg font-semibold text-neutral-text-primary">
+            {getAmPm(hours)}
+          </div>
+          <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
         </div>
-        <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
       </div>
     </div>
   );

@@ -29,17 +29,22 @@ export default function GlassDateTimePicker({
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Parse value prop to Date object
+  // Parse value prop to Date object and sync tempTime
+  // This ensures the component state stays in sync with the parent's value
   useEffect(() => {
     if (value && value.trim()) {
       try {
         const date = new Date(value);
         if (!isNaN(date.getTime())) {
-          setSelectedDateTime(date);
-          // Extract time in HH:mm format
+          // Extract time in HH:mm format for the time picker
           const hours = date.getHours().toString().padStart(2, '0');
           const minutes = date.getMinutes().toString().padStart(2, '0');
-          setTempTime(`${hours}:${minutes}`);
+          const timeString = `${hours}:${minutes}`;
+          
+          // Update selectedDateTime
+          setSelectedDateTime(date);
+          // Update tempTime if it's different (to avoid unnecessary re-renders of GlassTimePicker)
+          setTempTime(prevTime => prevTime !== timeString ? timeString : prevTime);
         } else {
           setSelectedDateTime(null);
           setTempTime('09:00');
@@ -127,16 +132,28 @@ export default function GlassDateTimePicker({
       const timeValue = e?.target?.value || ''; // Format: "HH:mm"
       if (!timeValue) return;
       
+      // Update tempTime immediately for GlassTimePicker display
       setTempTime(timeValue);
       
       const [hours, minutes] = timeValue.split(':').map(Number);
-      // Use current date if no date is selected, otherwise use selected date
-      const baseDate = selectedDateTime || new Date();
+      
+      // If we have a selected date, update it with the new time
+      // If no date is selected, use today (or minDate if today is before minDate)
+      let baseDate;
+      if (selectedDateTime) {
+        baseDate = new Date(selectedDateTime);
+      } else {
+        baseDate = new Date();
+        // If minDate is set and today is before minDate, use minDate instead
+        if (minDateObj && baseDate < minDateObj) {
+          baseDate = new Date(minDateObj);
+        }
+      }
       
       const newDateTime = setMilliseconds(
         setSeconds(
           setMinutes(
-            setHours(new Date(baseDate), hours || 9),
+            setHours(baseDate, hours || 9),
             minutes || 0
           ),
           0
@@ -146,7 +163,7 @@ export default function GlassDateTimePicker({
       
       // Update state immediately for UI feedback
       setSelectedDateTime(newDateTime);
-      // Update parent component
+      // Update parent component with the new date-time
       updateDateTime(newDateTime);
     } catch (error) {
       console.error('Error in handleTimeChange:', error);
@@ -220,8 +237,19 @@ export default function GlassDateTimePicker({
     if (selectedDateTime) {
       return format(selectedDateTime, 'MMM d, yyyy h:mm a');
     }
+    // If we have a time selected but no date, show just the time
+    if (tempTime && tempTime !== '09:00') {
+      try {
+        const [hours, minutes] = tempTime.split(':').map(Number);
+        const timeDate = new Date();
+        timeDate.setHours(hours, minutes, 0, 0);
+        return `Time: ${format(timeDate, 'h:mm a')}`;
+      } catch {
+        return '';
+      }
+    }
     return '';
-  }, [selectedDateTime]);
+  }, [selectedDateTime, tempTime]);
 
   // Parse minDate and maxDate to Date objects if they're strings
   const minDateObj = minDate ? new Date(minDate) : null;
