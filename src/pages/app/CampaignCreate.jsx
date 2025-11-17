@@ -204,73 +204,76 @@ export default function CampaignCreate() {
         if (isScheduled && formData.scheduleAt) {
           try {
             // Convert scheduled time from shop's timezone to UTC
-            // The date picker gives us an ISO string (from GlassDateTimePicker)
+            // The date picker gives us an ISO string in local browser timezone
             // We need to interpret the user's selection as being in the shop's timezone
             let scheduleAtUTC;
             try {
-              // Parse the ISO string to get the date/time components
+              // Parse the ISO string - this gives us a Date object in local browser timezone
               const selectedDate = new Date(formData.scheduleAt);
-              const year = selectedDate.getUTCFullYear();
-              const month = selectedDate.getUTCMonth() + 1;
-              const day = selectedDate.getUTCDate();
-              const hour = selectedDate.getUTCHours();
-              const minute = selectedDate.getUTCMinutes();
               
-            // Method: Convert shop timezone time to UTC
-            // The user selected a time (year, month, day, hour, minute) which should be
-            // interpreted as being in the shop's timezone, not UTC or browser timezone.
-            // We need to find the UTC time that, when displayed in shop timezone, equals the selected time.
-            
-            // Step 1: Create a formatter for the shop's timezone
-            const formatter = new Intl.DateTimeFormat('en-CA', {
-              timeZone: shopTimezone,
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            });
-            
-            // Step 2: Start with a UTC date and find the one that displays as desired shop time
-            // We'll test UTC times around the selected time (±24 hours to handle all timezones)
-            let testUTC = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-            let bestMatch = testUTC;
-            let foundExact = false;
-            
-            // Try a range of UTC times (±24 hours in 1-hour increments)
-            for (let offsetHours = -24; offsetHours <= 24; offsetHours++) {
-              const candidateUTC = new Date(testUTC.getTime() + offsetHours * 60 * 60 * 1000);
-              const shopParts = formatter.formatToParts(candidateUTC);
-              const shopYear = parseInt(shopParts.find(p => p.type === 'year').value);
-              const shopMonth = parseInt(shopParts.find(p => p.type === 'month').value);
-              const shopDay = parseInt(shopParts.find(p => p.type === 'day').value);
-              const shopHour = parseInt(shopParts.find(p => p.type === 'hour').value);
-              const shopMinute = parseInt(shopParts.find(p => p.type === 'minute').value);
+              // Extract the date/time components as the user selected them (local time)
+              // These represent what the user wants in their shop timezone
+              const year = selectedDate.getFullYear();
+              const month = selectedDate.getMonth() + 1;
+              const day = selectedDate.getDate();
+              const hour = selectedDate.getHours();
+              const minute = selectedDate.getMinutes();
               
-              // Check if this UTC time displays as the desired shop time
-              if (shopYear === year && shopMonth === month && shopDay === day && 
-                  shopHour === hour && shopMinute === minute) {
-                bestMatch = candidateUTC;
-                foundExact = true;
-                break; // Found exact match
-              }
-            }
-            
-            // If no exact match found, use the closest one (shouldn't happen in practice)
-            if (!foundExact) {
-              console.warn('No exact timezone match found, using closest match', {
-                desired: `${year}-${month}-${day} ${hour}:${minute}`,
-                shopTimezone,
+              // Method: Convert shop timezone time to UTC
+              // The user selected a time (year, month, day, hour, minute) which should be
+              // interpreted as being in the shop's timezone.
+              // We need to find the UTC time that, when displayed in shop timezone, equals the selected time.
+              
+              // Step 1: Create a formatter for the shop's timezone
+              const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: shopTimezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
               });
+              
+              // Step 2: Start with a UTC date and find the one that displays as desired shop time
+              // We'll test UTC times around the selected time (±24 hours to handle all timezones)
+              let testUTC = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+              let bestMatch = testUTC;
+              let foundExact = false;
+              
+              // Try a range of UTC times (±24 hours in 1-hour increments)
+              for (let offsetHours = -24; offsetHours <= 24; offsetHours++) {
+                const candidateUTC = new Date(testUTC.getTime() + offsetHours * 60 * 60 * 1000);
+                const shopParts = formatter.formatToParts(candidateUTC);
+                const shopYear = parseInt(shopParts.find(p => p.type === 'year').value);
+                const shopMonth = parseInt(shopParts.find(p => p.type === 'month').value);
+                const shopDay = parseInt(shopParts.find(p => p.type === 'day').value);
+                const shopHour = parseInt(shopParts.find(p => p.type === 'hour').value);
+                const shopMinute = parseInt(shopParts.find(p => p.type === 'minute').value);
+                
+                // Check if this UTC time displays as the desired shop time
+                if (shopYear === year && shopMonth === month && shopDay === day && 
+                    shopHour === hour && shopMinute === minute) {
+                  bestMatch = candidateUTC;
+                  foundExact = true;
+                  break; // Found exact match
+                }
+              }
+              
+              // If no exact match found, use the closest one (shouldn't happen in practice)
+              if (!foundExact) {
+                console.warn('No exact timezone match found, using closest match', {
+                  desired: `${year}-${month}-${day} ${hour}:${minute}`,
+                  shopTimezone,
+                });
+              }
+              
+              scheduleAtUTC = bestMatch.toISOString();
+            } catch (error) {
+              console.error('Timezone conversion error:', error);
+              // Fallback: treat the date as UTC (not ideal but safe)
+              scheduleAtUTC = new Date(formData.scheduleAt).toISOString();
             }
-            
-            scheduleAtUTC = bestMatch.toISOString();
-          } catch (error) {
-            console.error('Timezone conversion error:', error);
-            // Fallback: treat the date as UTC (not ideal but safe)
-            scheduleAtUTC = new Date(formData.scheduleAt).toISOString();
-          }
             
             await scheduleCampaign.mutateAsync({
               id,
@@ -299,21 +302,24 @@ export default function CampaignCreate() {
         // For new campaigns
         if (isScheduled && formData.scheduleAt) {
           // Convert scheduled time from shop's timezone to UTC
-          // The date picker gives us an ISO string (from GlassDateTimePicker)
+          // The date picker gives us an ISO string in local browser timezone
           // We need to interpret the user's selection as being in the shop's timezone
           let scheduleAtUTC;
           try {
-            // Parse the ISO string to get the date/time components
+            // Parse the ISO string - this gives us a Date object in local browser timezone
             const selectedDate = new Date(formData.scheduleAt);
-            const year = selectedDate.getUTCFullYear();
-            const month = selectedDate.getUTCMonth() + 1;
-            const day = selectedDate.getUTCDate();
-            const hour = selectedDate.getUTCHours();
-            const minute = selectedDate.getUTCMinutes();
+            
+            // Extract the date/time components as the user selected them (local time)
+            // These represent what the user wants in their shop timezone
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth() + 1;
+            const day = selectedDate.getDate();
+            const hour = selectedDate.getHours();
+            const minute = selectedDate.getMinutes();
             
             // Method: Convert shop timezone time to UTC
             // The user selected a time (year, month, day, hour, minute) which should be
-            // interpreted as being in the shop's timezone, not UTC or browser timezone.
+            // interpreted as being in the shop's timezone.
             // We need to find the UTC time that, when displayed in shop timezone, equals the selected time.
             
             // Step 1: Create a formatter for the shop's timezone
