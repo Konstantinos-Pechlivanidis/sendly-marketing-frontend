@@ -51,6 +51,17 @@ export default function CampaignCreate() {
   // Check for template from Templates page
   const templateFromState = location.state?.template;
 
+  const [formData, setFormData] = useState({
+    name: templateFromState?.name || '',
+    message: templateFromState?.message || '',
+    audience: 'all',
+    scheduleType: 'immediate',
+    scheduleAt: '',
+    discountId: null,
+    senderId: '',
+  });
+  const [isPlaceholderMenuOpen, setIsPlaceholderMenuOpen] = useState(false);
+  
   // Close placeholder menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -63,17 +74,6 @@ export default function CampaignCreate() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isPlaceholderMenuOpen]);
-  
-  const [formData, setFormData] = useState({
-    name: templateFromState?.name || '',
-    message: templateFromState?.message || '',
-    audience: 'all',
-    scheduleType: 'immediate',
-    scheduleAt: '',
-    discountId: null,
-    senderId: '',
-  });
-  const [isPlaceholderMenuOpen, setIsPlaceholderMenuOpen] = useState(false);
   
   const [errors, setErrors] = useState({});
   const [isScheduled, setIsScheduled] = useState(false);
