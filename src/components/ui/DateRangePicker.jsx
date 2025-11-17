@@ -39,7 +39,7 @@ export default function DateRangePicker({
       document.body.style.overflow = 'hidden';
       return () => {
         document.body.style.overflow = 'unset';
-      };
+  };
     }
   }, [isOpen]);
 
@@ -247,7 +247,7 @@ export default function DateRangePicker({
           role="presentation"
         >
           {/* Backdrop */}
-          <div
+          <div 
             className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
@@ -337,9 +337,9 @@ export default function DateRangePicker({
                     minDate={tempStartDate || undefined}
                   />
                 )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
         </div>,
         document.body
       )}

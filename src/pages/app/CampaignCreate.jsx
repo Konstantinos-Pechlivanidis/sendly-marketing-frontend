@@ -26,6 +26,7 @@ import { countSMSCharacters } from '../../utils/smsParser';
 import { normalizeArrayResponse } from '../../utils/apiHelpers';
 import { format } from 'date-fns';
 import SEO from '../../components/SEO';
+import { convertShopTimeToUTC, convertUTCToShopTime } from '../../utils/timezone';
 
 export default function CampaignCreate() {
   const navigate = useNavigate();
@@ -135,12 +136,25 @@ export default function CampaignCreate() {
       newErrors.message = 'Message is too long (max 1600 characters)';
     }
     
-    if (isScheduled && !formData.scheduleAt) {
-      newErrors.scheduleAt = 'Scheduled date and time is required';
-    } else if (formData.scheduleAt) {
-      const scheduleDate = new Date(formData.scheduleAt);
-      if (scheduleDate <= new Date()) {
-        newErrors.scheduleAt = 'Schedule date must be in the future';
+    if (isScheduled) {
+      if (!formData.scheduleAt || formData.scheduleAt.trim() === '') {
+        newErrors.scheduleAt = 'Scheduled date and time is required';
+      } else {
+        try {
+          const scheduleDate = new Date(formData.scheduleAt);
+          if (isNaN(scheduleDate.getTime())) {
+            newErrors.scheduleAt = 'Invalid date and time format';
+          } else {
+            const now = new Date();
+            // Allow 1 minute buffer for scheduling
+            const minScheduleTime = new Date(now.getTime() + 60 * 1000);
+            if (scheduleDate <= minScheduleTime) {
+              newErrors.scheduleAt = 'Schedule date must be at least 1 minute in the future';
+            }
+          }
+        } catch (error) {
+          newErrors.scheduleAt = 'Invalid date and time format';
+        }
       }
     }
     
@@ -161,9 +175,9 @@ export default function CampaignCreate() {
         senderId: formData.senderId || undefined,
       };
       
-      // Include scheduleAt if scheduled
+      // Include scheduleAt if scheduled (convert to UTC using shop timezone)
       if (isScheduled && formData.scheduleAt) {
-        campaignData.scheduleAt = new Date(formData.scheduleAt).toISOString();
+        campaignData.scheduleAt = convertShopTimeToUTC(formData.scheduleAt, shopTimezone);
       }
       
       let result;
@@ -204,76 +218,9 @@ export default function CampaignCreate() {
         if (isScheduled && formData.scheduleAt) {
           try {
             // Convert scheduled time from shop's timezone to UTC
-            // The date picker gives us an ISO string in local browser timezone
-            // We need to interpret the user's selection as being in the shop's timezone
-            let scheduleAtUTC;
-            try {
-              // Parse the ISO string - this gives us a Date object in local browser timezone
-              const selectedDate = new Date(formData.scheduleAt);
-              
-              // Extract the date/time components as the user selected them (local time)
-              // These represent what the user wants in their shop timezone
-              const year = selectedDate.getFullYear();
-              const month = selectedDate.getMonth() + 1;
-              const day = selectedDate.getDate();
-              const hour = selectedDate.getHours();
-              const minute = selectedDate.getMinutes();
-              
-              // Method: Convert shop timezone time to UTC
-              // The user selected a time (year, month, day, hour, minute) which should be
-              // interpreted as being in the shop's timezone.
-              // We need to find the UTC time that, when displayed in shop timezone, equals the selected time.
-              
-              // Step 1: Create a formatter for the shop's timezone
-              const formatter = new Intl.DateTimeFormat('en-CA', {
-                timeZone: shopTimezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-              });
-              
-              // Step 2: Start with a UTC date and find the one that displays as desired shop time
-              // We'll test UTC times around the selected time (±24 hours to handle all timezones)
-              let testUTC = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-              let bestMatch = testUTC;
-              let foundExact = false;
-              
-              // Try a range of UTC times (±24 hours in 1-hour increments)
-              for (let offsetHours = -24; offsetHours <= 24; offsetHours++) {
-                const candidateUTC = new Date(testUTC.getTime() + offsetHours * 60 * 60 * 1000);
-                const shopParts = formatter.formatToParts(candidateUTC);
-                const shopYear = parseInt(shopParts.find(p => p.type === 'year').value);
-                const shopMonth = parseInt(shopParts.find(p => p.type === 'month').value);
-                const shopDay = parseInt(shopParts.find(p => p.type === 'day').value);
-                const shopHour = parseInt(shopParts.find(p => p.type === 'hour').value);
-                const shopMinute = parseInt(shopParts.find(p => p.type === 'minute').value);
-                
-                // Check if this UTC time displays as the desired shop time
-                if (shopYear === year && shopMonth === month && shopDay === day && 
-                    shopHour === hour && shopMinute === minute) {
-                  bestMatch = candidateUTC;
-                  foundExact = true;
-                  break; // Found exact match
-                }
-              }
-              
-              // If no exact match found, use the closest one (shouldn't happen in practice)
-              if (!foundExact) {
-                console.warn('No exact timezone match found, using closest match', {
-                  desired: `${year}-${month}-${day} ${hour}:${minute}`,
-                  shopTimezone,
-                });
-              }
-              
-              scheduleAtUTC = bestMatch.toISOString();
-            } catch (error) {
-              console.error('Timezone conversion error:', error);
-              // Fallback: treat the date as UTC (not ideal but safe)
-              scheduleAtUTC = new Date(formData.scheduleAt).toISOString();
-            }
+            // The date picker gives us an ISO string, but we interpret the user's selection
+            // as being in the shop's timezone, then convert to UTC for the backend
+            const scheduleAtUTC = convertShopTimeToUTC(formData.scheduleAt, shopTimezone);
             
             await scheduleCampaign.mutateAsync({
               id,
@@ -302,77 +249,9 @@ export default function CampaignCreate() {
         // For new campaigns
         if (isScheduled && formData.scheduleAt) {
           // Convert scheduled time from shop's timezone to UTC
-          // The date picker gives us an ISO string in local browser timezone
-          // We need to interpret the user's selection as being in the shop's timezone
-          let scheduleAtUTC;
-          try {
-            // Parse the ISO string - this gives us a Date object in local browser timezone
-            const selectedDate = new Date(formData.scheduleAt);
-            
-            // Extract the date/time components as the user selected them (local time)
-            // These represent what the user wants in their shop timezone
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            const day = selectedDate.getDate();
-            const hour = selectedDate.getHours();
-            const minute = selectedDate.getMinutes();
-            
-            // Method: Convert shop timezone time to UTC
-            // The user selected a time (year, month, day, hour, minute) which should be
-            // interpreted as being in the shop's timezone.
-            // We need to find the UTC time that, when displayed in shop timezone, equals the selected time.
-            
-            // Step 1: Create a formatter for the shop's timezone
-            const formatter = new Intl.DateTimeFormat('en-CA', {
-              timeZone: shopTimezone,
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            });
-            
-            // Step 2: Start with a UTC date and find the one that displays as desired shop time
-            // We'll test UTC times around the selected time (±24 hours to handle all timezones)
-            let testUTC = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-            let bestMatch = testUTC;
-            let foundExact = false;
-            
-            // Try a range of UTC times (±24 hours in 1-hour increments)
-            for (let offsetHours = -24; offsetHours <= 24; offsetHours++) {
-              const candidateUTC = new Date(testUTC.getTime() + offsetHours * 60 * 60 * 1000);
-              const shopParts = formatter.formatToParts(candidateUTC);
-              const shopYear = parseInt(shopParts.find(p => p.type === 'year').value);
-              const shopMonth = parseInt(shopParts.find(p => p.type === 'month').value);
-              const shopDay = parseInt(shopParts.find(p => p.type === 'day').value);
-              const shopHour = parseInt(shopParts.find(p => p.type === 'hour').value);
-              const shopMinute = parseInt(shopParts.find(p => p.type === 'minute').value);
-              
-              // Check if this UTC time displays as the desired shop time
-              if (shopYear === year && shopMonth === month && shopDay === day && 
-                  shopHour === hour && shopMinute === minute) {
-                bestMatch = candidateUTC;
-                foundExact = true;
-                break; // Found exact match
-              }
-            }
-            
-            // If no exact match found, use the closest one (shouldn't happen in practice)
-            if (!foundExact) {
-              console.warn('No exact timezone match found, using closest match', {
-                desired: `${year}-${month}-${day} ${hour}:${minute}`,
-                shopTimezone,
-              });
-            }
-            
-            scheduleAtUTC = bestMatch.toISOString();
-          } catch (error) {
-            console.error('Timezone conversion error:', error);
-            // Fallback: treat the date as UTC (not ideal but safe)
-            scheduleAtUTC = new Date(formData.scheduleAt).toISOString();
-          }
-          
+          // The date picker gives us an ISO string, but we interpret the user's selection
+          // as being in the shop's timezone, then convert to UTC for the backend
+          const scheduleAtUTC = convertShopTimeToUTC(formData.scheduleAt, shopTimezone);
           campaignData.scheduleAt = scheduleAtUTC;
           result = await createCampaign.mutateAsync(campaignData);
           
@@ -625,14 +504,18 @@ export default function CampaignCreate() {
                           error={errors.scheduleAt}
                           minDate={new Date().toISOString()}
                         />
-                        {formData.scheduleAt && (
-                          <p className="mt-2 text-sm text-ice-primary flex items-center gap-2">
-                            <span>🕐</span>
-                            <span>
-                              Scheduled for {format(new Date(formData.scheduleAt), 'PPp')}
-                            </span>
-                          </p>
-                        )}
+                        {formData.scheduleAt && (() => {
+                          // Convert UTC time to shop timezone for display
+                          const displayDate = convertUTCToShopTime(formData.scheduleAt, shopTimezone);
+                          return (
+                            <p className="mt-2 text-sm text-ice-primary flex items-center gap-2">
+                              <Icon name="schedule" size="sm" variant="ice" className="text-ice-primary" />
+                              <span>
+                                Scheduled for {format(displayDate, 'PPp')} ({shopTimezone})
+                              </span>
+                            </p>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -658,7 +541,13 @@ export default function CampaignCreate() {
                       variant="primary"
                       size="lg"
                       onClick={handleSend}
-                      disabled={createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending || scheduleCampaign.isPending}
+                      disabled={
+                        createCampaign.isPending || 
+                        updateCampaign.isPending || 
+                        sendCampaign.isPending || 
+                        scheduleCampaign.isPending ||
+                        (isScheduled && (!formData.scheduleAt || formData.scheduleAt.trim() === ''))
+                      }
                       className="flex-1"
                     >
                       {createCampaign.isPending || updateCampaign.isPending || sendCampaign.isPending || scheduleCampaign.isPending ? (

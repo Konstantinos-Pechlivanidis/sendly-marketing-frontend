@@ -93,6 +93,10 @@ export default function GlassDateTimePicker({
     let cleanup = null;
     const timeoutId = setTimeout(() => {
       const handleClickOutside = (event) => {
+        // Don't close if clicking on hour/minute picker modals (they have higher z-index)
+        const isHourMinutePicker = event.target.closest('[data-hour-minute-picker="true"]');
+        if (isHourMinutePicker) return;
+
         if (
           dateButtonRef.current &&
           dateModalRef.current &&
