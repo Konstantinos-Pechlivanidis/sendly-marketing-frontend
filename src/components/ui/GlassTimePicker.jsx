@@ -6,32 +6,44 @@ import Icon from './Icon';
  * Glass Time Picker Component
  * Custom time picker with hour and minute selection
  * Matches iOS 26 styling and app UI
+ * 
+ * Value format: "HH:mm" (e.g., "14:30" for 2:30 PM)
  */
 export default function GlassTimePicker({
   value, // Format: "HH:mm"
   onChange,
   className = '',
 }) {
-  const [hours, setHours] = useState(9);
-  const [minutes, setMinutes] = useState(0);
+  // Internal state - always keep in sync with value prop
+  const [hours, setHours] = useState(() => {
+    if (value && typeof value === 'string' && value.includes(':')) {
+      const [h] = value.split(':').map(Number);
+      return !isNaN(h) && h >= 0 && h <= 23 ? h : 9;
+    }
+    return 9;
+  });
+  
+  const [minutes, setMinutes] = useState(() => {
+    if (value && typeof value === 'string' && value.includes(':')) {
+      const [, m] = value.split(':').map(Number);
+      return !isNaN(m) && m >= 0 && m <= 59 ? m : 0;
+    }
+    return 0;
+  });
+  
   const [isHourPickerOpen, setIsHourPickerOpen] = useState(false);
   const [isMinutePickerOpen, setIsMinutePickerOpen] = useState(false);
   const hourPickerRef = useRef(null);
   const minutePickerRef = useRef(null);
 
-  // Parse value prop and update internal state
-  // This syncs the internal state with the value prop from parent
-  // The value prop is the source of truth, so we always sync to it
+  // Sync internal state with value prop - this is the source of truth
   useEffect(() => {
     if (value && typeof value === 'string' && value.includes(':')) {
       const [h, m] = value.split(':').map(Number);
-      if (!isNaN(h) && !isNaN(m)) {
-        const validHours = h >= 0 && h <= 23 ? h : 9;
-        const validMinutes = m >= 0 && m <= 59 ? m : 0;
-        // Always update to sync with prop value (value prop is source of truth)
-        // Don't check if different - just always update to ensure sync
-        setHours(validHours);
-        setMinutes(validMinutes);
+      if (!isNaN(h) && !isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+        // Only update if different to avoid unnecessary re-renders
+        setHours(prev => prev !== h ? h : prev);
+        setMinutes(prev => prev !== m ? m : prev);
       }
     } else if (!value || value === '') {
       // Reset to default if value is empty
@@ -43,75 +55,69 @@ export default function GlassTimePicker({
   // Generate hour options (0-23)
   const hourOptions = Array.from({ length: 24 }, (_, i) => i);
   
-  // Generate minute options (0, 15, 30, 45) or all minutes (0-59)
+  // Generate minute options (0-59)
   const minuteOptions = Array.from({ length: 60 }, (_, i) => i);
 
-  const handleHourChange = (hour) => {
-    try {
-      // Update hours state immediately
-      setHours(hour);
+  // Handle hour change - update state and notify parent immediately
+  const handleHourChange = (newHour) => {
+    // Update hours state immediately
+    setHours(newHour);
+    
+    // Get current minutes (use functional update to ensure we have latest)
+    setMinutes(currentMinutes => {
+      // Build time string in HH:mm format
+      const newTime = `${String(newHour).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
       
-      // Use functional update to get the latest minutes value
-      // This ensures we always use the most current state, not a stale closure value
-      setMinutes(currentMinutes => {
-        const newTime = `${String(hour).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
-        
-        // Call onChange with the new time value
-        // Use setTimeout to ensure state updates are queued first
-        setTimeout(() => {
-          if (onChange && typeof onChange === 'function') {
-            onChange({ target: { value: newTime } });
-          }
-        }, 0);
-        
-        return currentMinutes; // Return unchanged minutes
-      });
+      // Notify parent immediately with the new time
+      if (onChange && typeof onChange === 'function') {
+        onChange({ 
+          target: { 
+            value: newTime 
+          } 
+        });
+      }
       
-      // Close modal after a small delay
-      setTimeout(() => {
-        setIsHourPickerOpen(false);
-      }, 150);
-    } catch (error) {
-      console.error('Error in handleHourChange:', error);
+      return currentMinutes; // Return unchanged
+    });
+    
+    // Close modal after a brief delay
+    setTimeout(() => {
       setIsHourPickerOpen(false);
-    }
+    }, 100);
   };
 
-  const handleMinuteChange = (minute) => {
-    try {
-      // Update minutes state immediately
-      setMinutes(minute);
+  // Handle minute change - update state and notify parent immediately
+  const handleMinuteChange = (newMinute) => {
+    // Update minutes state immediately
+    setMinutes(newMinute);
+    
+    // Get current hours (use functional update to ensure we have latest)
+    setHours(currentHours => {
+      // Build time string in HH:mm format
+      const newTime = `${String(currentHours).padStart(2, '0')}:${String(newMinute).padStart(2, '0')}`;
       
-      // Use functional update to get the latest hours value
-      // This ensures we always use the most current state, not a stale closure value
-      setHours(currentHours => {
-        const newTime = `${String(currentHours).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-        
-        // Call onChange with the new time value
-        // Use setTimeout to ensure state updates are queued first
-        setTimeout(() => {
-          if (onChange && typeof onChange === 'function') {
-            onChange({ target: { value: newTime } });
-          }
-        }, 0);
-        
-        return currentHours; // Return unchanged hours
-      });
+      // Notify parent immediately with the new time
+      if (onChange && typeof onChange === 'function') {
+        onChange({ 
+          target: { 
+            value: newTime 
+          } 
+        });
+      }
       
-      // Close modal after a small delay
-      setTimeout(() => {
-        setIsMinutePickerOpen(false);
-      }, 150);
-    } catch (error) {
-      console.error('Error in handleMinuteChange:', error);
+      return currentHours; // Return unchanged
+    });
+    
+    // Close modal after a brief delay
+    setTimeout(() => {
       setIsMinutePickerOpen(false);
-    }
+    }, 100);
   };
 
   const formatHour = (h) => {
-    if (h === 0) return '12';
-    if (h > 12) return String(h - 12);
-    return String(h);
+    if (h === 0) return 12;
+    if (h > 12) return h - 12;
+    return h;
   };
 
   const getAmPm = (h) => {
@@ -127,7 +133,6 @@ export default function GlassTimePicker({
       };
     }
   }, [isHourPickerOpen, isMinutePickerOpen]);
-
 
   // Determine if we have a valid time selection
   const hasValidTime = (hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59);
@@ -166,65 +171,65 @@ export default function GlassTimePicker({
             </div>
           </button>
 
-        {isHourPickerOpen && createPortal(
-          <div
-            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setIsHourPickerOpen(false);
-              }
-            }}
-            role="presentation"
-          >
-            {/* Backdrop */}
+          {isHourPickerOpen && createPortal(
             <div
-              className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
-              onClick={() => setIsHourPickerOpen(false)}
-              aria-hidden="true"
-            />
-            
-            {/* Modal Content */}
-            <div
-              className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setIsHourPickerOpen(false);
+                }
+              }}
+              role="presentation"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
-                <h3 className="text-lg font-semibold text-neutral-text-primary">Select Hour</h3>
-                <button
-                  onClick={() => setIsHourPickerOpen(false)}
-                  className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Close"
-                >
-                  <Icon name="close" size="sm" variant="neutral" />
-                </button>
-              </div>
-
-              {/* Options List */}
-              <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
-                {hourOptions.map((hour) => (
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
+                onClick={() => setIsHourPickerOpen(false)}
+                aria-hidden="true"
+              />
+              
+              {/* Modal Content */}
+              <div
+                className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+                  <h3 className="text-lg font-semibold text-neutral-text-primary">Select Hour</h3>
                   <button
-                    key={hour}
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleHourChange(hour);
-                    }}
-                    className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
-                      hours === hour
-                        ? 'bg-ice-primary text-white shadow-glow-ice-light'
-                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
-                    }`}
+                    onClick={() => setIsHourPickerOpen(false)}
+                    className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    aria-label="Close"
                   >
-                    {String(formatHour(hour)).padStart(2, '0')} {getAmPm(hour)}
+                    <Icon name="close" size="sm" variant="neutral" />
                   </button>
-                ))}
+                </div>
+
+                {/* Options List */}
+                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                  {hourOptions.map((hour) => (
+                    <button
+                      key={hour}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleHourChange(hour);
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
+                        hours === hour
+                          ? 'bg-ice-primary text-white shadow-glow-ice-light'
+                          : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                      }`}
+                    >
+                      {String(formatHour(hour)).padStart(2, '0')} {getAmPm(hour)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>,
-          document.body
-        )}
+            </div>,
+            document.body
+          )}
         </div>
 
         {/* Separator */}
@@ -250,66 +255,66 @@ export default function GlassTimePicker({
             </div>
           </button>
 
-        {isMinutePickerOpen && createPortal(
-          <div
-            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setIsMinutePickerOpen(false);
-              }
-            }}
-            role="presentation"
-          >
-            {/* Backdrop */}
+          {isMinutePickerOpen && createPortal(
             <div
-              className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
-              onClick={() => setIsMinutePickerOpen(false)}
-              aria-hidden="true"
-            />
-            
-            {/* Modal Content */}
-            <div
-              className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setIsMinutePickerOpen(false);
+                }
+              }}
+              role="presentation"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
-                <h3 className="text-lg font-semibold text-neutral-text-primary">Select Minute</h3>
-                <button
-                  onClick={() => setIsMinutePickerOpen(false)}
-                  className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Close"
-                >
-                  <Icon name="close" size="sm" variant="neutral" />
-                </button>
-              </div>
-
-              {/* Options List */}
-              <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
-                {minuteOptions.map((minute) => (
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
+                onClick={() => setIsMinutePickerOpen(false)}
+                aria-hidden="true"
+              />
+              
+              {/* Modal Content */}
+              <div
+                className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+                  <h3 className="text-lg font-semibold text-neutral-text-primary">Select Minute</h3>
                   <button
-                    key={minute}
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleMinuteChange(minute);
-                    }}
-                    className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
-                      minutes === minute
-                        ? 'bg-ice-primary text-white shadow-glow-ice-light'
-                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
-                    }`}
+                    onClick={() => setIsMinutePickerOpen(false)}
+                    className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    aria-label="Close"
                   >
-                    {String(minute).padStart(2, '0')}
+                    <Icon name="close" size="sm" variant="neutral" />
                   </button>
-                ))}
+                </div>
+
+                {/* Options List */}
+                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                  {minuteOptions.map((minute) => (
+                    <button
+                      key={minute}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleMinuteChange(minute);
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
+                        minutes === minute
+                          ? 'bg-ice-primary text-white shadow-glow-ice-light'
+                          : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                      }`}
+                    >
+                      {String(minute).padStart(2, '0')}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>,
-          document.body
-        )}
-      </div>
+            </div>,
+            document.body
+          )}
+        </div>
 
         {/* AM/PM Display */}
         <div className={`px-3 py-3 text-center rounded-xl border min-h-[44px] flex flex-col items-center justify-center ${
@@ -326,4 +331,3 @@ export default function GlassTimePicker({
     </div>
   );
 }
-

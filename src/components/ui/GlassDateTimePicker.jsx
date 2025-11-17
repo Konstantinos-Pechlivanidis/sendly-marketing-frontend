@@ -9,12 +9,15 @@ import Icon from './Icon';
 /**
  * Glass Date Time Picker Component
  * Custom calendar-based date and time picker with iOS 26 styling
- * Uses React Portal for proper z-index handling on mobile
+ * 
+ * Key improvement: Stores time separately from date to avoid timezone issues
+ * Time is stored as "HH:mm" string, date is stored as Date object
+ * Only combines them when creating the final ISO string for the parent
  */
 export default function GlassDateTimePicker({
   label,
   name,
-  value,
+  value, // ISO string from parent
   onChange,
   error,
   placeholder = 'Select date and time',
@@ -24,15 +27,14 @@ export default function GlassDateTimePicker({
   maxDate,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState(null);
-  const [tempTime, setTempTime] = useState('09:00');
+  const [selectedDate, setSelectedDate] = useState(null); // Date object (date only, time ignored)
+  const [selectedTime, setSelectedTime] = useState('09:00'); // "HH:mm" format string
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
-  const previousValueRef = useRef(value); // Track previous value to detect changes
+  const previousValueRef = useRef(value);
 
-  // Parse value prop to Date object and sync tempTime
-  // This ensures the component state stays in sync with the parent's value
-  // Always sync when value prop changes - don't try to optimize with comparisons
+  // Parse value prop and extract date and time separately
+  // This avoids timezone issues by keeping time as a simple string
   useEffect(() => {
     // Only update if value actually changed
     if (previousValueRef.current === value) {
@@ -44,31 +46,29 @@ export default function GlassDateTimePicker({
       try {
         const date = new Date(value);
         if (!isNaN(date.getTime())) {
-          // Extract time in HH:mm format for the time picker
-          // Use UTC methods since ISO strings are in UTC
-          // But we want to display the time as the user selected it
-          // The date object created from ISO string represents the correct moment in time
-          // We use getHours/getMinutes (local) because the date picker works in local time
-          // and the ISO string conversion happens in handleTimeChange
+          // Extract date (year, month, day) - create a new date with just the date part
+          const year = date.getFullYear();
+          const month = date.getMonth();
+          const day = date.getDate();
+          const dateOnly = new Date(year, month, day);
+          setSelectedDate(dateOnly);
+          
+          // Extract time as "HH:mm" - use local time methods since we're working in local timezone
           const hours = date.getHours().toString().padStart(2, '0');
           const minutes = date.getMinutes().toString().padStart(2, '0');
           const timeString = `${hours}:${minutes}`;
-          
-          // Always update both states to ensure they're in sync with the prop
-          // This is important because the value prop is the source of truth
-          setSelectedDateTime(date);
-          setTempTime(timeString);
+          setSelectedTime(timeString);
         } else {
-          setSelectedDateTime(null);
-          setTempTime('09:00');
+          setSelectedDate(null);
+          setSelectedTime('09:00');
         }
       } catch {
-        setSelectedDateTime(null);
-        setTempTime('09:00');
+        setSelectedDate(null);
+        setSelectedTime('09:00');
       }
     } else {
-      setSelectedDateTime(null);
-      setTempTime('09:00');
+      setSelectedDate(null);
+      setSelectedTime('09:00');
     }
   }, [value]);
 
@@ -86,7 +86,6 @@ export default function GlassDateTimePicker({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Use a small delay to prevent immediate closing when opening
     let cleanup = null;
     const timeoutId = setTimeout(() => {
       const handleClickOutside = (event) => {
@@ -117,100 +116,87 @@ export default function GlassDateTimePicker({
     };
   }, [isOpen]);
 
-  const handleDateSelect = (date) => {
+  // Combine date and time into a single Date object and notify parent
+  const updateParent = (date, time) => {
     try {
-      // Update date but keep existing time, or use tempTime if no existing time
-      const [hours, minutes] = tempTime.split(':').map(Number);
+      // Parse time string
+      const [hours, minutes] = time.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return;
+      
+      // Use the provided date, or default to today if no date selected
+      let baseDate = date;
+      if (!baseDate) {
+        baseDate = new Date();
+        // If minDate is set and today is before minDate, use minDate instead
+        const minDateValue = minDate ? new Date(minDate) : null;
+        if (minDateValue && baseDate < minDateValue) {
+          baseDate = new Date(minDateValue);
+        }
+      }
+      
+      // Create new date-time by combining date and time
       const newDateTime = setMilliseconds(
         setSeconds(
           setMinutes(
-            setHours(new Date(date), hours || 9),
+            setHours(new Date(baseDate), hours || 9),
             minutes || 0
           ),
           0
         ),
         0
       );
-      // Update state immediately for UI feedback
-      setSelectedDateTime(newDateTime);
-      // Update parent component
-      updateDateTime(newDateTime);
-    } catch (error) {
-      console.error('Error in handleDateSelect:', error);
-    }
-  };
-
-  const handleTimeChange = (e) => {
-    try {
-      const timeValue = e?.target?.value || ''; // Format: "HH:mm"
-      if (!timeValue || !timeValue.includes(':')) return;
       
-      const [hours, minutes] = timeValue.split(':').map(Number);
-      if (isNaN(hours) || isNaN(minutes)) return;
-      
-      // Calculate minDateObj here to ensure it's available
-      const minDateValue = minDate ? new Date(minDate) : null;
-      
-      // Update tempTime immediately for GlassTimePicker display
-      // This ensures the UI updates right away
-      setTempTime(timeValue);
-      
-      // Use functional update to get the latest selectedDateTime
-      setSelectedDateTime(currentDateTime => {
-        // If we have a selected date, update it with the new time
-        // If no date is selected, use today (or minDate if today is before minDate)
-        let baseDate;
-        if (currentDateTime) {
-          baseDate = new Date(currentDateTime);
-        } else {
-          baseDate = new Date();
-          // If minDate is set and today is before minDate, use minDate instead
-          if (minDateValue && baseDate < minDateValue) {
-            baseDate = new Date(minDateValue);
-          }
-        }
-        
-        // Create new date-time with the selected time
-        const newDateTime = setMilliseconds(
-          setSeconds(
-            setMinutes(
-              setHours(baseDate, hours || 9),
-              minutes || 0
-            ),
-            0
-          ),
-          0
-        );
-        
-        // Update parent component with the new date-time
-        // Call this synchronously to ensure parent updates immediately
-        // The parent will update formData.scheduleAt, which will flow back as value prop
-        updateDateTime(newDateTime);
-        
-        return newDateTime;
-      });
-    } catch (error) {
-      console.error('Error in handleTimeChange:', error);
-    }
-  };
-
-  const updateDateTime = (dateTime) => {
-    try {
-      const isoString = dateTime.toISOString();
+      // Convert to ISO string and notify parent
+      const isoString = newDateTime.toISOString();
       const syntheticEvent = {
         target: {
           name,
           value: isoString,
         },
       };
+      
       if (onChange && typeof onChange === 'function') {
         onChange(syntheticEvent);
       }
     } catch (error) {
-      console.error('Error in updateDateTime:', error);
+      console.error('Error in updateParent:', error);
     }
   };
 
+  // Handle date selection
+  const handleDateSelect = (date) => {
+    try {
+      // Update selected date
+      setSelectedDate(new Date(date));
+      
+      // Update parent with new date + current time
+      updateParent(new Date(date), selectedTime);
+    } catch (error) {
+      console.error('Error in handleDateSelect:', error);
+    }
+  };
+
+  // Handle time selection - this is the key fix
+  const handleTimeChange = (e) => {
+    try {
+      const timeValue = e?.target?.value || ''; // Format: "HH:mm"
+      if (!timeValue || !timeValue.includes(':')) return;
+      
+      // Update selected time immediately
+      setSelectedTime(timeValue);
+      
+      // Update parent with current date + new time
+      // Use functional update to get the latest selectedDate
+      setSelectedDate(currentDate => {
+        updateParent(currentDate || new Date(), timeValue);
+        return currentDate; // Return unchanged
+      });
+    } catch (error) {
+      console.error('Error in handleTimeChange:', error);
+    }
+  };
+
+  // Apply preset
   const applyPreset = (preset) => {
     const now = new Date();
     let date = new Date();
@@ -235,11 +221,18 @@ export default function GlassDateTimePicker({
         return;
     }
     
-    setSelectedDateTime(date);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    const dateOnly = new Date(year, month, day);
+    
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    setTempTime(`${hours}:${minutes}`);
-    updateDateTime(date);
+    const timeString = `${hours}:${minutes}`;
+    
+    setSelectedDate(dateOnly);
+    setSelectedTime(timeString);
+    updateParent(dateOnly, timeString);
     setIsOpen(false);
   };
 
@@ -251,8 +244,8 @@ export default function GlassDateTimePicker({
   ];
 
   const handleClear = () => {
-    setSelectedDateTime(null);
-    setTempTime('09:00');
+    setSelectedDate(null);
+    setSelectedTime('09:00');
     const syntheticEvent = {
       target: {
         name,
@@ -262,16 +255,19 @@ export default function GlassDateTimePicker({
     onChange(syntheticEvent);
   };
 
-  // Calculate display value - ensure it updates when time changes
-  // Use useMemo to ensure it recalculates when selectedDateTime or tempTime changes
+  // Calculate display value
   const displayValue = useMemo(() => {
-    if (selectedDateTime) {
-      return format(selectedDateTime, 'MMM d, yyyy h:mm a');
+    if (selectedDate) {
+      // Combine date and time for display
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      const displayDate = new Date(selectedDate);
+      displayDate.setHours(hours || 9, minutes || 0, 0, 0);
+      return format(displayDate, 'MMM d, yyyy h:mm a');
     }
     // If we have a time selected but no date, show just the time
-    if (tempTime && tempTime !== '09:00') {
+    if (selectedTime && selectedTime !== '09:00') {
       try {
-        const [hours, minutes] = tempTime.split(':').map(Number);
+        const [hours, minutes] = selectedTime.split(':').map(Number);
         const timeDate = new Date();
         timeDate.setHours(hours, minutes, 0, 0);
         return `Time: ${format(timeDate, 'h:mm a')}`;
@@ -280,7 +276,7 @@ export default function GlassDateTimePicker({
       }
     }
     return '';
-  }, [selectedDateTime, tempTime]);
+  }, [selectedDate, selectedTime]);
 
   // Parse minDate and maxDate to Date objects if they're strings
   const minDateObj = minDate ? new Date(minDate) : null;
@@ -304,7 +300,6 @@ export default function GlassDateTimePicker({
             setIsOpen(!isOpen);
           }}
           onMouseDown={(e) => {
-            // Prevent blur when clicking the button
             if (isOpen) {
               e.preventDefault();
             }
@@ -329,7 +324,7 @@ export default function GlassDateTimePicker({
             <span>{displayValue || placeholder}</span>
           </span>
           <div className="flex items-center gap-2">
-            {selectedDateTime && (
+            {selectedDate && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -414,7 +409,7 @@ export default function GlassDateTimePicker({
               <div className="pt-4 border-t border-neutral-border/60">
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Select Date</p>
                 <GlassCalendar
-                  selectedDate={selectedDateTime}
+                  selectedDate={selectedDate}
                   onDateSelect={handleDateSelect}
                   minDate={minDateObj}
                   maxDate={maxDateObj}
@@ -425,7 +420,7 @@ export default function GlassDateTimePicker({
               <div className="pt-4 border-t border-neutral-border/60">
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Select Time</p>
                 <GlassTimePicker
-                  value={tempTime}
+                  value={selectedTime}
                   onChange={handleTimeChange}
                 />
               </div>
