@@ -45,6 +45,11 @@ export default function GlassDateTimePicker({
         const date = new Date(value);
         if (!isNaN(date.getTime())) {
           // Extract time in HH:mm format for the time picker
+          // Use UTC methods since ISO strings are in UTC
+          // But we want to display the time as the user selected it
+          // The date object created from ISO string represents the correct moment in time
+          // We use getHours/getMinutes (local) because the date picker works in local time
+          // and the ISO string conversion happens in handleTimeChange
           const hours = date.getHours().toString().padStart(2, '0');
           const minutes = date.getMinutes().toString().padStart(2, '0');
           const timeString = `${hours}:${minutes}`;
@@ -147,6 +152,7 @@ export default function GlassDateTimePicker({
       const minDateValue = minDate ? new Date(minDate) : null;
       
       // Update tempTime immediately for GlassTimePicker display
+      // This ensures the UI updates right away
       setTempTime(timeValue);
       
       // Use functional update to get the latest selectedDateTime
@@ -164,6 +170,7 @@ export default function GlassDateTimePicker({
           }
         }
         
+        // Create new date-time with the selected time
         const newDateTime = setMilliseconds(
           setSeconds(
             setMinutes(
@@ -175,11 +182,10 @@ export default function GlassDateTimePicker({
           0
         );
         
-        // Update parent component with the new date-time immediately
-        // Use setTimeout to ensure state update completes first
-        setTimeout(() => {
-          updateDateTime(newDateTime);
-        }, 0);
+        // Update parent component with the new date-time
+        // Call this synchronously to ensure parent updates immediately
+        // The parent will update formData.scheduleAt, which will flow back as value prop
+        updateDateTime(newDateTime);
         
         return newDateTime;
       });
@@ -419,7 +425,6 @@ export default function GlassDateTimePicker({
               <div className="pt-4 border-t border-neutral-border/60">
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Select Time</p>
                 <GlassTimePicker
-                  key={tempTime} // Force re-render when tempTime changes
                   value={tempTime}
                   onChange={handleTimeChange}
                 />
