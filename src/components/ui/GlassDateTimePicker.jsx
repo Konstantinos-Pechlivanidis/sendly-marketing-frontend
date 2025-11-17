@@ -121,17 +121,25 @@ export default function GlassDateTimePicker({
   }, [isDateModalOpen]);
 
   // Close time modal when clicking outside
+  // Note: We don't use this for the time modal since it has its own backdrop handler
+  // This is kept for consistency but the backdrop onClick handles closing
   useEffect(() => {
     if (!isTimeModalOpen) return;
 
     let cleanup = null;
     const timeoutId = setTimeout(() => {
       const handleClickOutside = (event) => {
+        // Check if click is on hour/minute picker modals (they have higher z-index)
+        // If so, don't close the main time modal
+        const target = event.target;
+        const isHourMinutePicker = target.closest('[data-hour-minute-picker]');
+        
         if (
           timeButtonRef.current &&
           timeModalRef.current &&
-          !timeButtonRef.current.contains(event.target) &&
-          !timeModalRef.current.contains(event.target)
+          !timeButtonRef.current.contains(target) &&
+          !timeModalRef.current.contains(target) &&
+          !isHourMinutePicker
         ) {
           setIsTimeModalOpen(false);
         }
@@ -536,8 +544,15 @@ export default function GlassDateTimePicker({
         <div
           className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
           onClick={(e) => {
+            // Only close if clicking directly on the backdrop, not on child elements
             if (e.target === e.currentTarget) {
               setIsTimeModalOpen(false);
+            }
+          }}
+          onMouseDown={(e) => {
+            // Prevent mousedown from closing modal if clicking inside
+            if (e.target !== e.currentTarget) {
+              e.stopPropagation();
             }
           }}
           role="presentation"
@@ -545,7 +560,18 @@ export default function GlassDateTimePicker({
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
-            onClick={() => setIsTimeModalOpen(false)}
+            onClick={(e) => {
+              // Only close if clicking directly on backdrop
+              if (e.target === e.currentTarget) {
+                setIsTimeModalOpen(false);
+              }
+            }}
+            onMouseDown={(e) => {
+              // Prevent mousedown from propagating
+              if (e.target !== e.currentTarget) {
+                e.stopPropagation();
+              }
+            }}
             aria-hidden="true"
           />
           
@@ -553,7 +579,13 @@ export default function GlassDateTimePicker({
           <div
             ref={timeModalRef}
             className="relative z-10 w-full max-w-md rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Prevent clicks inside modal from closing it
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
@@ -568,7 +600,18 @@ export default function GlassDateTimePicker({
             </div>
 
             {/* Time Picker */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+            <div 
+              className="p-4 sm:p-6 overflow-y-auto flex-1" 
+              style={{ maxHeight: 'calc(90vh - 80px)' }}
+              onClick={(e) => {
+                // Prevent clicks inside time picker from closing modal
+                e.stopPropagation();
+              }}
+              onMouseDown={(e) => {
+                // Prevent mousedown from closing modal
+                e.stopPropagation();
+              }}
+            >
               <GlassTimePicker
                 value={selectedTime}
                 onChange={handleTimeChange}

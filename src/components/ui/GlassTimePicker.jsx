@@ -59,16 +59,48 @@ export default function GlassTimePicker({
   // Generate minute options (0-59)
   const minuteOptions = Array.from({ length: 60 }, (_, i) => i);
 
-  // Handle hour selection - only update temp state, don't close modal
-  const handleHourSelect = (newHour) => {
+  // Handle hour selection - only update temp state, don't close main modal
+  const handleHourSelect = (newHour, event) => {
+    // Stop all event propagation immediately
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) {
+        event.stopImmediatePropagation();
+      }
+    }
+    
     setTempHours(newHour);
-    setIsHourPickerOpen(false);
+    
+    // Close the hour picker modal after a small delay to ensure event is fully processed
+    // This prevents the click from propagating to the main modal
+    setTimeout(() => {
+      setIsHourPickerOpen(false);
+    }, 50);
+    
+    // Don't call onChange - wait for Save button
   };
 
-  // Handle minute selection - only update temp state, don't close modal
-  const handleMinuteSelect = (newMinute) => {
+  // Handle minute selection - only update temp state, don't close main modal
+  const handleMinuteSelect = (newMinute, event) => {
+    // Stop all event propagation immediately
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) {
+        event.stopImmediatePropagation();
+      }
+    }
+    
     setTempMinutes(newMinute);
-    setIsMinutePickerOpen(false);
+    
+    // Close the minute picker modal after a small delay to ensure event is fully processed
+    // This prevents the click from propagating to the main modal
+    setTimeout(() => {
+      setIsMinutePickerOpen(false);
+    }, 50);
+    
+    // Don't call onChange - wait for Save button
   };
 
   // Handle Save - apply the temporary selection
@@ -143,25 +175,44 @@ export default function GlassTimePicker({
 
           {isHourPickerOpen && createPortal(
             <div
-              className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+              data-hour-minute-picker="true"
+              className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 animate-fade-in"
               onClick={(e) => {
                 if (e.target === e.currentTarget) {
                   setIsHourPickerOpen(false);
                 }
+              }}
+              onMouseDown={(e) => {
+                // Prevent mousedown from propagating to parent modals
+                e.stopPropagation();
+                e.stopImmediatePropagation();
               }}
               role="presentation"
             >
               {/* Backdrop */}
               <div
                 className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
-                onClick={() => setIsHourPickerOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsHourPickerOpen(false);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
                 aria-hidden="true"
               />
               
               {/* Modal Content */}
               <div
                 className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
@@ -182,9 +233,11 @@ export default function GlassTimePicker({
                       key={hour}
                       type="button"
                       onClick={(e) => {
-                        e.preventDefault();
+                        handleHourSelect(hour, e);
+                      }}
+                      onMouseDown={(e) => {
+                        // Also prevent mousedown from propagating
                         e.stopPropagation();
-                        handleHourSelect(hour);
                       }}
                       className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
                         tempHours === hour
@@ -227,25 +280,44 @@ export default function GlassTimePicker({
 
           {isMinutePickerOpen && createPortal(
             <div
-              className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+              data-hour-minute-picker="true"
+              className="fixed inset-0 z-[9999999] flex items-center justify-center p-4 animate-fade-in"
               onClick={(e) => {
                 if (e.target === e.currentTarget) {
                   setIsMinutePickerOpen(false);
                 }
+              }}
+              onMouseDown={(e) => {
+                // Prevent mousedown from propagating to parent modals
+                e.stopPropagation();
+                e.stopImmediatePropagation();
               }}
               role="presentation"
             >
               {/* Backdrop */}
               <div
                 className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
-                onClick={() => setIsMinutePickerOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMinutePickerOpen(false);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
                 aria-hidden="true"
               />
               
               {/* Modal Content */}
               <div
                 className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
@@ -266,9 +338,11 @@ export default function GlassTimePicker({
                       key={minute}
                       type="button"
                       onClick={(e) => {
-                        e.preventDefault();
+                        handleMinuteSelect(minute, e);
+                      }}
+                      onMouseDown={(e) => {
+                        // Also prevent mousedown from propagating
                         e.stopPropagation();
-                        handleMinuteSelect(minute);
                       }}
                       className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
                         tempMinutes === minute
