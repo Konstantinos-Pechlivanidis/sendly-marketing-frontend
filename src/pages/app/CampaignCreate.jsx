@@ -6,6 +6,7 @@ import GlassInput from '../../components/ui/GlassInput';
 import GlassTextarea from '../../components/ui/GlassTextarea';
 import GlassSelectCustom from '../../components/ui/GlassSelectCustom';
 import GlassDateTimePicker from '../../components/ui/GlassDateTimePicker';
+import Icon from '../../components/ui/Icon';
 import BackButton from '../../components/ui/BackButton';
 import PageHeader from '../../components/ui/PageHeader';
 import IPhonePreviewWithDiscount from '../../components/iphone/IPhonePreviewWithDiscount';
@@ -578,17 +579,30 @@ export default function CampaignCreate() {
                   )}
 
                   <div>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isScheduled}
-                        onChange={handleScheduleToggle}
-                        className="w-5 h-5 rounded border-neutral-border bg-neutral-surface-primary text-ice-primary focus:ring-ice-primary focus:ring-2"
+                    <button
+                      type="button"
+                      onClick={handleScheduleToggle}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-xl
+                        bg-neutral-surface-primary border transition-all
+                        ${isScheduled 
+                          ? 'border-ice-primary bg-ice-primary/10 shadow-glow-ice-light' 
+                          : 'border-neutral-border/60 hover:border-neutral-border'
+                        }
+                        focus-ring focus:shadow-glow-ice-light
+                        min-h-[44px] w-full sm:w-auto
+                      `}
+                    >
+                      <Icon 
+                        name="schedule" 
+                        size="md" 
+                        variant={isScheduled ? "ice" : "default"}
+                        className={isScheduled ? 'text-ice-primary' : 'text-neutral-text-secondary'}
                       />
-                      <span className="text-sm font-medium text-neutral-text-primary">
+                      <span className={`text-sm font-medium ${isScheduled ? 'text-ice-primary' : 'text-neutral-text-primary'}`}>
                         Schedule for later
                       </span>
-                    </label>
+                    </button>
                     
                     {isScheduled && (
                       <div className="mt-4">

@@ -26,7 +26,6 @@ export default function GlassDateTimePicker({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [tempTime, setTempTime] = useState('09:00');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -55,92 +54,12 @@ export default function GlassDateTimePicker({
     }
   }, [value]);
 
-  // Calculate dropdown position
+  // Prevent body scroll when modal is open
   useEffect(() => {
-    const updatePosition = () => {
-      if (buttonRef.current && isOpen) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const width = rect.width;
-        const dropdownWidth = Math.min(Math.max(width, 400), 420); // Min 400px, max 420px for calendar + time
-        const estimatedDropdownHeight = 500; // Approximate height of calendar + time picker
-        
-        // Calculate horizontal position (viewport-relative for fixed positioning)
-        let adjustedLeft = rect.left;
-        if (rect.left + dropdownWidth > viewportWidth) {
-          adjustedLeft = viewportWidth - dropdownWidth - 16; // 16px padding from edge
-        }
-        if (adjustedLeft < 16) {
-          adjustedLeft = 16;
-        }
-
-        // Calculate vertical position - check if we should open above or below
-        const spaceBelow = viewportHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        const gap = 8; // Gap between button and dropdown
-        
-        let adjustedTop;
-        if (spaceBelow >= estimatedDropdownHeight + gap) {
-          // Enough space below - position below the button (viewport-relative)
-          adjustedTop = rect.bottom + gap;
-        } else if (spaceAbove >= estimatedDropdownHeight + gap) {
-          // Not enough space below, but enough above - position above the button
-          adjustedTop = rect.top - estimatedDropdownHeight - gap;
-        } else {
-          // Not enough space either way - position where there's more space
-          if (spaceBelow > spaceAbove) {
-            // More space below - position below with max-height constraint
-            adjustedTop = rect.bottom + gap;
-          } else {
-            // More space above - position above with max-height constraint
-            adjustedTop = rect.top - estimatedDropdownHeight - gap;
-          }
-          // Ensure it doesn't go outside viewport
-          if (adjustedTop < 16) {
-            adjustedTop = 16;
-          }
-          if (adjustedTop + estimatedDropdownHeight > viewportHeight - 16) {
-            adjustedTop = viewportHeight - estimatedDropdownHeight - 16;
-          }
-        }
-
-        setDropdownPosition({
-          top: adjustedTop,
-          left: adjustedLeft,
-          width: dropdownWidth,
-        });
-      }
-    };
-
     if (isOpen) {
-      updatePosition();
-      
-      // Update position on scroll and resize to keep it aligned with the button
-      const scrollOptions = { passive: true, capture: true };
-      window.addEventListener('scroll', updatePosition, scrollOptions);
-      window.addEventListener('resize', updatePosition);
-      
-      // Also listen to scroll on all scrollable parents
-      let parent = buttonRef.current?.parentElement;
-      const scrollableParents = [];
-      while (parent && parent !== document.body) {
-        const style = window.getComputedStyle(parent);
-        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-            style.overflowY === 'auto' || style.overflowY === 'scroll') {
-          parent.addEventListener('scroll', updatePosition, scrollOptions);
-          scrollableParents.push(parent);
-        }
-        parent = parent.parentElement;
-      }
-      
+      document.body.style.overflow = 'hidden';
       return () => {
-        window.removeEventListener('scroll', updatePosition, scrollOptions);
-        window.removeEventListener('resize', updatePosition);
-        scrollableParents.forEach(p => {
-          p.removeEventListener('scroll', updatePosition, scrollOptions);
-        });
+        document.body.style.overflow = 'unset';
       };
     }
   }, [isOpen]);
@@ -356,28 +275,41 @@ export default function GlassDateTimePicker({
       </div>
 
       {isOpen && createPortal(
-        <>
-          {/* Mobile Backdrop */}
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsOpen(false);
+            }
+          }}
+          role="presentation"
+        >
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-neutral-text-primary/20 backdrop-blur-sm z-[99998] lg:hidden"
+            className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
           
-          {/* Date Time Picker Dropdown */}
+          {/* Modal Content */}
           <div
             ref={dropdownRef}
-            className="fixed rounded-xl glass border border-neutral-border/60 z-[99999] shadow-glass-light-lg overflow-hidden"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              width: dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : 'auto',
-              maxWidth: 'calc(100vw - 32px)',
-              maxHeight: 'calc(100vh - 32px)',
-              position: 'fixed', // Explicitly set fixed positioning
-            }}
+            className="relative z-10 w-full max-w-lg rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-2 sm:p-3 space-y-3 sm:space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 80px)' }}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+              <h3 className="text-lg font-semibold text-neutral-text-primary">{label || 'Select date and time'}</h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close"
+              >
+                <Icon name="close" size="sm" variant="neutral" />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1" style={{ maxHeight: 'calc(90vh - 80px)' }}>
               {/* Preset Buttons */}
               <div>
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Quick Select</p>
@@ -417,7 +349,7 @@ export default function GlassDateTimePicker({
               </div>
             </div>
           </div>
-        </>,
+        </div>,
         document.body
       )}
     </div>

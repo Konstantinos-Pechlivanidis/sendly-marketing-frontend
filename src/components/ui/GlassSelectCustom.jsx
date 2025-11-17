@@ -21,7 +21,6 @@ export default function GlassSelectCustom({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const selectRef = useRef(null);
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -44,7 +43,7 @@ export default function GlassSelectCustom({
       })
     : options;
 
-  // Calculate dropdown position when opening and update on scroll/resize
+  // Calculate dropdown position when opening
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const updatePosition = () => {
@@ -106,34 +105,14 @@ export default function GlassSelectCustom({
         setDropdownPosition({ top: adjustedTop, left: adjustedLeft, width });
       };
 
-      // Initial position calculation
       updatePosition();
-      
       // Update position on scroll and resize to keep it aligned with the button
-      // Use both capture and bubble phases to catch all scroll events
-      const scrollOptions = { passive: true, capture: true };
-      window.addEventListener('scroll', updatePosition, scrollOptions);
+      window.addEventListener('scroll', updatePosition, true);
       window.addEventListener('resize', updatePosition);
-      
-      // Also listen to scroll on all scrollable parents
-      let parent = buttonRef.current.parentElement;
-      const scrollableParents = [];
-      while (parent && parent !== document.body) {
-        const style = window.getComputedStyle(parent);
-        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-            style.overflowY === 'auto' || style.overflowY === 'scroll') {
-          parent.addEventListener('scroll', updatePosition, scrollOptions);
-          scrollableParents.push(parent);
-        }
-        parent = parent.parentElement;
-      }
 
       return () => {
-        window.removeEventListener('scroll', updatePosition, scrollOptions);
+        window.removeEventListener('scroll', updatePosition, true);
         window.removeEventListener('resize', updatePosition);
-        scrollableParents.forEach(p => {
-          p.removeEventListener('scroll', updatePosition, scrollOptions);
-        });
       };
     }
   }, [isOpen]);
@@ -241,41 +220,63 @@ export default function GlassSelectCustom({
       </div>
 
       {isOpen && createPortal(
-        <>
-          {/* Mobile Backdrop */}
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsOpen(false);
+              setSearchQuery('');
+            }
+          }}
+          role="presentation"
+        >
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-neutral-text-primary/20 backdrop-blur-sm z-[9998] lg:hidden"
-            onClick={() => setIsOpen(false)}
+            className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
+            onClick={() => {
+              setIsOpen(false);
+              setSearchQuery('');
+            }}
             aria-hidden="true"
           />
+          
+          {/* Modal Content */}
           <div 
             ref={dropdownRef}
-            className="fixed rounded-xl glass border border-neutral-border/60 z-[9999] shadow-glass-light-lg overflow-hidden sm:w-auto sm:min-w-[200px]"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              width: dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : 'auto',
-              maxWidth: 'calc(100vw - 32px)',
-              maxHeight: 'calc(100vh - 32px)',
-              position: 'fixed', // Explicitly set fixed positioning
-            }}
+            className="relative z-10 w-full max-w-md rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
           >
-          {/* Search Input (if searchable) */}
-          {searchable && (
-            <div className="p-3 border-b border-neutral-border/60">
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search options..."
-                className="w-full px-3 py-2 rounded-lg bg-neutral-surface-primary border border-neutral-border/60 text-neutral-text-primary text-sm focus-ring focus:border-ice-primary"
-              />
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+              <h3 className="text-lg font-semibold text-neutral-text-primary">{label || 'Select an option'}</h3>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchQuery('');
+                }}
+                className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close"
+              >
+                <Icon name="close" size="sm" variant="neutral" />
+              </button>
             </div>
-          )}
 
-          {/* Options List */}
-          <div className="max-h-60 overflow-y-auto">
+            {/* Search Input (if searchable) */}
+            {searchable && (
+              <div className="p-4 border-b border-neutral-border/60">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search options..."
+                  className="w-full px-4 py-3 rounded-xl bg-neutral-surface-primary border border-neutral-border/60 text-neutral-text-primary text-base focus-ring focus:border-ice-primary"
+                />
+              </div>
+            )}
+
+            {/* Options List */}
+            <div className="overflow-y-auto flex-1" style={{ maxHeight: 'calc(80vh - 120px)' }}>
             {filteredOptions.length === 0 ? (
               <div className="px-4 py-3 text-sm text-neutral-text-secondary text-center">
                 No options found
@@ -318,9 +319,9 @@ export default function GlassSelectCustom({
                 );
               })
             )}
+            </div>
           </div>
-          </div>
-        </>,
+        </div>,
         document.body
       )}
     </div>

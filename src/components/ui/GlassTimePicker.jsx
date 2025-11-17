@@ -38,20 +38,28 @@ export default function GlassTimePicker({
 
   const handleHourChange = (hour) => {
     const newHours = hour;
-    setHours(newHours);
-    setIsHourPickerOpen(false);
     const newTime = `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    // Update internal state immediately for responsive UI
+    // Update state immediately
+    setHours(newHours);
+    // Call onChange immediately with the new time value
     onChange({ target: { value: newTime } });
+    // Close modal after a small delay to allow state updates
+    setTimeout(() => {
+      setIsHourPickerOpen(false);
+    }, 100);
   };
 
   const handleMinuteChange = (minute) => {
     const newMinutes = minute;
-    setMinutes(newMinutes);
-    setIsMinutePickerOpen(false);
     const newTime = `${String(hours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
-    // Update internal state immediately for responsive UI
+    // Update state immediately
+    setMinutes(newMinutes);
+    // Call onChange immediately with the new time value
     onChange({ target: { value: newTime } });
+    // Close modal after a small delay to allow state updates
+    setTimeout(() => {
+      setIsMinutePickerOpen(false);
+    }, 100);
   };
 
   const formatHour = (h) => {
@@ -64,201 +72,21 @@ export default function GlassTimePicker({
     return h >= 12 ? 'PM' : 'AM';
   };
 
-  // Calculate dropdown positions
-  const [hourPickerPosition, setHourPickerPosition] = useState({ top: 0, left: 0, width: 0 });
-  const [minutePickerPosition, setMinutePickerPosition] = useState({ top: 0, left: 0, width: 0 });
-
-  // Update hour picker position on scroll/resize
+  // Prevent body scroll when modal is open
   useEffect(() => {
-    if (isHourPickerOpen && hourPickerRef.current) {
-      const updatePosition = () => {
-        if (!hourPickerRef.current) return;
-        const rect = hourPickerRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const estimatedHeight = 200;
-        const gap = 8;
-        
-        let top = rect.bottom + gap;
-        const spaceBelow = viewportHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        
-        // Check if we should position above
-        if (spaceBelow < estimatedHeight + gap && spaceAbove >= estimatedHeight + gap) {
-          top = rect.top - estimatedHeight - gap;
-        }
-        
-        // Ensure it stays within viewport
-        if (top < 16) top = 16;
-        if (top + estimatedHeight > viewportHeight - 16) {
-          top = viewportHeight - estimatedHeight - 16;
-        }
-        
-        setHourPickerPosition({
-          top,
-          left: rect.left,
-          width: rect.width,
-        });
-      };
-
-      updatePosition();
-      const scrollOptions = { passive: true, capture: true };
-      window.addEventListener('scroll', updatePosition, scrollOptions);
-      window.addEventListener('resize', updatePosition);
-      
-      // Listen to scroll on scrollable parents
-      let parent = hourPickerRef.current.parentElement;
-      const scrollableParents = [];
-      while (parent && parent !== document.body) {
-        const style = window.getComputedStyle(parent);
-        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-            style.overflowY === 'auto' || style.overflowY === 'scroll') {
-          parent.addEventListener('scroll', updatePosition, scrollOptions);
-          scrollableParents.push(parent);
-        }
-        parent = parent.parentElement;
-      }
-
+    if (isHourPickerOpen || isMinutePickerOpen) {
+      document.body.style.overflow = 'hidden';
       return () => {
-        window.removeEventListener('scroll', updatePosition, scrollOptions);
-        window.removeEventListener('resize', updatePosition);
-        scrollableParents.forEach(p => {
-          p.removeEventListener('scroll', updatePosition, scrollOptions);
-        });
+        document.body.style.overflow = 'unset';
       };
     }
-  }, [isHourPickerOpen]);
-
-  // Update minute picker position on scroll/resize
-  useEffect(() => {
-    if (isMinutePickerOpen && minutePickerRef.current) {
-      const updatePosition = () => {
-        if (!minutePickerRef.current) return;
-        const rect = minutePickerRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const estimatedHeight = 200;
-        const gap = 8;
-        
-        let top = rect.bottom + gap;
-        const spaceBelow = viewportHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        
-        // Check if we should position above
-        if (spaceBelow < estimatedHeight + gap && spaceAbove >= estimatedHeight + gap) {
-          top = rect.top - estimatedHeight - gap;
-        }
-        
-        // Ensure it stays within viewport
-        if (top < 16) top = 16;
-        if (top + estimatedHeight > viewportHeight - 16) {
-          top = viewportHeight - estimatedHeight - 16;
-        }
-        
-        setMinutePickerPosition({
-          top,
-          left: rect.left,
-          width: rect.width,
-        });
-      };
-
-      updatePosition();
-      const scrollOptions = { passive: true, capture: true };
-      window.addEventListener('scroll', updatePosition, scrollOptions);
-      window.addEventListener('resize', updatePosition);
-      
-      // Listen to scroll on scrollable parents
-      let parent = minutePickerRef.current.parentElement;
-      const scrollableParents = [];
-      while (parent && parent !== document.body) {
-        const style = window.getComputedStyle(parent);
-        if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-            style.overflowY === 'auto' || style.overflowY === 'scroll') {
-          parent.addEventListener('scroll', updatePosition, scrollOptions);
-          scrollableParents.push(parent);
-        }
-        parent = parent.parentElement;
-      }
-
-      return () => {
-        window.removeEventListener('scroll', updatePosition, scrollOptions);
-        window.removeEventListener('resize', updatePosition);
-        scrollableParents.forEach(p => {
-          p.removeEventListener('scroll', updatePosition, scrollOptions);
-        });
-      };
-    }
-  }, [isMinutePickerOpen]);
-
-  // Close pickers when clicking outside
-  useEffect(() => {
-    if (!isHourPickerOpen && !isMinutePickerOpen) return;
-
-    // Use a small delay to prevent immediate closing when opening
-    let cleanup = null;
-    const timeoutId = setTimeout(() => {
-      const handleClickOutside = (event) => {
-        if (hourPickerRef.current && !hourPickerRef.current.contains(event.target)) {
-          setIsHourPickerOpen(false);
-        }
-        if (minutePickerRef.current && !minutePickerRef.current.contains(event.target)) {
-          setIsMinutePickerOpen(false);
-        }
-      };
-
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-      
-      cleanup = () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('touchstart', handleClickOutside);
-      };
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (cleanup) {
-        cleanup();
-      }
-    };
   }, [isHourPickerOpen, isMinutePickerOpen]);
 
-  // Format time for display - use internal state for immediate feedback
-  const formatDisplayTime = () => {
-    // Use internal state (hours, minutes) for immediate display, fallback to value prop
-    const h = hours;
-    const m = minutes;
-    if (isNaN(h) || isNaN(m)) {
-      // Fallback to value prop if state is invalid
-      if (value && typeof value === 'string') {
-        const [hVal, mVal] = value.split(':').map(Number);
-        if (!isNaN(hVal) && !isNaN(mVal)) {
-          const hour12 = hVal === 0 ? 12 : hVal > 12 ? hVal - 12 : hVal;
-          const ampm = hVal >= 12 ? 'PM' : 'AM';
-          return `${hour12}:${String(mVal).padStart(2, '0')} ${ampm}`;
-        }
-      }
-      return 'Select time';
-    }
-    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    return `${hour12}:${String(m).padStart(2, '0')} ${ampm}`;
-  };
-
-  // Determine if we have a valid time selection
-  const hasValidTime = (hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59);
 
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
-      {/* Display Selected Time */}
-      {hasValidTime && (
-        <div className="px-4 py-2.5 rounded-lg bg-ice-primary/10 border border-ice-primary/30 text-center animate-in fade-in duration-200">
-          <p className="text-xs text-neutral-text-secondary mb-1 font-medium uppercase tracking-wider">Selected Time</p>
-          <p className="text-xl font-bold text-ice-primary">{formatDisplayTime()}</p>
-        </div>
-      )}
-      
-      <div className="flex items-center gap-3">
-        {/* Hour Picker */}
-        <div className="flex-1 relative" ref={hourPickerRef}>
+    <div className={`flex items-center gap-3 ${className}`}>
+      {/* Hour Picker */}
+      <div className="flex-1 relative" ref={hourPickerRef}>
         <button
           type="button"
           onClick={() => {
@@ -268,40 +96,66 @@ export default function GlassTimePicker({
           className="w-full px-4 py-3 rounded-xl bg-neutral-surface-primary border border-neutral-border/60 text-neutral-text-primary focus-ring focus:border-ice-primary focus:shadow-glow-ice-light text-center text-lg font-semibold min-h-[44px] hover:border-neutral-border transition-colors"
         >
           <div className="flex flex-col items-center">
-            <span className="text-2xl">{String(hours).padStart(2, '0')}</span>
+            <span className="text-2xl">{String(formatHour(hours)).padStart(2, '0')}</span>
             <span className="text-xs text-neutral-text-secondary mt-0.5">Hour</span>
           </div>
         </button>
 
         {isHourPickerOpen && createPortal(
           <div
-            className="fixed rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg z-[99999] max-h-[200px] overflow-y-auto"
-            style={{
-              top: `${hourPickerPosition.top}px`,
-              left: `${hourPickerPosition.left}px`,
-              width: `${hourPickerPosition.width}px`,
-              maxWidth: 'calc(100vw - 32px)',
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsHourPickerOpen(false);
+              }
             }}
+            role="presentation"
           >
-            <div className="p-2">
-              {hourOptions.map((hour) => (
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
+              onClick={() => setIsHourPickerOpen(false)}
+              aria-hidden="true"
+            />
+            
+            {/* Modal Content */}
+            <div
+              className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+                <h3 className="text-lg font-semibold text-neutral-text-primary">Select Hour</h3>
                 <button
-                  key={hour}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleHourChange(hour);
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors mb-1 ${
-                    hours === hour
-                      ? 'bg-ice-primary text-white shadow-glow-ice-light'
-                      : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
-                  }`}
+                  onClick={() => setIsHourPickerOpen(false)}
+                  className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  aria-label="Close"
                 >
-                  {String(hour).padStart(2, '0')} {getAmPm(hour)}
+                  <Icon name="close" size="sm" variant="neutral" />
                 </button>
-              ))}
+              </div>
+
+              {/* Options List */}
+              <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                {hourOptions.map((hour) => (
+                  <button
+                    key={hour}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleHourChange(hour);
+                    }}
+                    className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
+                      hours === hour
+                        ? 'bg-ice-primary text-white shadow-glow-ice-light'
+                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                    }`}
+                  >
+                    {String(formatHour(hour)).padStart(2, '0')} {getAmPm(hour)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>,
           document.body
@@ -329,46 +183,71 @@ export default function GlassTimePicker({
 
         {isMinutePickerOpen && createPortal(
           <div
-            className="fixed rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg z-[99999] max-h-[200px] overflow-y-auto"
-            style={{
-              top: `${minutePickerPosition.top}px`,
-              left: `${minutePickerPosition.left}px`,
-              width: `${minutePickerPosition.width}px`,
-              maxWidth: 'calc(100vw - 32px)',
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 animate-fade-in"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsMinutePickerOpen(false);
+              }
             }}
+            role="presentation"
           >
-            <div className="p-2">
-              {minuteOptions.map((minute) => (
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-neutral-text-primary/30 backdrop-blur-md animate-fade-in"
+              onClick={() => setIsMinutePickerOpen(false)}
+              aria-hidden="true"
+            />
+            
+            {/* Modal Content */}
+            <div
+              className="relative z-10 w-full max-w-xs rounded-xl glass border border-neutral-border/60 shadow-glass-light-lg overflow-hidden animate-scale-in max-h-[80vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-neutral-border/60">
+                <h3 className="text-lg font-semibold text-neutral-text-primary">Select Minute</h3>
                 <button
-                  key={minute}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMinuteChange(minute);
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors mb-1 ${
-                    minutes === minute
-                      ? 'bg-ice-primary text-white shadow-glow-ice-light'
-                      : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
-                  }`}
+                  onClick={() => setIsMinutePickerOpen(false)}
+                  className="p-2 rounded-lg hover:bg-neutral-surface-secondary transition-colors focus-ring min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  aria-label="Close"
                 >
-                  {String(minute).padStart(2, '0')}
+                  <Icon name="close" size="sm" variant="neutral" />
                 </button>
-              ))}
+              </div>
+
+              {/* Options List */}
+              <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                {minuteOptions.map((minute) => (
+                  <button
+                    key={minute}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMinuteChange(minute);
+                    }}
+                    className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
+                      minutes === minute
+                        ? 'bg-ice-primary text-white shadow-glow-ice-light'
+                        : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                    }`}
+                  >
+                    {String(minute).padStart(2, '0')}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>,
           document.body
         )}
       </div>
 
-        {/* AM/PM Display */}
-        <div className="px-3 py-3 text-center">
-          <div className="text-lg font-semibold text-neutral-text-primary">
-            {getAmPm(hours)}
-          </div>
-          <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
+      {/* AM/PM Display */}
+      <div className="px-3 py-3 text-center">
+        <div className="text-lg font-semibold text-neutral-text-primary">
+          {getAmPm(hours)}
         </div>
+        <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
       </div>
     </div>
   );
