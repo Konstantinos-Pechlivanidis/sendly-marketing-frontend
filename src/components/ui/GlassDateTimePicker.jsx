@@ -225,7 +225,7 @@ export default function GlassDateTimePicker({
     setIsTimeModalOpen(true);
   };
 
-  // Handle time change from time picker modal
+  // Handle time change from time picker modal (called when Save is pressed)
   const handleTimeChange = (e) => {
     try {
       const timeValue = e?.target?.value || ''; // Format: "HH:mm"
@@ -240,10 +240,8 @@ export default function GlassDateTimePicker({
         return currentDate; // Return unchanged
       });
       
-      // Close time modal after a brief delay
-      setTimeout(() => {
-        setIsTimeModalOpen(false);
-      }, 200);
+      // Close time modal after Save is pressed
+      setIsTimeModalOpen(false);
     } catch (error) {
       console.error('Error in handleTimeChange:', error);
     }

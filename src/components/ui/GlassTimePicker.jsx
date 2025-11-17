@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from './Icon';
+import GlassButton from './GlassButton';
 
 /**
  * Glass Time Picker Component
@@ -8,14 +9,16 @@ import Icon from './Icon';
  * Matches iOS 26 styling and app UI
  * 
  * Value format: "HH:mm" (e.g., "14:30" for 2:30 PM)
+ * 
+ * Behavior: Selections are temporary until "Save" is pressed
  */
 export default function GlassTimePicker({
   value, // Format: "HH:mm"
   onChange,
   className = '',
 }) {
-  // Internal state - always keep in sync with value prop
-  const [hours, setHours] = useState(() => {
+  // Temporary selection state (not applied until Save)
+  const [tempHours, setTempHours] = useState(() => {
     if (value && typeof value === 'string' && value.includes(':')) {
       const [h] = value.split(':').map(Number);
       return !isNaN(h) && h >= 0 && h <= 23 ? h : 9;
@@ -23,7 +26,7 @@ export default function GlassTimePicker({
     return 9;
   });
   
-  const [minutes, setMinutes] = useState(() => {
+  const [tempMinutes, setTempMinutes] = useState(() => {
     if (value && typeof value === 'string' && value.includes(':')) {
       const [, m] = value.split(':').map(Number);
       return !isNaN(m) && m >= 0 && m <= 59 ? m : 0;
@@ -36,19 +39,17 @@ export default function GlassTimePicker({
   const hourPickerRef = useRef(null);
   const minutePickerRef = useRef(null);
 
-  // Sync internal state with value prop - this is the source of truth
+  // Sync temporary state with value prop when it changes externally
   useEffect(() => {
     if (value && typeof value === 'string' && value.includes(':')) {
       const [h, m] = value.split(':').map(Number);
       if (!isNaN(h) && !isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59) {
-        // Only update if different to avoid unnecessary re-renders
-        setHours(prev => prev !== h ? h : prev);
-        setMinutes(prev => prev !== m ? m : prev);
+        setTempHours(h);
+        setTempMinutes(m);
       }
     } else if (!value || value === '') {
-      // Reset to default if value is empty
-      setHours(9);
-      setMinutes(0);
+      setTempHours(9);
+      setTempMinutes(0);
     }
   }, [value]);
 
@@ -58,60 +59,29 @@ export default function GlassTimePicker({
   // Generate minute options (0-59)
   const minuteOptions = Array.from({ length: 60 }, (_, i) => i);
 
-  // Handle hour change - update state and notify parent immediately
-  const handleHourChange = (newHour) => {
-    // Update hours state immediately
-    setHours(newHour);
-    
-    // Get current minutes (use functional update to ensure we have latest)
-    setMinutes(currentMinutes => {
-      // Build time string in HH:mm format
-      const newTime = `${String(newHour).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
-      
-      // Notify parent immediately with the new time
-      if (onChange && typeof onChange === 'function') {
-        onChange({ 
-          target: { 
-            value: newTime 
-          } 
-        });
-      }
-      
-      return currentMinutes; // Return unchanged
-    });
-    
-    // Close modal after a brief delay
-    setTimeout(() => {
-      setIsHourPickerOpen(false);
-    }, 100);
+  // Handle hour selection - only update temp state, don't close modal
+  const handleHourSelect = (newHour) => {
+    setTempHours(newHour);
+    setIsHourPickerOpen(false);
   };
 
-  // Handle minute change - update state and notify parent immediately
-  const handleMinuteChange = (newMinute) => {
-    // Update minutes state immediately
-    setMinutes(newMinute);
+  // Handle minute selection - only update temp state, don't close modal
+  const handleMinuteSelect = (newMinute) => {
+    setTempMinutes(newMinute);
+    setIsMinutePickerOpen(false);
+  };
+
+  // Handle Save - apply the temporary selection
+  const handleSave = () => {
+    const newTime = `${String(tempHours).padStart(2, '0')}:${String(tempMinutes).padStart(2, '0')}`;
     
-    // Get current hours (use functional update to ensure we have latest)
-    setHours(currentHours => {
-      // Build time string in HH:mm format
-      const newTime = `${String(currentHours).padStart(2, '0')}:${String(newMinute).padStart(2, '0')}`;
-      
-      // Notify parent immediately with the new time
-      if (onChange && typeof onChange === 'function') {
-        onChange({ 
-          target: { 
-            value: newTime 
-          } 
-        });
-      }
-      
-      return currentHours; // Return unchanged
-    });
-    
-    // Close modal after a brief delay
-    setTimeout(() => {
-      setIsMinutePickerOpen(false);
-    }, 100);
+    if (onChange && typeof onChange === 'function') {
+      onChange({ 
+        target: { 
+          value: newTime 
+        } 
+      });
+    }
   };
 
   const formatHour = (h) => {
@@ -135,18 +105,18 @@ export default function GlassTimePicker({
   }, [isHourPickerOpen, isMinutePickerOpen]);
 
   // Determine if we have a valid time selection
-  const hasValidTime = (hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59);
+  const hasValidTime = (tempHours >= 0 && tempHours <= 23) && (tempMinutes >= 0 && tempMinutes <= 59);
   const displayTime = hasValidTime 
-    ? `${String(formatHour(hours)).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${getAmPm(hours)}`
+    ? `${String(formatHour(tempHours)).padStart(2, '0')}:${String(tempMinutes).padStart(2, '0')} ${getAmPm(tempHours)}`
     : '';
 
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
-      {/* Display Selected Time */}
+    <div className={`flex flex-col gap-4 ${className}`}>
+      {/* Display Selected Time Preview */}
       {hasValidTime && displayTime && (
-        <div className="px-4 py-2.5 rounded-lg bg-ice-primary/10 border border-ice-primary/30 text-center animate-in fade-in duration-200">
+        <div className="px-4 py-3 rounded-lg bg-ice-primary/10 border border-ice-primary/30 text-center">
           <p className="text-xs text-neutral-text-secondary mb-1 font-medium uppercase tracking-wider">Selected Time</p>
-          <p className="text-xl font-bold text-ice-primary">{displayTime}</p>
+          <p className="text-2xl font-bold text-ice-primary">{displayTime}</p>
         </div>
       )}
       
@@ -166,7 +136,7 @@ export default function GlassTimePicker({
             }`}
           >
             <div className="flex flex-col items-center">
-              <span className="text-2xl">{String(formatHour(hours)).padStart(2, '0')}</span>
+              <span className="text-2xl">{String(formatHour(tempHours)).padStart(2, '0')}</span>
               <span className="text-xs text-neutral-text-secondary mt-0.5">Hour</span>
             </div>
           </button>
@@ -206,7 +176,7 @@ export default function GlassTimePicker({
                 </div>
 
                 {/* Options List */}
-                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 140px)' }}>
                   {hourOptions.map((hour) => (
                     <button
                       key={hour}
@@ -214,10 +184,10 @@ export default function GlassTimePicker({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleHourChange(hour);
+                        handleHourSelect(hour);
                       }}
                       className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
-                        hours === hour
+                        tempHours === hour
                           ? 'bg-ice-primary text-white shadow-glow-ice-light'
                           : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
                       }`}
@@ -250,7 +220,7 @@ export default function GlassTimePicker({
             }`}
           >
             <div className="flex flex-col items-center">
-              <span className="text-2xl">{String(minutes).padStart(2, '0')}</span>
+              <span className="text-2xl">{String(tempMinutes).padStart(2, '0')}</span>
               <span className="text-xs text-neutral-text-secondary mt-0.5">Minute</span>
             </div>
           </button>
@@ -290,7 +260,7 @@ export default function GlassTimePicker({
                 </div>
 
                 {/* Options List */}
-                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                <div className="overflow-y-auto flex-1 p-2" style={{ maxHeight: 'calc(80vh - 140px)' }}>
                   {minuteOptions.map((minute) => (
                     <button
                       key={minute}
@@ -298,10 +268,10 @@ export default function GlassTimePicker({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleMinuteChange(minute);
+                        handleMinuteSelect(minute);
                       }}
                       className={`w-full px-4 py-3 rounded-lg text-base font-medium transition-colors mb-1 ${
-                        minutes === minute
+                        tempMinutes === minute
                           ? 'bg-ice-primary text-white shadow-glow-ice-light'
                           : 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
                       }`}
@@ -323,11 +293,21 @@ export default function GlassTimePicker({
             : 'border-transparent'
         }`}>
           <div className="text-lg font-semibold text-neutral-text-primary">
-            {getAmPm(hours)}
+            {getAmPm(tempHours)}
           </div>
           <div className="text-xs text-neutral-text-secondary mt-0.5">Period</div>
         </div>
       </div>
+
+      {/* Save Button */}
+      <GlassButton
+        onClick={handleSave}
+        variant="primary"
+        size="md"
+        className="w-full mt-2"
+      >
+        Save Time
+      </GlassButton>
     </div>
   );
 }
