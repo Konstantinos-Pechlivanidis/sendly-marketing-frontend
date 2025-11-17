@@ -28,10 +28,18 @@ export default function GlassDateTimePicker({
   const [tempTime, setTempTime] = useState('09:00');
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
+  const previousValueRef = useRef(value); // Track previous value to detect changes
 
   // Parse value prop to Date object and sync tempTime
   // This ensures the component state stays in sync with the parent's value
+  // Always sync when value prop changes - don't try to optimize with comparisons
   useEffect(() => {
+    // Only update if value actually changed
+    if (previousValueRef.current === value) {
+      return;
+    }
+    previousValueRef.current = value;
+    
     if (value && value.trim()) {
       try {
         const date = new Date(value);
@@ -41,10 +49,10 @@ export default function GlassDateTimePicker({
           const minutes = date.getMinutes().toString().padStart(2, '0');
           const timeString = `${hours}:${minutes}`;
           
-          // Update selectedDateTime
+          // Always update both states to ensure they're in sync with the prop
+          // This is important because the value prop is the source of truth
           setSelectedDateTime(date);
-          // Update tempTime if it's different (to avoid unnecessary re-renders of GlassTimePicker)
-          setTempTime(prevTime => prevTime !== timeString ? timeString : prevTime);
+          setTempTime(timeString);
         } else {
           setSelectedDateTime(null);
           setTempTime('09:00');
@@ -130,54 +138,71 @@ export default function GlassDateTimePicker({
   const handleTimeChange = (e) => {
     try {
       const timeValue = e?.target?.value || ''; // Format: "HH:mm"
-      if (!timeValue) return;
+      if (!timeValue || !timeValue.includes(':')) return;
+      
+      const [hours, minutes] = timeValue.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return;
+      
+      // Calculate minDateObj here to ensure it's available
+      const minDateValue = minDate ? new Date(minDate) : null;
       
       // Update tempTime immediately for GlassTimePicker display
       setTempTime(timeValue);
       
-      const [hours, minutes] = timeValue.split(':').map(Number);
-      
-      // If we have a selected date, update it with the new time
-      // If no date is selected, use today (or minDate if today is before minDate)
-      let baseDate;
-      if (selectedDateTime) {
-        baseDate = new Date(selectedDateTime);
-      } else {
-        baseDate = new Date();
-        // If minDate is set and today is before minDate, use minDate instead
-        if (minDateObj && baseDate < minDateObj) {
-          baseDate = new Date(minDateObj);
+      // Use functional update to get the latest selectedDateTime
+      setSelectedDateTime(currentDateTime => {
+        // If we have a selected date, update it with the new time
+        // If no date is selected, use today (or minDate if today is before minDate)
+        let baseDate;
+        if (currentDateTime) {
+          baseDate = new Date(currentDateTime);
+        } else {
+          baseDate = new Date();
+          // If minDate is set and today is before minDate, use minDate instead
+          if (minDateValue && baseDate < minDateValue) {
+            baseDate = new Date(minDateValue);
+          }
         }
-      }
-      
-      const newDateTime = setMilliseconds(
-        setSeconds(
-          setMinutes(
-            setHours(baseDate, hours || 9),
-            minutes || 0
+        
+        const newDateTime = setMilliseconds(
+          setSeconds(
+            setMinutes(
+              setHours(baseDate, hours || 9),
+              minutes || 0
+            ),
+            0
           ),
           0
-        ),
-        0
-      );
-      
-      // Update state immediately for UI feedback
-      setSelectedDateTime(newDateTime);
-      // Update parent component with the new date-time
-      updateDateTime(newDateTime);
+        );
+        
+        // Update parent component with the new date-time immediately
+        // Use setTimeout to ensure state update completes first
+        setTimeout(() => {
+          updateDateTime(newDateTime);
+        }, 0);
+        
+        return newDateTime;
+      });
     } catch (error) {
       console.error('Error in handleTimeChange:', error);
     }
   };
 
   const updateDateTime = (dateTime) => {
-    const syntheticEvent = {
-      target: {
-        name,
-        value: dateTime.toISOString(),
-      },
-    };
-    onChange(syntheticEvent);
+    try {
+      const isoString = dateTime.toISOString();
+      const syntheticEvent = {
+        target: {
+          name,
+          value: isoString,
+        },
+      };
+      if (onChange && typeof onChange === 'function') {
+        onChange(syntheticEvent);
+      }
+    } catch (error) {
+      console.error('Error in updateDateTime:', error);
+    }
   };
 
   const applyPreset = (preset) => {
@@ -394,6 +419,7 @@ export default function GlassDateTimePicker({
               <div className="pt-4 border-t border-neutral-border/60">
                 <p className="text-xs font-semibold text-neutral-text-secondary uppercase tracking-wider mb-3">Select Time</p>
                 <GlassTimePicker
+                  key={tempTime} // Force re-render when tempTime changes
                   value={tempTime}
                   onChange={handleTimeChange}
                 />

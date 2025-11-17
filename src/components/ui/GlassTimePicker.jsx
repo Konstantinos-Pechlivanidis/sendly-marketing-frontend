@@ -21,17 +21,19 @@ export default function GlassTimePicker({
 
   // Parse value prop and update internal state
   // This syncs the internal state with the value prop from parent
+  // The value prop is the source of truth, so we always sync to it
   useEffect(() => {
-    if (value && typeof value === 'string') {
+    if (value && typeof value === 'string' && value.includes(':')) {
       const [h, m] = value.split(':').map(Number);
       if (!isNaN(h) && !isNaN(m)) {
         const validHours = h >= 0 && h <= 23 ? h : 9;
         const validMinutes = m >= 0 && m <= 59 ? m : 0;
         // Always update to sync with prop value (value prop is source of truth)
+        // Don't check if different - just always update to ensure sync
         setHours(validHours);
         setMinutes(validMinutes);
       }
-    } else if (!value) {
+    } else if (!value || value === '') {
       // Reset to default if value is empty
       setHours(9);
       setMinutes(0);
@@ -46,15 +48,19 @@ export default function GlassTimePicker({
 
   const handleHourChange = (hour) => {
     try {
-      const newHours = hour;
-      const newTime = `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      // Update state immediately for UI feedback
-      setHours(newHours);
-      // Call onChange immediately with the new time value
+      // Update hours state immediately
+      setHours(hour);
+      
+      // Build the time string using current minutes (from closure)
+      // This ensures we use the latest minutes value
+      const newTime = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      
+      // Call onChange immediately with the new time
       if (onChange && typeof onChange === 'function') {
         onChange({ target: { value: newTime } });
       }
-      // Close modal after a small delay to allow state updates
+      
+      // Close modal after a small delay
       setTimeout(() => {
         setIsHourPickerOpen(false);
       }, 100);
@@ -66,15 +72,19 @@ export default function GlassTimePicker({
 
   const handleMinuteChange = (minute) => {
     try {
-      const newMinutes = minute;
-      const newTime = `${String(hours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
-      // Update state immediately for UI feedback
-      setMinutes(newMinutes);
-      // Call onChange immediately with the new time value
+      // Update minutes state immediately
+      setMinutes(minute);
+      
+      // Build the time string using current hours (from closure)
+      // This ensures we use the latest hours value
+      const newTime = `${String(hours).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+      
+      // Call onChange immediately with the new time
       if (onChange && typeof onChange === 'function') {
         onChange({ target: { value: newTime } });
       }
-      // Close modal after a small delay to allow state updates
+      
+      // Close modal after a small delay
       setTimeout(() => {
         setIsMinutePickerOpen(false);
       }, 100);
