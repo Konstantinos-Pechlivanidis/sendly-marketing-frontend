@@ -40,7 +40,7 @@ export default function CampaignCreate() {
   const scheduleCampaign = useScheduleCampaign();
   const { data: existingCampaign, isLoading: isLoadingCampaign } = useCampaign(id);
   const { data: audiencesData } = useAudiences();
-  const { data: discountsData } = useDiscounts();
+  const { data: discountsData, isLoading: isLoadingDiscounts, error: discountsError } = useDiscounts();
   const { data: settingsData } = useSettings();
   const toast = useToastContext();
   
@@ -324,7 +324,7 @@ export default function CampaignCreate() {
     return options;
   }, [audiencesData]);
 
-  // Prepare discount options
+  // Prepare discount options with rich labels showing code, title, status, value, and validity
   const discountOptions = useMemo(() => {
     const options = [
       { value: '', label: 'No Discount Code' },
@@ -333,9 +333,56 @@ export default function CampaignCreate() {
     if (discountsData) {
       const discounts = normalizeArrayResponse(discountsData, 'discounts');
       discounts.forEach((discount) => {
+        // Build rich label: "{code} — {title} ({status}, {valueLabel}, {validityLabel})"
+        const parts = [];
+        
+        // Add code (always show if available)
+        if (discount.code && discount.code !== 'N/A') {
+          parts.push(discount.code);
+        }
+        
+        // Add title (only if different from code)
+        if (discount.title && discount.title !== discount.code) {
+          if (parts.length > 0) {
+            parts.push('—', discount.title);
+          } else {
+            parts.push(discount.title);
+          }
+        }
+        
+        // Build details array for parentheses: status, valueLabel, validityLabel
+        const details = [];
+        
+        // Add status if available
+        if (discount.status) {
+          details.push(discount.status);
+        }
+        
+        // Add value label if available and not empty
+        if (discount.valueLabel && discount.valueLabel.trim() !== '') {
+          details.push(discount.valueLabel);
+        }
+        
+        // Add validity label if available and not empty
+        if (discount.validityLabel && discount.validityLabel.trim() !== '') {
+          details.push(discount.validityLabel);
+        }
+        
+        // Combine parts and details
+        let label = parts.join(' ');
+        if (details.length > 0) {
+          label += ` (${details.join(', ')})`;
+        }
+        
+        // Fallback to simple label if no rich data available
+        if (!label || label.trim() === '') {
+          label = discount.code || discount.title || discount.id || 'Unknown Discount';
+        }
+        
         options.push({
           value: discount.id,
-          label: `${discount.code || discount.name}${discount.value ? ` (${discount.value}${discount.type === 'percentage' ? '%' : ''})` : ''}`,
+          label: label,
+          discount: discount, // Store full discount object for tooltip/accessibility
         });
       });
     }
@@ -348,12 +395,12 @@ export default function CampaignCreate() {
     return countSMSCharacters(formData.message);
   }, [formData.message]);
 
-  // Get selected discount code for preview
+  // Get selected discount code for preview and insertion
   const selectedDiscount = useMemo(() => {
-    if (!formData.discountId || !discountsData) return 'DISCOUNT20';
-    const discounts = Array.isArray(discountsData) ? discountsData : discountsData.discounts || [];
+    if (!formData.discountId || !discountsData) return null;
+    const discounts = normalizeArrayResponse(discountsData, 'discounts');
     const discount = discounts.find((d) => d.id === formData.discountId);
-    return discount?.code || 'DISCOUNT20';
+    return discount?.code || null;
   }, [formData.discountId, discountsData]);
 
   // Only show full loading state on initial load (no cached data)
@@ -498,11 +545,62 @@ export default function CampaignCreate() {
                                   textarea.setSelectionRange(newPosition, newPosition);
                                 }, 10);
                               }}
-                              className="w-full px-4 py-3 text-left text-sm text-neutral-text-primary hover:bg-neutral-surface-secondary transition-colors"
+                              className="w-full px-4 py-3 text-left text-sm text-neutral-text-primary hover:bg-neutral-surface-secondary transition-colors border-b border-neutral-border/30"
                             >
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs bg-neutral-surface-secondary px-2 py-1 rounded">{'{{last_name}}'}</span>
                                 <span>Last Name</span>
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                // Check if discount is selected
+                                if (!formData.discountId || !selectedDiscount) {
+                                  toast.warning('Please select a discount code first from the Discount Code dropdown.');
+                                  setIsPlaceholderMenuOpen(false);
+                                  return;
+                                }
+                                
+                                const textarea = document.getElementById('message');
+                                if (!textarea) {
+                                  toast.error('Message editor not found');
+                                  setIsPlaceholderMenuOpen(false);
+                                  return;
+                                }
+                                
+                                const start = textarea.selectionStart || formData.message.length;
+                                const end = textarea.selectionEnd || formData.message.length;
+                                const placeholder = '{{discount_code}}';
+                                const newMessage = 
+                                  formData.message.substring(0, start) + 
+                                  placeholder + 
+                                  formData.message.substring(end);
+                                setFormData(prev => ({ ...prev, message: newMessage }));
+                                setIsPlaceholderMenuOpen(false);
+                                setTimeout(() => {
+                                  textarea.focus();
+                                  const newPosition = start + placeholder.length;
+                                  textarea.setSelectionRange(newPosition, newPosition);
+                                }, 10);
+                              }}
+                              className={`w-full px-4 py-3 text-left text-sm transition-colors ${
+                                formData.discountId && selectedDiscount
+                                  ? 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
+                                  : 'text-neutral-text-secondary opacity-50 cursor-not-allowed'
+                              }`}
+                              disabled={!formData.discountId || !selectedDiscount}
+                              title={formData.discountId && selectedDiscount ? `Insert ${selectedDiscount} code` : 'Select a discount code first'}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs bg-neutral-surface-secondary px-2 py-1 rounded">{'{{discount_code}}'}</span>
+                                <span>Discount Code</span>
+                                {formData.discountId && selectedDiscount && (
+                                  <span className="ml-auto text-xs text-neutral-text-secondary">({selectedDiscount})</span>
+                                )}
                               </div>
                             </button>
                           </div>
@@ -516,7 +614,7 @@ export default function CampaignCreate() {
                       onChange={handleChange}
                       error={errors.message}
                       rows={8}
-                      placeholder="Type your SMS message here... Use {{first_name}} and {{last_name}} for personalization."
+                      placeholder="Type your SMS message here... Use {{first_name}}, {{last_name}}, and {{discount_code}} for personalization."
                       required
                     />
                   </div>
@@ -542,7 +640,7 @@ export default function CampaignCreate() {
                     </div>
                   </div>
 
-                  {discountOptions.length > 1 && (
+                  <div>
                     <GlassSelectCustom
                       label="Discount Code (Optional)"
                       name="discountId"
@@ -555,9 +653,74 @@ export default function CampaignCreate() {
                       }}
                       options={discountOptions}
                       searchable={discountOptions.length > 5}
-                      placeholder="Select a discount code..."
+                      placeholder={
+                        isLoadingDiscounts 
+                          ? "Loading discounts..." 
+                          : discountOptions.length === 1 
+                            ? "No discounts available" 
+                            : "Select a discount code..."
+                      }
+                      disabled={isLoadingDiscounts || discountOptions.length === 1}
                     />
-                  )}
+                    {isLoadingDiscounts && (
+                      <p className="mt-1 text-xs text-neutral-text-secondary flex items-center gap-1">
+                        <LoadingSpinner size="sm" />
+                        Loading discounts...
+                      </p>
+                    )}
+                    {discountsError && !isLoadingDiscounts && (
+                      <p className="mt-1 text-xs text-amber-500">
+                        Unable to load discounts. You can still create the campaign without a discount code.
+                      </p>
+                    )}
+                    {!isLoadingDiscounts && !discountsError && discountOptions.length === 1 && (
+                      <p className="mt-1 text-xs text-neutral-text-secondary">
+                        No discount codes available in your Shopify store.
+                      </p>
+                    )}
+                    {formData.discountId && selectedDiscount && (() => {
+                      const discounts = normalizeArrayResponse(discountsData, 'discounts');
+                      const selectedDiscountObj = discounts.find((d) => d.id === formData.discountId);
+                      if (!selectedDiscountObj) return null;
+                      
+                      return (
+                        <div className="mt-2 p-3 rounded-lg bg-neutral-surface-secondary border border-neutral-border/60">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-neutral-text-primary mb-1">
+                                Selected: {selectedDiscountObj.code}
+                              </p>
+                              {selectedDiscountObj.title && selectedDiscountObj.title !== selectedDiscountObj.code && (
+                                <p className="text-xs text-neutral-text-secondary mb-1">
+                                  {selectedDiscountObj.title}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {selectedDiscountObj.status && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-ice-primary/10 text-ice-primary border border-ice-primary/20">
+                                    {selectedDiscountObj.status}
+                                  </span>
+                                )}
+                                {selectedDiscountObj.valueLabel && selectedDiscountObj.valueLabel.trim() !== '' && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-fuchsia-primary/10 text-fuchsia-primary border border-fuchsia-primary/20">
+                                    {selectedDiscountObj.valueLabel}
+                                  </span>
+                                )}
+                                {selectedDiscountObj.validityLabel && selectedDiscountObj.validityLabel.trim() !== '' && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-surface-primary text-neutral-text-secondary border border-neutral-border/60">
+                                    {selectedDiscountObj.validityLabel}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-neutral-text-secondary mt-2">
+                            Use the "Insert variable" button above to add <code className="text-xs bg-neutral-surface-primary px-1 py-0.5 rounded">{'{{discount_code}}'}</code> to your message.
+                          </p>
+                        </div>
+                      );
+                    })()}
+                  </div>
 
                   <div>
                     <button
@@ -671,7 +834,7 @@ export default function CampaignCreate() {
                 </div>
                 <IPhonePreviewWithDiscount
                   message={formData.message || 'Type your message to see preview...'}
-                  discountCode={selectedDiscount}
+                  discountCode={selectedDiscount || 'DISCOUNT20'}
                   firstName="Sarah"
                 />
               </GlassCard>
