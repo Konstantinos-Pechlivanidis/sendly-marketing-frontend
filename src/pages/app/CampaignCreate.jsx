@@ -324,7 +324,7 @@ export default function CampaignCreate() {
     return options;
   }, [audiencesData]);
 
-  // Prepare discount options with rich labels showing code, title, status, value, and validity
+  // Prepare discount options with rich labels showing code, title, value, and validity
   const discountOptions = useMemo(() => {
     const options = [
       { value: '', label: 'No Discount Code' },
@@ -333,16 +333,16 @@ export default function CampaignCreate() {
     if (discountsData) {
       const discounts = normalizeArrayResponse(discountsData, 'discounts');
       discounts.forEach((discount) => {
-        // Build rich label: "{code} — {title} ({status}, {valueLabel}, {validityLabel})"
+        // Build rich label: "{code} — {title} ({valueLabel}, {validityLabel})"
         const parts = [];
         
-        // Add code (always show if available)
+        // Add code
         if (discount.code && discount.code !== 'N/A') {
           parts.push(discount.code);
         }
         
-        // Add title (only if different from code)
-        if (discount.title && discount.title !== discount.code) {
+        // Add title
+        if (discount.title) {
           if (parts.length > 0) {
             parts.push('—', discount.title);
           } else {
@@ -350,25 +350,15 @@ export default function CampaignCreate() {
           }
         }
         
-        // Build details array for parentheses: status, valueLabel, validityLabel
+        // Add value and validity in parentheses
         const details = [];
-        
-        // Add status if available
-        if (discount.status) {
-          details.push(discount.status);
-        }
-        
-        // Add value label if available and not empty
-        if (discount.valueLabel && discount.valueLabel.trim() !== '') {
+        if (discount.valueLabel) {
           details.push(discount.valueLabel);
         }
-        
-        // Add validity label if available and not empty
-        if (discount.validityLabel && discount.validityLabel.trim() !== '') {
+        if (discount.validityLabel) {
           details.push(discount.validityLabel);
         }
         
-        // Combine parts and details
         let label = parts.join(' ');
         if (details.length > 0) {
           label += ` (${details.join(', ')})`;
@@ -382,7 +372,6 @@ export default function CampaignCreate() {
         options.push({
           value: discount.id,
           label: label,
-          discount: discount, // Store full discount object for tooltip/accessibility
         });
       });
     }
@@ -395,12 +384,12 @@ export default function CampaignCreate() {
     return countSMSCharacters(formData.message);
   }, [formData.message]);
 
-  // Get selected discount code for preview and insertion
+  // Get selected discount code for preview
   const selectedDiscount = useMemo(() => {
-    if (!formData.discountId || !discountsData) return null;
-    const discounts = normalizeArrayResponse(discountsData, 'discounts');
+    if (!formData.discountId || !discountsData) return 'DISCOUNT20';
+    const discounts = Array.isArray(discountsData) ? discountsData : discountsData.discounts || [];
     const discount = discounts.find((d) => d.id === formData.discountId);
-    return discount?.code || null;
+    return discount?.code || 'DISCOUNT20';
   }, [formData.discountId, discountsData]);
 
   // Only show full loading state on initial load (no cached data)
@@ -559,19 +548,13 @@ export default function CampaignCreate() {
                                 e.stopPropagation();
                                 
                                 // Check if discount is selected
-                                if (!formData.discountId || !selectedDiscount) {
+                                if (!formData.discountId) {
                                   toast.warning('Please select a discount code first from the Discount Code dropdown.');
                                   setIsPlaceholderMenuOpen(false);
                                   return;
                                 }
                                 
                                 const textarea = document.getElementById('message');
-                                if (!textarea) {
-                                  toast.error('Message editor not found');
-                                  setIsPlaceholderMenuOpen(false);
-                                  return;
-                                }
-                                
                                 const start = textarea.selectionStart || formData.message.length;
                                 const end = textarea.selectionEnd || formData.message.length;
                                 const placeholder = '{{discount_code}}';
@@ -587,20 +570,12 @@ export default function CampaignCreate() {
                                   textarea.setSelectionRange(newPosition, newPosition);
                                 }, 10);
                               }}
-                              className={`w-full px-4 py-3 text-left text-sm transition-colors ${
-                                formData.discountId && selectedDiscount
-                                  ? 'text-neutral-text-primary hover:bg-neutral-surface-secondary'
-                                  : 'text-neutral-text-secondary opacity-50 cursor-not-allowed'
-                              }`}
-                              disabled={!formData.discountId || !selectedDiscount}
-                              title={formData.discountId && selectedDiscount ? `Insert ${selectedDiscount} code` : 'Select a discount code first'}
+                              className="w-full px-4 py-3 text-left text-sm text-neutral-text-primary hover:bg-neutral-surface-secondary transition-colors"
+                              disabled={!formData.discountId}
                             >
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs bg-neutral-surface-secondary px-2 py-1 rounded">{'{{discount_code}}'}</span>
-                                <span>Discount Code</span>
-                                {formData.discountId && selectedDiscount && (
-                                  <span className="ml-auto text-xs text-neutral-text-secondary">({selectedDiscount})</span>
-                                )}
+                                <span className={formData.discountId ? '' : 'opacity-50'}>Discount Code</span>
                               </div>
                             </button>
                           </div>
@@ -678,48 +653,6 @@ export default function CampaignCreate() {
                         No discount codes available in your Shopify store.
                       </p>
                     )}
-                    {formData.discountId && selectedDiscount && (() => {
-                      const discounts = normalizeArrayResponse(discountsData, 'discounts');
-                      const selectedDiscountObj = discounts.find((d) => d.id === formData.discountId);
-                      if (!selectedDiscountObj) return null;
-                      
-                      return (
-                        <div className="mt-2 p-3 rounded-lg bg-neutral-surface-secondary border border-neutral-border/60">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-neutral-text-primary mb-1">
-                                Selected: {selectedDiscountObj.code}
-                              </p>
-                              {selectedDiscountObj.title && selectedDiscountObj.title !== selectedDiscountObj.code && (
-                                <p className="text-xs text-neutral-text-secondary mb-1">
-                                  {selectedDiscountObj.title}
-                                </p>
-                              )}
-                              <div className="flex flex-wrap gap-2 mt-1">
-                                {selectedDiscountObj.status && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-ice-primary/10 text-ice-primary border border-ice-primary/20">
-                                    {selectedDiscountObj.status}
-                                  </span>
-                                )}
-                                {selectedDiscountObj.valueLabel && selectedDiscountObj.valueLabel.trim() !== '' && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-fuchsia-primary/10 text-fuchsia-primary border border-fuchsia-primary/20">
-                                    {selectedDiscountObj.valueLabel}
-                                  </span>
-                                )}
-                                {selectedDiscountObj.validityLabel && selectedDiscountObj.validityLabel.trim() !== '' && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-surface-primary text-neutral-text-secondary border border-neutral-border/60">
-                                    {selectedDiscountObj.validityLabel}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-neutral-text-secondary mt-2">
-                            Use the "Insert variable" button above to add <code className="text-xs bg-neutral-surface-primary px-1 py-0.5 rounded">{'{{discount_code}}'}</code> to your message.
-                          </p>
-                        </div>
-                      );
-                    })()}
                   </div>
 
                   <div>
@@ -834,7 +767,7 @@ export default function CampaignCreate() {
                 </div>
                 <IPhonePreviewWithDiscount
                   message={formData.message || 'Type your message to see preview...'}
-                  discountCode={selectedDiscount || 'DISCOUNT20'}
+                  discountCode={selectedDiscount}
                   firstName="Sarah"
                 />
               </GlassCard>
