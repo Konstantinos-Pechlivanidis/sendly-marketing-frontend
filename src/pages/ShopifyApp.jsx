@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import GlassBadge from '../components/ui/GlassBadge';
@@ -69,11 +68,11 @@ export default function ShopifyApp() {
     },
   ];
 
-  const howItWorks = [
+  const quickStart = [
     {
       step: '1',
-      title: 'Install the Extension',
-      description: 'Add Sendly SMS Marketing to your Shopify store with one click. No technical knowledge required.',
+      title: 'Open Your Dashboard',
+      description: 'Click the button above to access your full Sendly dashboard in a new browser tab.',
     },
     {
       step: '2',
@@ -88,7 +87,7 @@ export default function ShopifyApp() {
     {
       step: '4',
       title: 'Send & Automate',
-      description: 'Create campaigns, set up automations, and watch your sales grow. All from your Shopify admin.',
+      description: 'Create campaigns, set up automations, and watch your sales grow. All from your Sendly dashboard.',
     },
   ];
 
@@ -116,39 +115,28 @@ export default function ShopifyApp() {
               </GlassBadge>
               
               <h1 className="text-hero md:text-7xl font-bold mb-6 leading-tight">
-                <span className="block mb-2">SMS Marketing</span>
-                <GradientText>Built for Shopify</GradientText>
+                <span className="block mb-2">Welcome to</span>
+                <GradientText>Sendly SMS Marketing</GradientText>
               </h1>
               
               <p className="text-xl md:text-2xl text-border-subtle max-w-3xl mx-auto mb-8 leading-relaxed">
-                The <strong className="text-primary-light">only SMS marketing extension</strong> you need for Shopify.
-                <span className="text-ice-accent"> Native integration</span>,{' '}
-                <span className="text-zoom-fuchsia">storefront opt-in</span>, and{' '}
-                <span className="text-ice-accent">automated campaigns</span>—all in one powerful app.
+                Your Shopify extension is <strong className="text-primary-light">installed and ready</strong>!
+                <span className="text-ice-accent"> Access your full dashboard</span> to start creating campaigns,{' '}
+                <span className="text-zoom-fuchsia">manage contacts</span>, and{' '}
+                <span className="text-ice-accent">set up automations</span>.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex justify-center items-center">
                 <GlassButton
-                  as={Link}
-                  to="https://sendly-marketing-frontend.onrender.com"
+                  onClick={() => {
+                    window.open('https://sendly-marketing-frontend.onrender.com', '_blank', 'noopener,noreferrer');
+                  }}
                   variant="primary"
                   size="lg"
                   className="w-full sm:w-auto"
                 >
                   <Icon name="arrow-right" size="sm" className="mr-2" />
-                  Open Sendly Dashboard
-                </GlassButton>
-                <GlassButton
-                  as="a"
-                  href="https://apps.shopify.com/sendly-sms-marketing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="ghost"
-                  size="lg"
-                  className="w-full sm:w-auto"
-                >
-                  <Icon name="integration" size="sm" className="mr-2" />
-                  Install from Shopify App Store
+                  Open Sendly Dashboard in New Tab
                 </GlassButton>
               </div>
             </div>
@@ -215,20 +203,20 @@ export default function ShopifyApp() {
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* Quick Start Section */}
         <section className="py-24 px-4 lg:px-8 bg-surface-dark/50">
           <div className="max-w-[1200px] mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                Get Started in <GradientText>4 Simple Steps</GradientText>
+                Get Started <GradientText>Right Away</GradientText>
               </h2>
               <p className="text-xl text-border-subtle max-w-2xl mx-auto">
-                From installation to your first SMS campaign—it takes less than 10 minutes.
+                Your extension is installed. Now it's time to unlock the full power of SMS marketing.
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {howItWorks.map((step, index) => (
+              {quickStart.map((step, index) => (
                 <GlassCard key={index} className="p-6 relative">
                   <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-gradient-to-br from-ice-accent to-zoom-fuchsia flex items-center justify-center text-white font-bold text-lg shadow-glow-ice-light">
                     {step.step}
@@ -256,30 +244,20 @@ export default function ShopifyApp() {
                 Join thousands of Shopify merchants who are using SMS marketing to drive sales, 
                 recover abandoned carts, and build stronger customer relationships.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <GlassButton
-                  as={Link}
-                  to="https://sendly-marketing-frontend.onrender.com"
+                  onClick={() => {
+                    window.open('https://sendly-marketing-frontend.onrender.com', '_blank', 'noopener,noreferrer');
+                  }}
                   variant="primary"
                   size="lg"
                 >
                   <Icon name="arrow-right" size="sm" className="mr-2" />
-                  Open Sendly Dashboard
-                </GlassButton>
-                <GlassButton
-                  as="a"
-                  href="https://apps.shopify.com/sendly-sms-marketing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="fuchsia"
-                  size="lg"
-                >
-                  <Icon name="integration" size="sm" className="mr-2" />
-                  Install Extension
+                  Open Sendly Dashboard in New Tab
                 </GlassButton>
               </div>
               <p className="text-sm text-border-subtle mt-6">
-                Free 14-day trial • No credit card required • Cancel anytime
+                Access your full dashboard to manage campaigns, contacts, and automations
               </p>
             </GlassCard>
           </div>
