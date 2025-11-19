@@ -23,6 +23,7 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Install = lazy(() => import('./pages/Install'));
 const Login = lazy(() => import('./pages/Login'));
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
+const ShopifyApp = lazy(() => import('./pages/ShopifyApp'));
 const AuthCallback = lazy(() => import('./pages/auth/AuthCallback'));
 const Dashboard = lazy(() => import('./pages/app/Dashboard'));
 const Campaigns = lazy(() => import('./pages/app/Campaigns'));
@@ -144,6 +145,7 @@ function AppRoutes() {
           <Route path="/install" element={<Install />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unsubscribe/:token" element={<Unsubscribe />} />
+          <Route path="/shopify-app" element={<ShopifyApp />} />
           
           {/* Auth Routes */}
           <Route path="/auth/callback" element={<AuthCallback />} />
