@@ -31,3 +31,6 @@ build/
 .env.production
 .env.development
 
+# Shopify Extension (separate repository)
+shopify-extension/
+
