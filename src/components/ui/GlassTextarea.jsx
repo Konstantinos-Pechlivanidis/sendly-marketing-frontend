@@ -14,7 +14,7 @@ const GlassTextarea = forwardRef(({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={textareaId} className="block text-sm font-medium text-neutral-text-primary mb-2">
+        <label htmlFor={textareaId} className="block text-sm font-medium text-primary-light mb-2">
           {label}
         </label>
       )}

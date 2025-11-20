@@ -83,7 +83,8 @@ export default function Footer() {
           </div>
 
           {/* Right: Social Icons */}
-          <div>
+          {/* TODO: Enable social channels in the future */}
+          {/* <div>
             <h3 className="text-sm font-semibold text-primary-light mb-4">Connect</h3>
             <div className="flex gap-4">
               <a
@@ -120,7 +121,7 @@ export default function Footer() {
                 </svg>
               </a>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-8 pt-8 border-t border-glass-border text-center text-sm text-border-subtle">

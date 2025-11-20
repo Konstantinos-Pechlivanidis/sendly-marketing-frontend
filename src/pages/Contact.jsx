@@ -8,7 +8,7 @@ import GlassTextarea from '../components/ui/GlassTextarea';
 import Icon from '../components/ui/Icon';
 import { useToastContext } from '../contexts/ToastContext';
 import SEO from '../components/SEO';
-import { API_URL } from '../utils/constants';
+import { API_URL, FRONTEND_URL } from '../utils/constants';
 
 export default function Contact() {
   const toast = useToastContext();
@@ -105,14 +105,46 @@ export default function Contact() {
     }
   };
 
+  const localBusinessData = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'Sendly',
+    description: 'SMS Marketing for Shopify stores',
+    url: FRONTEND_URL,
+    email: 'support@sendly.com',
+    areaServed: 'Worldwide',
+    serviceType: 'SMS Marketing Software',
+  };
+
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: FRONTEND_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Contact',
+        item: `${FRONTEND_URL}/contact`,
+      },
+    ],
+  };
+
   return (
     <>
       <SEO
         title="Contact Us - Sendly SMS Marketing"
         description="Get in touch with the Sendly team. We're here to help you succeed with SMS marketing."
         path="/contact"
+        keywords="contact Sendly, SMS marketing support, Shopify SMS help"
+        jsonLd={[localBusinessData, breadcrumbData]}
       />
-      <div className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
+      <main className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
@@ -318,7 +350,7 @@ export default function Contact() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </>
   );
 }

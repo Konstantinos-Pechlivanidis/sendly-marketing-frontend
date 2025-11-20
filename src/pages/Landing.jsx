@@ -8,6 +8,7 @@ import IPhonePreviewWithDiscount from '../components/iphone/IPhonePreviewWithDis
 import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
 import StructuredData from '../components/StructuredData';
+import { FRONTEND_URL } from '../utils/constants';
 
 export default function Landing() {
   const features = [
@@ -65,17 +66,29 @@ export default function Landing() {
     },
   };
 
+  const organizationData = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Sendly',
+    url: FRONTEND_URL,
+    logo: `${FRONTEND_URL}/logo.png`,
+    description: 'SMS Marketing for Shopify. Grow your store with SMS marketing that converts.',
+    sameAs: [],
+  };
+
   return (
     <>
       <SEO
         title="SMS Marketing for Shopify - Sendly"
         description="Grow your store with SMS marketing that converts. Free 14-day trial, 98% open rates, 24/7 support."
         path="/"
+        keywords="SMS marketing, Shopify SMS, text message marketing, SMS campaigns, Shopify integration"
+        jsonLd={[structuredData, organizationData]}
       />
       <StructuredData data={structuredData} />
-      <div className="min-h-screen">
+      <main className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative pt-36 pb-24 px-4 lg:px-8 overflow-hidden">
+        <section className="relative pt-36 pb-24 px-4 lg:px-8 overflow-hidden" aria-label="Hero section">
           {/* Background gradient with blobs */}
           <div className="absolute inset-0 bg-gradient-to-b from-bg-dark via-surface-dark to-bg-dark">
             <div className="absolute top-20 right-20 w-96 h-96 bg-ice-accent/10 rounded-full blur-3xl animate-float" />
@@ -357,7 +370,7 @@ export default function Landing() {
             <p className="text-sm text-border-subtle mt-4">No credit card required • 14-day free trial</p>
           </div>
         </section>
-      </div>
+      </main>
     </>
   );
 }

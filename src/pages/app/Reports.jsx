@@ -1,9 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy } from 'react';
 import GlassCard from '../../components/ui/GlassCard';
 import PageHeader from '../../components/ui/PageHeader';
 import DateRangePicker from '../../components/ui/DateRangePicker';
-import LineChart from '../../components/charts/LineChart';
-import PieChart from '../../components/charts/PieChart';
+import ChartWrapper from '../../components/charts/ChartWrapper';
+
+// Lazy load chart components to reduce initial bundle size
+const LineChart = lazy(() => import('../../components/charts/LineChart'));
+const PieChart = lazy(() => import('../../components/charts/PieChart'));
 import GlassTable, {
   GlassTableHeader,
   GlassTableBody,
@@ -385,23 +388,27 @@ export default function Reports() {
                       {campaignTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
-                          <LineChart
-                            data={campaignTrends}
-                            dataKey="messages"
-                            name="Messages"
-                            stroke="#4E8FB8"
-                          />
+                          <ChartWrapper>
+                            <LineChart
+                              data={campaignTrends}
+                              dataKey="messages"
+                              name="Messages"
+                              stroke="#4E8FB8"
+                            />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {deliveryStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Delivery Status</h3>
-                          <PieChart
-                            data={deliveryStatusData}
-                            dataKey="value"
-                            nameKey="name"
-                          />
+                          <ChartWrapper>
+                            <PieChart
+                              data={deliveryStatusData}
+                              dataKey="value"
+                              nameKey="name"
+                            />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
                     </div>
@@ -462,23 +469,27 @@ export default function Reports() {
                       {campaignTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Messages Over Time</h3>
-                          <LineChart
+                          <ChartWrapper>
+                            <LineChart
                             data={campaignTrends}
                             dataKey="messages"
                             name="Messages"
                             stroke="#4E8FB8"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {campaignStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Status Breakdown</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={campaignStatusData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
                     </div>
@@ -628,34 +639,40 @@ export default function Reports() {
                       {messagingTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
-                          <LineChart
+                          <ChartWrapper>
+                            <LineChart
                             data={messagingTrends}
                             dataKey="messages"
                             name="Messages"
                             stroke="#4E8FB8"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {messagingStatusData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Status Breakdown</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={messagingStatusData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {messagingDirectionData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Direction Breakdown</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={messagingDirectionData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
                     </div>
@@ -717,23 +734,27 @@ export default function Reports() {
                       {creditsTrends.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Credits Usage Over Time</h3>
-                          <LineChart
+                          <ChartWrapper>
+                            <LineChart
                             data={creditsTrends}
                             dataKey="creditsUsed"
                             name="Credits Used"
                             stroke="#C09DAE"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {creditsUsageData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Usage Breakdown</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={creditsUsageData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
                     </div>
@@ -834,22 +855,26 @@ export default function Reports() {
                       {genderDistributionData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Gender Distribution</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={genderDistributionData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
 
                       {consentBreakdownData.length > 0 && (
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Consent Breakdown</h3>
-                          <PieChart
+                          <ChartWrapper>
+                            <PieChart
                             data={consentBreakdownData}
                             dataKey="value"
                             nameKey="name"
                           />
+                          </ChartWrapper>
                         </GlassCard>
                       )}
                     </div>

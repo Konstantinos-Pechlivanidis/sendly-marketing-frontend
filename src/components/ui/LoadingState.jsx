@@ -11,9 +11,16 @@ export default function LoadingState({
   message,
   className,
   fullScreen = true,
+  height,
+  width,
 }) {
   const content = (
-    <div className={clsx('flex flex-col items-center justify-center gap-4', className)}>
+    <div 
+      className={clsx('flex flex-col items-center justify-center gap-4', className)}
+      style={height ? { minHeight: height, width: width || '100%' } : undefined}
+      aria-live="polite"
+      aria-label={message || 'Loading content'}
+    >
       <LoadingSpinner size={size} />
       {message && (
         <p className="text-sm text-neutral-text-secondary">{message}</p>

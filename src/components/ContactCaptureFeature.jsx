@@ -76,8 +76,11 @@ export default function ContactCaptureFeature() {
                 <img
                   src="/banner/banner.png"
                   alt="SMS opt-in banner displayed on storefront"
+                  width="1200"
+                  height="675"
                   className="w-full h-full object-contain object-center transition-transform duration-300 group-hover/image:scale-105"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/70 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -115,8 +118,11 @@ export default function ContactCaptureFeature() {
                 <img
                   src="/banner/modal.png"
                   alt="SMS opt-in modal form"
+                  width="1200"
+                  height="675"
                   className="w-full h-full object-contain object-center transition-transform duration-300 group-hover/image:scale-105"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/70 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -191,6 +197,8 @@ export default function ContactCaptureFeature() {
               src={lightboxImage.src}
               alt={lightboxImage.alt}
               className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              loading="eager"
+              decoding="async"
             />
           </div>
         )}

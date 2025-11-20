@@ -20,6 +20,7 @@ import { useBillingBalance, useBillingPackages, useBillingHistory, useCreatePurc
 import { useToastContext } from '../../contexts/ToastContext';
 import SEO from '../../components/SEO';
 import { format } from 'date-fns';
+import { FRONTEND_URL } from '../../utils/constants';
 
 export default function Billing() {
   const toast = useToastContext();
@@ -73,10 +74,9 @@ export default function Billing() {
 
   const handlePurchase = async (packageId) => {
     try {
-      // Build success and cancel URLs based on current location
-      const baseUrl = window.location.origin;
-      const successUrl = `${baseUrl}/app/billing?success=true`;
-      const cancelUrl = `${baseUrl}/app/billing?canceled=true`;
+      // Build success and cancel URLs based on frontend URL
+      const successUrl = `${FRONTEND_URL}/app/billing?success=true`;
+      const cancelUrl = `${FRONTEND_URL}/app/billing?canceled=true`;
       
       const result = await createPurchase.mutateAsync({ 
         packageId,

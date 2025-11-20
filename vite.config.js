@@ -16,7 +16,29 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production for smaller bundle
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+      },
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['react-helmet-async'],
+          'chart-vendor': ['recharts'],
+          'utils-vendor': ['date-fns', 'clsx'],
+        },
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
 })
 

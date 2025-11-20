@@ -72,16 +72,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Scroll to top on route change with smooth animation
+// Scroll to top on route change (instant for better CLS)
 function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth',
-    });
+    // Use instant scroll to prevent layout shift
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return null;

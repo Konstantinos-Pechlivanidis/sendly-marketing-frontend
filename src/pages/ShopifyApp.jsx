@@ -5,6 +5,7 @@ import GradientText from '../components/ui/GradientText';
 import Icon from '../components/ui/Icon';
 import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
+import { FRONTEND_URL } from '../utils/constants';
 
 export default function ShopifyApp() {
   const extensionFeatures = [
@@ -130,7 +131,7 @@ export default function ShopifyApp() {
               <div className="flex justify-center items-center">
                 <GlassButton
                   onClick={() => {
-                    window.open('https://sendly-marketing-frontend.onrender.com', '_blank', 'noopener,noreferrer');
+                    window.open(FRONTEND_URL, '_blank', 'noopener,noreferrer');
                   }}
                   variant="primary"
                   size="lg"
@@ -251,7 +252,7 @@ export default function ShopifyApp() {
               <div className="flex justify-center">
                 <GlassButton
                   onClick={() => {
-                    window.open('https://sendly-marketing-frontend.onrender.com', '_blank', 'noopener,noreferrer');
+                    window.open(FRONTEND_URL, '_blank', 'noopener,noreferrer');
                   }}
                   variant="primary"
                   size="lg"

@@ -4,6 +4,7 @@ import GlassBadge from '../components/ui/GlassBadge';
 import GlassButton from '../components/ui/GlassButton';
 import Icon from '../components/ui/Icon';
 import SEO from '../components/SEO';
+import { FRONTEND_URL } from '../utils/constants';
 
 export default function Features() {
   const coreFeatures = [
@@ -88,8 +89,27 @@ export default function Features() {
         title="Features - Sendly SMS Marketing"
         description="Powerful features to help you create, send, and track SMS campaigns that convert."
         path="/features"
+        keywords="SMS features, text message features, campaign builder, automation, analytics"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: FRONTEND_URL,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Features',
+              item: `${FRONTEND_URL}/features`,
+            },
+          ],
+        }}
       />
-      <div className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
+      <main className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
@@ -174,7 +194,7 @@ export default function Features() {
             </GlassCard>
           </section>
         </div>
-      </div>
+      </main>
     </>
   );
 }

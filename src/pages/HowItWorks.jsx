@@ -6,6 +6,7 @@ import Icon from '../components/ui/Icon';
 import IPhonePreviewWithDiscount from '../components/iphone/IPhonePreviewWithDiscount';
 import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
+import { FRONTEND_URL } from '../utils/constants';
 
 export default function HowItWorks() {
   const steps = [
@@ -76,8 +77,27 @@ export default function HowItWorks() {
         title="How It Works - Sendly SMS Marketing"
         description="Get started with Sendly in minutes. Simple 3-step process to start sending SMS campaigns."
         path="/how-it-works"
+        keywords="how Sendly works, SMS setup, Shopify SMS integration, getting started"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: FRONTEND_URL,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'How It Works',
+              item: `${FRONTEND_URL}/how-it-works`,
+            },
+          ],
+        }}
       />
-      <div className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
+      <main className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
@@ -186,7 +206,7 @@ export default function HowItWorks() {
             </GlassCard>
           </section>
         </div>
-      </div>
+      </main>
     </>
   );
 }

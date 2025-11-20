@@ -6,6 +6,7 @@ import Icon from '../components/ui/Icon';
 import SEO from '../components/SEO';
 import { usePublicPackages } from '../services/queries';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { FRONTEND_URL } from '../utils/constants';
 
 // Fallback packages in case backend is not available
 const FALLBACK_PACKAGES = [
@@ -77,14 +78,55 @@ export default function Pricing() {
     'Priority support',
   ];
 
+  const serviceData = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Sendly SMS Marketing',
+    description: 'SMS marketing service for Shopify stores',
+    provider: {
+      '@type': 'Organization',
+      name: 'Sendly',
+    },
+    areaServed: 'Worldwide',
+    serviceType: 'SMS Marketing',
+    offers: packages.map(pkg => ({
+      '@type': 'Offer',
+      name: pkg.name,
+      price: pkg.price,
+      priceCurrency: pkg.currency,
+      description: pkg.description,
+    })),
+  };
+
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: FRONTEND_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Pricing',
+        item: `${FRONTEND_URL}/pricing`,
+      },
+    ],
+  };
+
   return (
     <>
       <SEO
         title="Pricing - Sendly SMS Marketing"
         description="Simple, pay-as-you-go pricing. Pay only for SMS credits you use. All features included free."
         path="/pricing"
+        keywords="SMS pricing, text message pricing, Shopify SMS cost, SMS credits"
+        jsonLd={[serviceData, breadcrumbData]}
       />
-      <div className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
+      <main className="min-h-screen pt-24 pb-20 px-4 lg:px-8">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
@@ -302,7 +344,7 @@ export default function Pricing() {
             </div>
           </section>
         </div>
-      </div>
+      </main>
     </>
   );
 }

@@ -43,6 +43,25 @@ export const BREAKPOINTS = {
   TABLET: 1280,
 };
 
+// Get Frontend URL from environment variable
+// Vite requires VITE_ prefix for environment variables exposed to client
+let _frontendUrl = null;
+const getFrontendUrlInternal = () => {
+  if (_frontendUrl === null) {
+    // Check for VITE_FRONT_END_URL or VITE_FRONTEND_URL (both supported)
+    if (import.meta.env.VITE_FRONT_END_URL) {
+      _frontendUrl = import.meta.env.VITE_FRONT_END_URL;
+    } else if (import.meta.env.VITE_FRONTEND_URL) {
+      _frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+    } else if (typeof window !== 'undefined' && window.location) {
+      _frontendUrl = window.location.origin;
+    } else {
+      _frontendUrl = 'https://sendly-marketing-frontend.onrender.com';
+    }
+  }
+  return _frontendUrl;
+};
+
 // Determine API URL based on environment
 // In production, if VITE_API_URL is not set, detect backend URL from current hostname
 // This function is called at runtime to ensure window is available
@@ -57,8 +76,23 @@ const getApiUrl = () => {
   if (typeof window !== 'undefined' && window.location) {
     const hostname = window.location.hostname;
     
+    // Use FRONT_END_URL to determine if we're on production frontend
+    const frontendUrl = getFrontendUrlInternal();
+    let frontendHostname;
+    try {
+      frontendHostname = new URL(frontendUrl).hostname;
+    } catch (e) {
+      frontendHostname = frontendUrl.replace(/^https?:\/\//, '').split('/')[0];
+    }
+    
     // If we're on the frontend domain, construct backend URL
-    if (hostname === 'sendly-marketing-frontend.onrender.com') {
+    if (hostname === frontendHostname) {
+      // Try to construct backend URL by replacing 'frontend' with 'backend'
+      if (hostname.includes('frontend')) {
+        const backendHostname = hostname.replace('frontend', 'backend');
+        return `https://${backendHostname}`;
+      }
+      // Default backend URL
       return 'https://sendly-marketing-backend.onrender.com';
     }
     
@@ -103,4 +137,21 @@ export const API_URL = (() => {
 })();
 export const TOKEN_KEY = 'sendly_app_token';
 export const STORE_KEY = 'sendly_store_info';
+
+// Export getter function for Frontend URL
+export const getFrontendUrl = () => {
+  return getFrontendUrlInternal();
+};
+
+// Export constant for backward compatibility
+export const FRONTEND_URL = (() => {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      return getFrontendUrlInternal();
+    }
+  } catch (e) {
+    // Fallback if window is not available
+  }
+  return getFrontendUrlInternal();
+})();
 
