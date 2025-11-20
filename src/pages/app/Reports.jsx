@@ -389,12 +389,12 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
                           <ChartWrapper>
-                            <LineChart
-                              data={campaignTrends}
-                              dataKey="messages"
-                              name="Messages"
-                              stroke="#4E8FB8"
-                            />
+                          <LineChart
+                            data={campaignTrends}
+                            dataKey="messages"
+                            name="Messages"
+                            stroke="#4E8FB8"
+                          />
                           </ChartWrapper>
                         </GlassCard>
                       )}
@@ -403,11 +403,11 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Delivery Status</h3>
                           <ChartWrapper>
-                            <PieChart
-                              data={deliveryStatusData}
-                              dataKey="value"
-                              nameKey="name"
-                            />
+                          <PieChart
+                            data={deliveryStatusData}
+                            dataKey="value"
+                            nameKey="name"
+                          />
                           </ChartWrapper>
                         </GlassCard>
                       )}
@@ -470,7 +470,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Messages Over Time</h3>
                           <ChartWrapper>
-                            <LineChart
+                          <LineChart
                             data={campaignTrends}
                             dataKey="messages"
                             name="Messages"
@@ -484,7 +484,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Campaign Status Breakdown</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={campaignStatusData}
                             dataKey="value"
                             nameKey="name"
@@ -640,7 +640,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Messages Over Time</h3>
                           <ChartWrapper>
-                            <LineChart
+                          <LineChart
                             data={messagingTrends}
                             dataKey="messages"
                             name="Messages"
@@ -654,7 +654,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Status Breakdown</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={messagingStatusData}
                             dataKey="value"
                             nameKey="name"
@@ -667,7 +667,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Direction Breakdown</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={messagingDirectionData}
                             dataKey="value"
                             nameKey="name"
@@ -735,7 +735,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Credits Usage Over Time</h3>
                           <ChartWrapper>
-                            <LineChart
+                          <LineChart
                             data={creditsTrends}
                             dataKey="creditsUsed"
                             name="Credits Used"
@@ -749,7 +749,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Usage Breakdown</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={creditsUsageData}
                             dataKey="value"
                             nameKey="name"
@@ -856,7 +856,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Gender Distribution</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={genderDistributionData}
                             dataKey="value"
                             nameKey="name"
@@ -869,7 +869,7 @@ export default function Reports() {
                         <GlassCard className="p-4 sm:p-6">
                           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 lg:mb-6 text-neutral-text-primary">Consent Breakdown</h3>
                           <ChartWrapper>
-                            <PieChart
+                          <PieChart
                             data={consentBreakdownData}
                             dataKey="value"
                             nameKey="name"
