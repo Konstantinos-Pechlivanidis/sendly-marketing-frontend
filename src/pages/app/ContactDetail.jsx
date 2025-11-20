@@ -36,7 +36,7 @@ export default function ContactDetail() {
     email: '',
     gender: '',
     birthDate: '',
-    smsConsent: 'unknown',
+    smsConsent: 'opted_in', // Default to 'opted_in' for new contacts
     tags: [],
   });
   const [errors, setErrors] = useState({});
@@ -56,7 +56,7 @@ export default function ContactDetail() {
         email: contact.email || '',
         gender: contact.gender || '',
         birthDate: contact.birthDate ? new Date(contact.birthDate).toISOString() : '',
-        smsConsent: contact.smsConsent || 'unknown',
+        smsConsent: contact.smsConsent || 'opted_in', // Default to 'opted_in' if not set
         tags: contact.tags || [],
       });
     }
@@ -176,7 +176,7 @@ export default function ContactDetail() {
         email: formData.email?.trim() || null,
         gender: formData.gender || null,
         birthDate: formData.birthDate && formData.birthDate.trim() ? (formData.birthDate.includes('T') ? formData.birthDate : new Date(formData.birthDate).toISOString()) : null,
-        smsConsent: formData.smsConsent || 'unknown',
+        smsConsent: formData.smsConsent || 'opted_in',
         tags: formData.tags || [],
       };
 
@@ -451,7 +451,6 @@ export default function ContactDetail() {
                       value={formData.smsConsent}
                       onChange={handleChange}
                       options={[
-                        { value: 'unknown', label: 'Unknown' },
                         { value: 'opted_in', label: 'Opted In' },
                         { value: 'opted_out', label: 'Opted Out' },
                       ]}
