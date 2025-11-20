@@ -1,15 +1,13 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import GlassBadge from '../components/ui/GlassBadge';
 import Icon from '../components/ui/Icon';
 import SEO from '../components/SEO';
-import { usePublicPackages } from '../services/queries';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { FRONTEND_URL } from '../utils/constants';
 
-// Fallback packages in case backend is not available
-const FALLBACK_PACKAGES = [
+// Static pricing packages for public landing page
+const STATIC_PACKAGES = [
   {
     id: 'package_1000',
     name: '1,000 SMS Credits',
@@ -53,15 +51,15 @@ const FALLBACK_PACKAGES = [
 ];
 
 export default function Pricing() {
-  // Detect user's currency preference (default to EUR)
-  const userCurrency = navigator.language?.includes('US') ? 'USD' : 'EUR';
-  const { data: packagesData, isLoading } = usePublicPackages(userCurrency);
+  const navigate = useNavigate();
   
-  // Use fallback packages if API fails or no data
-  // If we have packages from API, use them; otherwise use fallback
-  const packages = (packagesData?.packages && packagesData.packages.length > 0)
-    ? packagesData.packages 
-    : FALLBACK_PACKAGES;
+  // Use static packages for public landing page
+  const packages = STATIC_PACKAGES;
+  
+  // Handle package card click - redirect to install page
+  const handlePackageClick = () => {
+    navigate('/install');
+  };
 
   // Free features that are included with all packages
   const freeFeatures = [
@@ -227,18 +225,14 @@ export default function Pricing() {
           </GlassCard>
 
           {/* Pricing Cards */}
-          {isLoading ? (
-            <div className="flex justify-center py-20">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-              {packages.map((pkg) => (
-                <GlassCard
-                  key={pkg.id}
-                  variant={pkg.popular ? 'fuchsia' : 'default'}
-                  className={`relative ${pkg.popular ? 'shadow-glow-fuchsia' : ''}`}
-                >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            {packages.map((pkg) => (
+              <GlassCard
+                key={pkg.id}
+                variant={pkg.popular ? 'fuchsia' : 'default'}
+                className={`relative cursor-pointer transition-transform hover:scale-[1.02] ${pkg.popular ? 'shadow-glow-fuchsia' : ''}`}
+                onClick={handlePackageClick}
+              >
                   {pkg.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <GlassBadge variant="fuchsia">Most Popular</GlassBadge>
@@ -280,8 +274,10 @@ export default function Pricing() {
                     variant={pkg.popular ? 'fuchsia' : 'primary'}
                     size="lg"
                     className="w-full"
-                    as={Link}
-                    to="/install"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/install');
+                    }}
                   >
                     Get Started
                   </GlassButton>
@@ -290,8 +286,7 @@ export default function Pricing() {
                   </p>
                 </GlassCard>
               ))}
-            </div>
-          )}
+          </div>
 
           {/* FAQ Section */}
           <section className="max-w-2xl mx-auto">
