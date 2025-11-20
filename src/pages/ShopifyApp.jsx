@@ -3,6 +3,7 @@ import GlassButton from '../components/ui/GlassButton';
 import GlassBadge from '../components/ui/GlassBadge';
 import GradientText from '../components/ui/GradientText';
 import Icon from '../components/ui/Icon';
+import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
 
 export default function ShopifyApp() {
@@ -202,6 +203,9 @@ export default function ShopifyApp() {
             </div>
           </div>
         </section>
+
+        {/* How We Capture Contacts Section */}
+        <ContactCaptureFeature />
 
         {/* Quick Start Section */}
         <section className="py-24 px-4 lg:px-8 bg-surface-dark/50">

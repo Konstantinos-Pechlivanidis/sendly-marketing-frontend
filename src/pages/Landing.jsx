@@ -5,6 +5,7 @@ import GlassBadge from '../components/ui/GlassBadge';
 import GradientText from '../components/ui/GradientText';
 import Icon from '../components/ui/Icon';
 import IPhonePreviewWithDiscount from '../components/iphone/IPhonePreviewWithDiscount';
+import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
 import StructuredData from '../components/StructuredData';
 
@@ -261,6 +262,9 @@ export default function Landing() {
             </div>
           </div>
         </section>
+
+        {/* How We Capture Contacts Section */}
+        <ContactCaptureFeature />
 
         {/* GDPR Compliance Section */}
         <section className="py-20 px-4 lg:px-8">

@@ -4,6 +4,7 @@ import GlassButton from '../components/ui/GlassButton';
 import GlassBadge from '../components/ui/GlassBadge';
 import Icon from '../components/ui/Icon';
 import IPhonePreviewWithDiscount from '../components/iphone/IPhonePreviewWithDiscount';
+import ContactCaptureFeature from '../components/ContactCaptureFeature';
 import SEO from '../components/SEO';
 
 export default function HowItWorks() {
@@ -125,6 +126,9 @@ export default function HowItWorks() {
               </div>
             </GlassCard>
           </section>
+
+          {/* How We Capture Contacts Section */}
+          <ContactCaptureFeature />
 
           {/* Automation Examples */}
           <section className="mb-20">
