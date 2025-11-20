@@ -46,6 +46,22 @@ export default function GlassCalendar({
     }
   }, [showYearPicker, showMonthPicker]);
 
+  // Month names (defined early for use in render)
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Calculate current year and month values (needed for useEffect and render)
+  const currentYearValue = getYear(currentMonth);
+  const currentMonthValue = getMonth(currentMonth);
+
+  // Generate year range (from 100 years ago to current year)
+  const currentYear = getYear(new Date());
+  const startYear = minDate ? getYear(minDate) : currentYear - 100;
+  const endYear = maxDate ? getYear(maxDate) : currentYear;
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i).reverse();
+
   // Auto-scroll to selected year when year picker opens
   useEffect(() => {
     if (showYearPicker && yearListRef.current) {
@@ -94,18 +110,6 @@ export default function GlassCalendar({
     }
   };
 
-  // Generate year range (from 100 years ago to current year)
-  const currentYear = getYear(new Date());
-  const startYear = minDate ? getYear(minDate) : currentYear - 100;
-  const endYear = maxDate ? getYear(maxDate) : currentYear;
-  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i).reverse();
-
-  // Month names
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
   const handleYearSelect = (year) => {
     const newDate = setYear(currentMonth, year);
     setCurrentMonth(newDate);
@@ -117,9 +121,6 @@ export default function GlassCalendar({
     setCurrentMonth(newDate);
     setShowMonthPicker(false);
   };
-
-  const currentYearValue = getYear(currentMonth);
-  const currentMonthValue = getMonth(currentMonth);
 
   return (
     <div className={`glass rounded-xl border border-neutral-border/60 p-3 sm:p-4 ${className}`}>
