@@ -712,6 +712,19 @@ export const useUpdateAutomation = () => {
   });
 };
 
+export const useDeleteAutomation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id) => api.delete(`/automations/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['automations'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['automations', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }); // Update dashboard stats
+    },
+  });
+};
+
 export const useSystemDefaults = () => {
   return useQuery({
     queryKey: ['automations', 'defaults'],

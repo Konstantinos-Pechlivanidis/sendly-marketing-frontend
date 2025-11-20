@@ -10,7 +10,7 @@ import LoadingState from '../../components/ui/LoadingState';
 import ErrorState from '../../components/ui/ErrorState';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import EmptyState from '../../components/ui/EmptyState';
-import { useAutomations, useAutomationStats, useUpdateAutomation, useDeleteCampaign } from '../../services/queries';
+import { useAutomations, useAutomationStats, useUpdateAutomation, useDeleteAutomation } from '../../services/queries';
 import { useToastContext } from '../../contexts/ToastContext';
 import { normalizeArrayResponse } from '../../utils/apiHelpers';
 import SEO from '../../components/SEO';
@@ -24,7 +24,7 @@ export default function Automations() {
   const { data: automationsData, isLoading, error } = useAutomations();
   const { data: stats, error: statsError } = useAutomationStats();
   const updateAutomation = useUpdateAutomation();
-  const deleteAutomation = useDeleteCampaign(); // Reuse delete campaign mutation
+  const deleteAutomation = useDeleteAutomation();
 
   const automations = normalizeArrayResponse(automationsData, 'automations');
 
